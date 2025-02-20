@@ -83,6 +83,9 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(aprsroute_tests PRIVATE -Wall -Wextra -pedantic -Werror)
 endif()
 
+add_executable (aprsroute_use_in_tu "use_in_tu.h" "use_in_tu.cpp" "compile_in_tu.cpp")
+set_property(TARGET aprsroute_use_in_tu PROPERTY CXX_STANDARD 20)
+
 include(GoogleTest)
 
 gtest_discover_tests(aprsroute_tests)

@@ -76,6 +76,9 @@
 #ifndef APRS_TRACK_INLINE
 #define APRS_TRACK_INLINE inline
 #endif
+#ifndef APRS_TRACK_INLINE_NO_DISABLE
+#define APRS_TRACK_INLINE_NO_DISABLE inline
+#endif
 #ifdef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 // Intentionally left empty
 #endif
@@ -466,7 +469,7 @@ APRS_TRACK_NAMESPACE_END
 
 APRS_TRACK_NAMESPACE_BEGIN
 
-#ifndef APRS_ROUTER_PUBLIC_FORWARD_DECLARATIONS_ONLY
+#ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 APRS_TRACK_INLINE void tracker::algorithm(enum algorithm a)
 {
@@ -628,8 +631,10 @@ APRS_TRACK_INLINE int tracker::turn_slope() const
     return turn_slope_;
 }
 
+#endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
+
 template <typename CharType, typename Traits>
-APRS_TRACK_INLINE void tracker::message(const std::basic_string_view<CharType, Traits>& m)
+APRS_TRACK_INLINE_NO_DISABLE void tracker::message(const std::basic_string_view<CharType, Traits>& m)
 {
     message_data_length_ = m.size();
 
@@ -639,35 +644,37 @@ APRS_TRACK_INLINE void tracker::message(const std::basic_string_view<CharType, T
 }
 
 template <typename CharType>
-APRS_TRACK_INLINE void tracker::message(const CharType* m)
+APRS_TRACK_INLINE_NO_DISABLE void tracker::message(const CharType* m)
 {
     message(std::basic_string_view<CharType>(m));
 }
 
 template <typename CharType>
-APRS_TRACK_INLINE void tracker::message(const CharType* m, size_t count)
+APRS_TRACK_INLINE_NO_DISABLE void tracker::message(const CharType* m, size_t count)
 {
     message(std::basic_string_view<CharType>(m, count));
 }
 
 template <std::ranges::input_range InputRange>
-APRS_TRACK_INLINE void tracker::message(InputRange&& input_range)
+APRS_TRACK_INLINE_NO_DISABLE void tracker::message(InputRange&& input_range)
 {
     message(std::ranges::begin(input_range), std::ranges::end(input_range));
 }
 
 template <std::input_iterator InputIterator>
-APRS_TRACK_INLINE void tracker::message(InputIterator begin, InputIterator end)
+APRS_TRACK_INLINE_NO_DISABLE void tracker::message(InputIterator begin, InputIterator end)
 {
     message_data_length_ = std::distance(begin, end);
     message_data_.assign(begin, end);
 }
 
 template <std::output_iterator<unsigned char> OutputIterator>
-APRS_TRACK_INLINE void tracker::message(OutputIterator output)
+APRS_TRACK_INLINE_NO_DISABLE void tracker::message(OutputIterator output)
 {
     std::copy(message_data_.begin(), message_data_.end(), output);
 }
+
+#ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 APRS_TRACK_INLINE std::string tracker::message() const
 {
@@ -681,14 +688,16 @@ APRS_TRACK_INLINE std::u8string tracker::u8message() const
     return std::u8string(data, message_data_length_);
 }
 
+#endif
+
 template <class Rep, class Period>
-APRS_TRACK_INLINE void tracker::interval(std::chrono::duration<Rep, Period> interval)
+APRS_TRACK_INLINE_NO_DISABLE void tracker::interval(std::chrono::duration<Rep, Period> interval)
 {
     interval_seconds = static_cast<int>(std::chrono::duration_cast<std::chrono::seconds>(interval).count());
 }
 
 template <Position T>
-APRS_TRACK_INLINE void tracker::position(const T& p)
+APRS_TRACK_INLINE_NO_DISABLE void tracker::position(const T& p)
 {
 APRS_TRACK_DETAIL_NAMESPACE_USE
 
@@ -718,6 +727,8 @@ APRS_TRACK_DETAIL_NAMESPACE_USE
         data_.alt_feet = meters_to_feet(p.alt);
     }
 }
+
+#ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 APRS_TRACK_INLINE void tracker::position(double lat, double lon)
 {
@@ -898,8 +909,10 @@ APRS_TRACK_INLINE std::u8string tracker::u8packet_string(packet_type p) const
     return u8packet;
 }
 
+#endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
+
 template <std::output_iterator<unsigned char> OutputIterator>
-APRS_TRACK_INLINE void tracker::packet(packet_type p, OutputIterator output) const
+APRS_TRACK_INLINE_NO_DISABLE void tracker::packet(packet_type p, OutputIterator output) const
 {
     std::string packet = packet_string_no_message(p);
 
@@ -908,10 +921,12 @@ APRS_TRACK_INLINE void tracker::packet(packet_type p, OutputIterator output) con
 }
 
 template <std::ranges::output_range<unsigned char> OutputRange>
-APRS_TRACK_INLINE void tracker::packet(packet_type p, OutputRange&& output_range) const
+APRS_TRACK_INLINE_NO_DISABLE void tracker::packet(packet_type p, OutputRange&& output_range) const
 {
     packet(p, std::ranges::begin(output_range));
 }
+
+#ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 APRS_TRACK_INLINE bool tracker::smart_beaconing_test()
 {
@@ -940,7 +955,7 @@ APRS_TRACK_NAMESPACE_BEGIN
 
 APRS_TRACK_DETAIL_NAMESPACE_BEGIN
 
-#ifndef APRS_ROUTER_PUBLIC_FORWARD_DECLARATIONS_ONLY
+#ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 APRS_TRACK_INLINE char packet_type_1(bool m)
 {
@@ -2562,665 +2577,3 @@ APRS_TRACK_INLINE int compression_type_to_int(compression_type type)
 APRS_TRACK_DETAIL_NAMESPACE_END
 
 APRS_TRACK_NAMESPACE_END
-
-
-
-
-
-
-
-
-
-
-
-
-constexpr double kPolylinePrecision = 1E6;
-constexpr double kInvPolylinePrecision = 1.0 / kPolylinePrecision;
-
-struct position_dd
-{
-    double lat;
-    double lon;
-};
-
-std::vector<position_dd> decode(const std::string& encoded) {
-    size_t i = 0;     // what byte are we looking at
-
-    // Handy lambda to turn a few bytes of an encoded string into an integer
-    auto deserialize = [&encoded, &i](const int previous) {
-        // Grab each 5 bits and mask it in where it belongs using the shift
-        int byte, shift = 0, result = 0;
-        do {
-            byte = static_cast<int>(encoded[i++]) - 63;
-            result |= (byte & 0x1f) << shift;
-            shift += 5;
-        } while (byte >= 0x20);
-        // Undo the left shift from above or the bit flipping and add to previous
-        // since its an offset
-        return previous + (result & 1 ? ~(result >> 1) : (result >> 1));
-        };
-
-    // Iterate over all characters in the encoded string
-    std::vector<position_dd> shape;
-    int last_lon = 0, last_lat = 0;
-    while (i < encoded.length()) {
-        // Decode the coordinates, lat first for some reason
-        int lat = deserialize(last_lat);
-        int lon = deserialize(last_lon);
-
-        // Shift the decimal point 5 places to the left
-        shape.emplace_back(static_cast<float>(static_cast<double>(lat) *
-            kInvPolylinePrecision),
-            static_cast<float>(static_cast<double>(lon) *
-                kInvPolylinePrecision));
-
-        // Remember the last one we encountered
-        last_lon = lon;
-        last_lat = lat;
-    }
-    return shape;
-}
-
-nlohmann::ordered_json generate_geojson(const std::vector<position_dd>& coordinates)
-{
-    nlohmann::ordered_json geojson;
-    geojson["type"] = "FeatureCollection";
-    geojson["features"] = {
-        {
-            {"type", "Feature"},
-            {"geometry", {
-                {"type", "LineString"},
-                {"coordinates", nlohmann::json::array()}
-            }},
-            {"properties", {
-                {"name", "Generated Route"},
-                {"stroke", "blue"},        // Set line color to blue
-                {"stroke-width", 3},       // Set line thickness
-                {"stroke-opacity", 0.6}    // Set line transparency
-            }}
-        }
-    };
-
-    for (const auto& point : coordinates)
-    {
-        geojson["features"][0]["geometry"]["coordinates"].push_back({ point.lon, point.lat });
-    }
-
-    return geojson;
-}
-
-void write_geojson_to_file(const nlohmann::json& geojson, const std::string& filename)
-{
-    std::ofstream file(filename);
-    if (!file)
-    {
-        std::cerr << "Error: Could not open " << filename << " for writing\n";
-        return;
-    }
-    file << geojson.dump(2) << std::endl; // Pretty print JSON with 2-space indentation
-    file.close();
-    std::cout << "GeoJSON file '" << filename << "' has been created successfully.\n";
-}
-
-void write_coordinates_to_file(const std::vector<position_dd>& coordinates, const std::string& filename)
-{
-    std::ofstream file(filename);
-    if (!file)
-    {
-        std::cerr << "Error: Could not open " << filename << " for writing\n";
-        return;
-    }
-
-    //33.76672456808148, -118.171424833816
-    file << std::fixed << std::setprecision(10); // Ensure full decimal precision
-
-    for (const auto& point : coordinates)
-    {
-        file << point.lat << ", " << point.lon << "\n";
-    }
-
-    file.close();
-
-    std::cout << "Coordinates file '" << filename << "' has been created successfully.\n";
-}
-
-std::vector<position_dd> read_coordinates_from_file(const std::string& filename)
-{
-    std::vector<position_dd> coordinates;
-    std::ifstream file(filename);
-
-    if (!file)
-    {
-        std::cerr << "Error: Could not open " << filename << " for reading\n";
-        return coordinates;
-    }
-
-    std::string line;
-    while (std::getline(file, line))
-    {
-        std::stringstream ss(line);
-        position_dd point;
-        char comma;
-
-        if (ss >> point.lat >> comma >> point.lon)
-        {
-            coordinates.push_back(point);
-        }
-    }
-
-    file.close();
-    std::cout << "Read " << coordinates.size() << " coordinates from " << filename << "\n";
-
-    return coordinates;
-}
-
-double haversine_distance(const position_dd& p1, const position_dd& p2)
-{
-    constexpr double M_PI = 3.14159265358979323846;
-    constexpr double R = 6371000; // Earth radius in meters
-    double lat1 = p1.lat * M_PI / 180.0;
-    double lon1 = p1.lon * M_PI / 180.0;
-    double lat2 = p2.lat * M_PI / 180.0;
-    double lon2 = p2.lon * M_PI / 180.0;
-
-    double dLat = lat2 - lat1;
-    double dLon = lon2 - lon1;
-
-    double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2);
-    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-
-    return R * c; // Distance in meters
-}
-
-double calculate_bearing(const position_dd& p1, const position_dd& p2)
-{
-    constexpr double M_PI = 3.14159265358979323846;
-    constexpr double DEG_TO_RAD = M_PI / 180.0;
-    constexpr double RAD_TO_DEG = 180.0 / M_PI;
-
-    double lat1 = p1.lat * DEG_TO_RAD;
-    double lat2 = p2.lat * DEG_TO_RAD;
-    double dLon = (p2.lon - p1.lon) * DEG_TO_RAD;
-
-    double y = sin(dLon) * cos(lat2);
-    double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
-    double bearing = atan2(y, x) * RAD_TO_DEG;
-
-    return fmod(bearing + 360.0, 360.0); // Normalize to 0-360 degrees
-}
-
-
-//void run()
-//{
-//    if (route.empty()) {
-//        std::cerr << "Error: Route is empty!\n";
-//        return;
-//    }
-
-//    size_t index = 0;
-//    double remaining_distance = 0.0;
-//    auto last_update = std::chrono::high_resolution_clock::now();
-
-//    PointLL current_position = route[index];
-
-//    while (index < route.size() - 1) {
-//        auto now = std::chrono::high_resolution_clock::now();
-//        auto elapsed = std::chrono::duration<double>(now - last_update).count();
-//        last_update = now;
-
-//        PointLL next_position = route[index + 1];
-//        double segment_distance = haversineDistance(current_position, next_position); // meters
-//        double travel_distance = speed_mps * elapsed; // meters based on actual elapsed time
-//        double heading = calculateBearing(current_position, next_position);
-
-//        if (remaining_distance + travel_distance >= segment_distance) {
-//            // Move to the next point
-//            remaining_distance = (remaining_distance + travel_distance) - segment_distance;
-//            index++;
-
-//            if (index < route.size()) {
-//                current_position = route[index];
-//            }
-//        }
-//        else {
-//            // Interpolate between current and next point based on actual time elapsed
-//            double ratio = (remaining_distance + travel_distance) / segment_distance;
-//            current_position.lat = current_position.lat + ratio * (next_position.lat - current_position.lat);
-//            current_position.lon = current_position.lon + ratio * (next_position.lon - current_position.lon);
-//            remaining_distance += travel_distance;
-//        }
-
-//        // Output simulated GPS position
-//        std::cout << "Simulated GPS: " << current_position.lat << ", " << current_position.lon
-//            << ", heading: " << heading << "°, speed: " << speed_mps * 2.23694 << " mph" << std::endl;
-
-//        // Wait for next update interval while accounting for processing time
-//        auto processing_time = std::chrono::high_resolution_clock::now() - now;
-//        auto sleep_time = std::chrono::duration<double>(update_interval) - processing_time;
-//        if (sleep_time.count() > 0) {
-//            std::this_thread::sleep_for(sleep_time);
-//        }
-//    }
-
-//    std::cout << "Simulation completed.\n";
-//}
-
-
-// simulate a GPS route at a constant speed
-// just traverse a route - no speed limit
-
-//void timer_handler(const boost::system::error_code& ec)
-//{
-//    if (ec) {
-//        return;
-//    }
-//
-//    if (index_ >= route.size() - 1) {
-//        std::cout << "Simulation completed.\n";
-//        return;
-//    }
-//
-//    auto now = std::chrono::high_resolution_clock::now();
-//    auto elapsed_seconds = std::chrono::duration<double>(now - last_update_).count();
-//    last_update_ = now;
-//
-//    position_dd next_position = route[index_ + 1];
-//
-//    double segment_distance = haversine_distance(current_position, next_position);
-//    double travel_distance = speed_mps * elapsed_seconds * time_factor;
-//    current_heading = calculate_bearing(current_position, next_position);
-//
-//    segment_progress_ += travel_distance / segment_distance;
-//
-//    if (segment_progress_ >= 1.0)
-//    {
-//        index_++;
-//        if (index_ >= route.size() - 1)
-//        {
-//            return;
-//        }
-//
-//        current_position = route[index_];
-//        segment_progress_ = 0.0;
-//    }
-//    else
-//    {
-//        current_position.lat = route[index_].lat + segment_progress_ * (route[index_ + 1].lat - route[index_].lat);
-//        current_position.lon = route[index_].lon + segment_progress_ * (route[index_ + 1].lon - route[index_].lon);
-//    }
-//
-//    // Output simulated GPS position
-//    std::cout << "Simulated GPS: " << current_position.lat << ", " << current_position.lon << ", " << current_heading << std::endl;
-//
-//    // Schedule next update
-//    timer_.expires_after(std::chrono::milliseconds(static_cast<int>(update_interval * 1000.0 / time_factor)));
-//    timer_.async_wait(std::bind(&route_simulator::timer_handler, this, std::placeholders::_1));
-//}
-//
-//void run()
-//{
-//    if (route.empty())
-//    {
-//        return;
-//    }
-//
-//    index_ = 0;
-//    segment_progress_ = 0.0;
-//    last_update_ = std::chrono::high_resolution_clock::now();
-//    current_position = route[index_];
-//
-//    // Start the timer
-//    timer_.expires_after(std::chrono::milliseconds(static_cast<int>(update_interval * 1000.0 / time_factor)));
-//    timer_.async_wait(std::bind(&route_simulator::timer_handler, this, std::placeholders::_1));
-//
-//    // Run the io_context
-//    io_context_.run();
-//}
-//
-//  position_dd current_position;
-//double current_heading;
-//std::vector<position_dd> route;
-//double speed_mps; // meters per second  
-//int update_interval; // seconds
-//int time_factor; // speed up simulation by this factor
-//
-//boost::asio::io_context io_context_;
-//boost::asio::steady_timer timer_;
-//size_t index_ = 0;
-//double segment_progress_ = 0.0;
-//std::chrono::time_point<std::chrono::high_resolution_clock> last_update_;
-
-struct route_speed_simulator
-{
-    route_speed_simulator()
-    {
-    }
-
-    route_speed_simulator(const std::vector<position_dd>& route, double speed_mps, int update_interval_seconds, int time_factor = 1)
-        : route(route), speed_mps(speed_mps), update_interval(update_interval_seconds), time_factor(time_factor)
-    {
-    }
-
-    void run()
-    {
-        if (route.empty())
-        {
-            return;
-        }
-
-        size_t index = 0;
-        double segment_progress = 0.0; // progress along current segment (0.0 to 1.0)
-        auto last_update = std::chrono::high_resolution_clock::now();
-
-        current_position = route[index];
-
-        while (index < route.size() - 1)
-        {
-            auto now = std::chrono::high_resolution_clock::now();
-            auto elapsed_seconds = std::chrono::duration<double>(now - last_update).count();
-            last_update = now;
-
-            position_dd next_position = route[index + 1];
-
-            double segment_distance = haversine_distance(current_position, next_position); // meters
-            double travel_distance = speed_mps * elapsed_seconds * time_factor; // meters per update
-            current_heading = calculate_bearing(current_position, next_position);
-
-            segment_progress += travel_distance / segment_distance;
-
-            if (segment_progress >= 1.0)
-            {
-                // Move to the next point
-                index++;
-                if (index >= route.size() - 1)
-                {
-                    // end of route
-                    break;
-                }
-
-                current_position = route[index];
-                segment_progress = 0.0;
-            }
-            else
-            {
-                current_position.lat = route[index].lat + segment_progress * (route[index + 1].lat - route[index].lat);
-                current_position.lon = route[index].lon + segment_progress * (route[index + 1].lon - route[index].lon);
-            }
-
-            double update_interval_ms = update_interval * 1000.0;
-            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(update_interval_ms / time_factor)));
-
-            // Output simulated GPS position
-            std::cout << "Simulated GPS: " << current_position.lat << ", " << current_position.lon << ", " << current_heading << std::endl;
-        }
-
-        std::cout << "Simulation completed.\n";
-    }
-
-    position_dd current_position;
-    double current_heading;
-    std::vector<position_dd> route;
-    double speed_mps; // meters per second
-    int update_interval; // seconds
-    int time_factor; // speed up simulation by this factor
-};
-
-struct route_static_simulator
-{
-
-};
-//
-//int main2()
-//{
-//    // Decode the polyline string
-//    aprs::track::detail::encode_mic_e_alt(200);
-//
-//    std::string encoded = "ymwxyAnqkhhFElbA?xD?tDElcA?xEAfGAl]AbIAhV?bIA`IC~W@|k@A`E@lCDlCHlCJjCLjCPjCRhCVhCXlC^jC^jCd@hCd@fCj@bCj@bCn@`Cl@jBFRp@xBrHzU~O~g@tCzJHX`@nAJ^p@vBZtA^nAzAvEnLr^xAjEvF~PvDnLdDrKxCxJrAjEjB|FjDnK`EhMvKh]fAfDpAdErAhEvGbTbJxYhB~FtAfExLp_@zClJlDvKZ|@t@bCjApDvWfz@nAxDiDpCkQ|NeQvNiBzAaAhC_CnGgEzHuGnHwm@lh@sb@v_@{SnRsZpW_QvOuJbHmGfDeGpCmIvDeSzKiGfAkGz@mGn@mGb@mGXoGJsIFsIIsI[sIk@qI_AoIoAmIaBeGkAwkAa\\mc@mKkIyCcOcG{Ny@q^iMeOkEyD_AgM{Cat@iSe~@uVga@}Isa@eGg_@qEcMiAgIo@iQkAuPq@_n@eBet@_A_dJKcGKaGScG[_Gg@aGo@_Gw@_GaA}FkA{FsA{F}AyFgBwFmBuFyBsF_CqFiCoFsCkFyCiFcDgFkDeFsDaF}D}EcE{EkEsn@yn@qu@ww@sG_HuGwGsFiFyF_F{FuE{BeBaJmG{FmDwEmCyEgCyE_CuFeCuF}BwFsB{FkBu{Asd@_LcDcLuCcLiCgL}BgLqBgLeBkLwAkLkAkL_AmLq@mLg@gISyGKgp@y@}u@aAul@}Fs|@oCck@kCcDe@_Dk@wCy@eEwAsEyBiEqCwDuCyE{E{CqD{D_G{CoFaDgH_DuIoB_HaBiHoAwHuAiK_Juy@yAoOqAaQaDk_@aEsx@kCee@qHyxAkAsXsAqa@e@}WMsXmAyrDSwU_@qSa@eMeAgXcB_UiCwXw]mmCiDiXyD{\\sDy_@yDmc@{Fig@cDg^sA_Uc@}TiCsbAaAcPqAwVeBmWqBgg@aDcr@aJoaBoEckAkAgd@w@qd@Wkn@V{_@p@_a@bNkjFhMu{EzL}bFtAod@tBsc@hCgc@hDud@tKwfAvLwfAxZuuCbTe`ChE{j@pEkp@npA}oOj_Ea_e@l[crCtJg{@dWiyA`Ns{@~Fkb@p@_F~AeLpF}f@dByOpBaZ|@gM|KaeBrGc{@vGqc@vGqn@fBqNhFsh@rAwNfAsKjAwPpA_Rh@eLp@uMjA}HbAka@MgGY_DMkCFmC\\gCl@wB|@eBjAmArAu@zK_CpAk@tEkBzCGdHI~h@RdAHhBEtAEbmAHnKSpIItECjQS`DFAeH?cTA}VGq~ACsm@?_GCax@EqrAEqrAAqa@Cqh@Csy@Cgu@?kCAsD@qDA}DCoN?m@SklCC}{@Euv@Gsf@?sD?_D@yCBsDKwN@sHQswB?uEAyCAcE?{AM}_@";
-//    std::vector<position_dd> points = decode(encoded);  
-//    nlohmann::json geojson = generate_geojson(points);
-//    //std::cout << geojson.dump(2) << std::endl;
-//    write_geojson_to_file(geojson, "route.geojson");
-//    write_coordinates_to_file(points, "coordinates.txt");
-//
-//
-//    //points = readCoordinatesFromFile("/home/iontodirel/route1.points.txt");
-//
-//
-//    route_speed_simulator simulator;
-//    simulator.route = points;
-//    simulator.speed_mps = 26.8224; // 60 MPH = 26.8224 m/s
-//    simulator.update_interval = 1.0; // 1 second
-//    simulator.time_factor = 1; // real time
-//    //simulator.run();
-//
-//    //aprs::track::detail::encode_compressed_lon(-72.75);
-//    //aprs::track::detail::encode_compressed_course_speed(88, 36);
-//
-//    //aprs::track::detail::encode_position_data_compressed_no_timestamp('=', 49.5, -72.75, '/', '>', 88, 36, '[');
-//    //aprs::track::detail::encode_mic_e_data('`', 33.4274, -72.75, '/', '>');
-//    std::string rr = "S32U6T";
-//    aprs::track::detail::add_mic_e_position_ambiguity(rr, 6);
-//    aprs::track::detail::encode_mic_e_lat(49.172666666667, -124.03383333333, aprs::track::mic_e_status::en_route, 0);
-//    aprs::track::detail::encode_mic_e_data('`', 49.172666666667, -124.03383333333, 61, 28, '/', '>');
-//
-//
-//
-//
-//
-//
-//    gpsd_client gpsd("192.168.1.11", 8888);
-//    gpsd.open();
-//
-//    aprs::track::tracker t;
-//
-//    t.message("hello, world!");
-//    t.algorithm(aprs::track::algorithm::smart_beaconing);
-//    t.message("Hello, world!");
-//    t.symbol_code('I');
-//    t.symbol_table('/');
-//    t.from("N0CALL");
-//    t.to("APRS"); // not used for mic-e
-//    t.path("WIDE1-1,WIDE2-2");
-//    t.interval(std::chrono::seconds(5)); // not used for smart beaconing
-//    t.ambiguity(0); // no ambiguity (default)
-//    t.mic_e_status(aprs::track::mic_e_status::en_route);
-//    t.messaging(false); // no messaging (default)
-//    // smart beaconing
-//    t.low_speed(5); // 5 mph
-//    t.high_speed(60); // 60 mph
-//    t.slow_rate(60); // sec
-//    t.fast_rate(10); // sec
-//    t.turn_angle(28); // degrees
-//    t.turn_time(30); // sec
-//    t.turn_slope(26); // 1 to 255
-//
-//    while (true)
-//    {
-//        gnss_info info;
-//        gpsd.try_get_gps_info(info, gnss_include_info::all, 1000);
-//        
-//        // generic, expects any type which contains fields: lat, lon
-//        // and optionally will use fields if they exist: speed, track, alt, day, hour, minute, second
-//        t.position(info);
-//
-//        // update the period calculations
-//        t.update();
-//
-//        if (t.updated())
-//        {
-//            // get the full packet string
-//            // other packet types supported: position, position_compressed, position_with_timestamp,
-//            // position_with_timestamp_utc, position_with_timestamp_utc_mhs
-//            std::string packet = t.packet_string(aprs::track::packet_type::mic_e);
-//
-//            fmt::println("{}", packet);
-//        }
-//    }
-//
-//    
-//
-//
-//
-//    // speed
-//    // utf8
-//    // max size 36 for the message
-//    // max size 43 for the comment
-//    // with or without messaging
-//
-//    // 0b00100000 - current, other, compressed
-//    // 0b00000000 - old, other, compressed
-//    // 0b00111000 - current, RMC, compressed
-//    // 0b00011000 - old, RMC, compressed
-//    // https://aprs.to/v/packet_decoder
-//
-//
-//    return 0;
-//}
-
-
-/*
-
-
-  /// @cond undocumented
-  template<typename _CharT, typename _Traits, typename _Allocator>
-    std::basic_string<_CharT, _Traits, _Allocator>
-    path::_S_str_convert(basic_string_view<value_type> __str,
-             const _Allocator& __a)
-    {
-      static_assert(!is_same_v<_CharT, value_type>);
-
-      using _WString = basic_string<_CharT, _Traits, _Allocator>;
-
-      if (__str.size() == 0)
-    return _WString(__a);
-
-#ifndef _GLIBCXX_FILESYSTEM_IS_WINDOWS
-      string_view __u8str = __str;
-#else
-      // First convert native string from UTF-16 to to UTF-8.
-      // XXX This assumes that the execution wide-character set is UTF-16.
-      std::codecvt_utf8_utf16<value_type> __cvt;
-
-      using _CharAlloc = __alloc_rebind<_Allocator, char>;
-      using _String = basic_string<char, char_traits<char>, _CharAlloc>;
-      _String __u8str{_CharAlloc{__a}};
-      const value_type* __wfirst = __str.data();
-      const value_type* __wlast = __wfirst + __str.size();
-      if (!__str_codecvt_out_all(__wfirst, __wlast, __u8str, __cvt))
-    __detail::__throw_conversion_error();
-      if constexpr (is_same_v<_CharT, char>)
-    return __u8str; // XXX assumes native ordinary encoding is UTF-8.
-      else
-#endif
-    {
-      const char* __first = __u8str.data();
-      const char* __last = __first + __u8str.size();
-
-      // Convert UTF-8 string to requested format.
-#ifdef _GLIBCXX_USE_CHAR8_T
-      if constexpr (is_same_v<_CharT, char8_t>)
-        return _WString(__first, __last, __a);
-      else
-#endif
-        {
-          // Convert UTF-8 to wide string.
-          _WString __wstr(__a);
-          path::_Codecvt<_CharT> __cvt;
-          if (__str_codecvt_in_all(__first, __last, __wstr, __cvt))
-        return __wstr;
-        }
-    }
-      __detail::__throw_conversion_error();
-    }
-  /// @endcond
-
-  template<typename _CharT, typename _Traits, typename _Allocator>
-    inline basic_string<_CharT, _Traits, _Allocator>
-    path::string(const _Allocator& __a) const
-    {
-      if constexpr (is_same_v<_CharT, value_type>)
-    return { _M_pathname.c_str(), _M_pathname.length(), __a };
-      else
-    return _S_str_convert<_CharT, _Traits>(_M_pathname, __a);
-    }
-
-  inline std::string
-  path::string() const { return string<char>(); }
-
-#if _GLIBCXX_USE_WCHAR_T
-  inline std::wstring
-  path::wstring() const { return string<wchar_t>(); }
-#endif
-
-#ifdef _GLIBCXX_USE_CHAR8_T
-  inline std::u8string
-  path::u8string() const { return string<char8_t>(); }
-#else
-  inline std::string
-  path::u8string() const
-  {
-#ifdef _GLIBCXX_FILESYSTEM_IS_WINDOWS
-    std::string __str;
-    // convert from native wide encoding (assumed to be UTF-16) to UTF-8
-    std::codecvt_utf8_utf16<value_type> __cvt;
-    const value_type* __first = _M_pathname.data();
-    const value_type* __last = __first + _M_pathname.size();
-    if (__str_codecvt_out_all(__first, __last, __str, __cvt))
-      return __str;
-    __detail::__throw_conversion_error();
-#else
-    return _M_pathname;
-#endif
-  }
-#endif // _GLIBCXX_USE_CHAR8_T
-
-  inline std::u16string
-  path::u16string() const { return string<char16_t>(); }
-
-  inline std::u32string
-  path::u32string() const { return string<char32_t>(); }
-
-  template<typename _CharT, typename _Traits, typename _Allocator>
-    inline std::basic_string<_CharT, _Traits, _Allocator>
-    path::generic_string(const _Allocator& __a) const
-    {
-#ifdef _GLIBCXX_FILESYSTEM_IS_WINDOWS
-      const value_type __slash = L'/';
-#else
-      const value_type __slash = '/';
-#endif
-      using _Alloc2 = typename allocator_traits<_Allocator>::template
-    rebind_alloc<value_type>;
-      basic_string<value_type, char_traits<value_type>, _Alloc2> __str(__a);
-
-      if (_M_type() == _Type::_Root_dir)
-    __str.assign(1, __slash);
-      else
-    {
-      __str.reserve(_M_pathname.size());
-      bool __add_slash = false;
-      for (auto& __elem : *this)
-        {
-#ifdef _GLIBCXX_FILESYSTEM_IS_WINDOWS
-          if (__elem._M_type() == _Type::_Root_dir)
-        {
-          __str += __slash;
-          continue;
-        }
-#endif
-          if (__add_slash)
-        __str += __slash;
-          __str += basic_string_view<value_type>(__elem._M_pathname);
-          __add_slash = __elem._M_type() == _Type::_Filename;
-        }
-    }
-
-      if constexpr (is_same_v<_CharT, value_type>)
-    return __str;
-      else
-    return _S_str_convert<_CharT, _Traits>(__str, __a);
-    }
-
-
-*/
