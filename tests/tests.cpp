@@ -242,6 +242,57 @@ TEST(position, encode_compressed_lat_lon)
     }
 }
 
+TEST(position, encode_compressed_course_speed)
+{
+    {
+        std::string course_speed_str = encode_compressed_course_speed(88, 36.2);
+        EXPECT_TRUE(course_speed_str == "7P");
+    }
+
+    {
+        std::string course_speed_str = encode_compressed_course_speed(360, 0.0);
+        EXPECT_TRUE(course_speed_str == "!!");
+    }
+
+    {
+        std::string course_speed_str = encode_compressed_course_speed(244, 19.12);
+        EXPECT_TRUE(course_speed_str == "^H");
+    }
+
+    {
+        std::string course_speed_str = encode_compressed_course_speed(232, 2.17);
+        EXPECT_TRUE(course_speed_str == "[0");
+    }
+
+    {
+        std::string course_speed_str = encode_compressed_course_speed(24, 0);
+        EXPECT_TRUE(course_speed_str == "'!");
+    }
+
+    {
+        std::string course_speed_str = encode_compressed_course_speed(72, 42.43);
+        EXPECT_TRUE(course_speed_str == "3R");
+    }
+}
+
+TEST(position, encode_compressed_altitude)
+{
+    {
+        std::string alt_str = encode_compressed_altitude(10004);
+        EXPECT_TRUE(alt_str == "S]");
+    }
+
+    {
+        std::string alt_str = encode_compressed_altitude(277.65);
+        EXPECT_TRUE(alt_str == "?w");
+    }
+
+    {
+        std::string alt_str = encode_compressed_altitude(427.50);
+        EXPECT_TRUE(alt_str == "B>");
+    }
+}
+
 TEST(mic_e, encode_mic_e_status)
 {
     {
@@ -1503,6 +1554,59 @@ TEST(tracker, position)
     packet = t.packet_string_no_message(packet_type::mic_e);
 
     EXPECT_TRUE(packet == "N0CALL>T9QPVP,WIDE1-1:`3T{lh}>/\"48}");
+}
+
+TEST(tracker, message_and_packet_bytes)
+{
+    tracker t;
+    t.from("N0CALL");
+    t.to("APRS");
+    t.path("WIDE1-1");
+    t.symbol_table('/');
+    t.symbol_code('_');
+
+    struct s
+    {
+        double lat = 0.0;
+        double lon = 0.0;
+    };
+
+    s data{ 39.751166666667, -75.085333333333 };
+
+    t.position(data);
+
+    // set message using a vector of bytes, by passing in the range
+
+    std::string message = "Hello World";
+    std::vector<unsigned char> message_bytes = { 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64 };
+    t.message(message_bytes);    
+
+    std::string packet = t.packet_string_no_message(packet_type::position);
+
+    EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!3945.07N/07505.12W_");
+
+    // get packet bytes, by passing in an output iterator
+
+    std::vector<unsigned char> packet_bytes;
+    t.packet(packet_type::position, std::back_inserter(packet_bytes));
+
+    std::string packet_from_bytes(packet_bytes.begin(), packet_bytes.end());
+
+    EXPECT_TRUE(packet_from_bytes == packet + message);
+
+    // set message using a vector of bytes, by passing in the input/output iterators
+
+    t.message(message_bytes.begin(), message_bytes.end());
+
+    // get packet bytes, by passing in a range
+
+    std::vector<unsigned char> packet_bytes_copy;
+    packet_bytes_copy.resize(packet_bytes.size());
+    t.packet(packet_type::position, packet_bytes_copy);    
+
+    std::string packet_from_bytes_copy(packet_bytes_copy.begin(), packet_bytes_copy.end());
+
+    EXPECT_TRUE(packet_from_bytes_copy == packet + message);
 }
 
 int main(int argc, char** argv)

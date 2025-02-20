@@ -916,8 +916,8 @@ APRS_TRACK_INLINE_NO_DISABLE void tracker::packet(packet_type p, OutputIterator 
 {
     std::string packet = packet_string_no_message(p);
 
-    std::copy(reinterpret_cast<const unsigned char*>(packet.data()), reinterpret_cast<const unsigned char*>(packet.data() + packet.size()), output);
-    std::copy(message_data_.begin(), message_data_.end(), output);
+    OutputIterator current = std::copy(reinterpret_cast<const unsigned char*>(packet.data()), reinterpret_cast<const unsigned char*>(packet.data() + packet.size()), output);
+    std::copy(message_data_.begin(), message_data_.end(), current);
 }
 
 template <std::ranges::output_range<unsigned char> OutputRange>
@@ -2450,8 +2450,15 @@ APRS_TRACK_INLINE std::string encode_compressed_course_speed(double course_degre
 {
     std::string course_speed(2, '\0');
 
-    int c = static_cast<int>(course_degrees / 4);
-    int s = static_cast<int>(std::round(std::log(speed_knots + 1) / std::log(1.08)));
+    // course degrees is expressed in degrees 0 to 359, clockwise from due north
+    // if the value exceeds 359, it is wrapped around to 0
+    while (course_degrees >= 360.0)
+    {
+        course_degrees -= 360.0;
+    }
+
+    int c = static_cast<int>(course_degrees / 4.0);
+    int s = static_cast<int>(std::round(std::log(speed_knots + 1.0) / std::log(1.08)));
 
     course_speed[0] = static_cast<char>(c + 33);
     course_speed[1] = static_cast<char>(s + 33);
@@ -2461,27 +2468,20 @@ APRS_TRACK_INLINE std::string encode_compressed_course_speed(double course_degre
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-//inline std::string encode_compressed_altitude(int altitude_feet)
-//{
-//    // altitude = 1.002^cs
-//    // cs = floor or round of log(altitude)/log(1.002)
-//
-//    if (altitude_feet < 1)
-//        altitude_feet = 1; // avoid log(0)
-//
-//    int cs_val = static_cast<int>(
-//        std::round(std::log(static_cast<double>(altitude_feet))
-//            / std::log(1.002)));
-//
-//    int c = cs_val / 91;
-//    int s = cs_val % 91;
-//
-//    std::string out(2, '\0');
-//    out[0] = static_cast<char>(c + 33);
-//    out[1] = static_cast<char>(s + 33);
-//
-//    return out;
-//}
+APRS_TRACK_INLINE std::string encode_compressed_altitude(double altitude_feet)
+{
+    int cs = static_cast<int>(std::round(std::log(altitude_feet) / std::log(1.002)));
+
+    int c = cs / 91;
+    int s = cs % 91;
+
+    std::string out(2, '\0');
+
+    out[0] = static_cast<char>(c + 33);
+    out[1] = static_cast<char>(s + 33);
+
+    return out;
+}
 
 // **************************************************************** //
 //                                                                  //
