@@ -1,5 +1,5 @@
 ﻿// **************************************************************** //
-// libaprstrack - APRS tracking library                             // 
+// libaprstrack - APRS tracking library                             //
 // Version 0.1.0                                                    //
 // https://github.com/iontodirel/libaprstrack                       //
 // Copyright (c) 2025 Ion Todirel                                   //
@@ -1037,6 +1037,7 @@ APRS_TRACK_INLINE position_ddm dd_to_ddm(double lat, double lon)
 APRS_TRACK_INLINE std::string format_number_to_string(double number, int width, int precision)
 {
     std::string pretty_number_str;
+
     if (precision == 0)
     {
         double i;
@@ -1049,6 +1050,7 @@ APRS_TRACK_INLINE std::string format_number_to_string(double number, int width, 
         ss << std::fixed << std::setprecision(precision) << number;
         pretty_number_str = ss.str();
     }
+
     if (width > 0)
     {
         // use index of '.' to determine how many digits to add
@@ -1073,6 +1075,7 @@ APRS_TRACK_INLINE std::string format_number_to_string(double number, int width, 
             }
         }
     }
+
     return pretty_number_str;
 }
 
@@ -1181,13 +1184,13 @@ APRS_TRACK_INLINE std::string encode_header(std::string_view from, std::string_v
     packet.append(from);
     packet.append(">");
     packet.append(to);
-    
+
     if (path.empty() == false)
     {
         packet.append(",");
         packet.append(path);
     }
-    
+
     packet.append(":");
 
     return packet;
@@ -1718,7 +1721,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_
     packet.append(encode_header(from, to, path));
     
     packet.append(encode_position_data_compressed_no_timestamp(packet_type_1(messaging), lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type));
-    
+
     return packet;
 }
 
@@ -2409,7 +2412,7 @@ APRS_TRACK_INLINE std::string encode_course_speed(double course_degrees, double 
     //       /    - the course is unknown
     //
     //  Course is expressed in degrees 001 to 360, clockwise from due north
-    //  
+    //
 
     int course_degrees_int = static_cast<int>(std::round(course_degrees));
     int speed_knots_int = static_cast<int>(std::round(speed_knots));
@@ -2423,7 +2426,7 @@ APRS_TRACK_INLINE std::string encode_course_speed(double course_degrees, double 
 
 APRS_TRACK_INLINE std::string encode_altitude(double alt_feet)
 {
-    // 
+    //
     //  Data Format:
     // 
     //    /A=aaaaaa
@@ -2436,7 +2439,7 @@ APRS_TRACK_INLINE std::string encode_altitude(double alt_feet)
     //    /A=123456 - the altitude is 123456 feet
     //
     //  Altitude is expressed in feet above sea level
-    //  
+    //
 
     int alt_feet_int = static_cast<int>(std::round(alt_feet));
 

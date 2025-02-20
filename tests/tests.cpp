@@ -1501,6 +1501,31 @@ TEST(tracker, packet_string_no_message)
         {
             double lat = 0.0;
             double lon = 0.0;
+            double speed = 0.0;
+            double track = 0.0;
+        };
+
+        s data{ 51.6145, -0.0485, 3.601, 297.0 };
+
+        t.position(data);
+
+        std::string packet = t.packet_string_no_message(packet_type::mic_e);
+
+        EXPECT_TRUE(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/");
+    }
+
+    {
+        tracker t;
+        t.from("N0CALL");
+        t.mic_e_status(mic_e_status::en_route);
+        t.path("WIDE1-1");
+        t.symbol_table('/');
+        t.symbol_code('>');
+
+        struct s
+        {
+            double lat = 0.0;
+            double lon = 0.0;
         };
 
         s data{ 51.6145, -0.0485 };
@@ -1579,7 +1604,7 @@ TEST(tracker, message_and_packet_bytes)
 
     std::string message = "Hello World";
     std::vector<unsigned char> message_bytes = { 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64 };
-    t.message(message_bytes);    
+    t.message(message_bytes);
 
     std::string packet = t.packet_string_no_message(packet_type::position);
 
@@ -1602,7 +1627,7 @@ TEST(tracker, message_and_packet_bytes)
 
     std::vector<unsigned char> packet_bytes_copy;
     packet_bytes_copy.resize(packet_bytes.size());
-    t.packet(packet_type::position, packet_bytes_copy);    
+    t.packet(packet_type::position, packet_bytes_copy);
 
     std::string packet_from_bytes_copy(packet_bytes_copy.begin(), packet_bytes_copy.end());
 
