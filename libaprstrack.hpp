@@ -1130,13 +1130,13 @@ APRS_TRACK_INLINE std::string encode_compressed_lon(double lon)
 
     long num = static_cast<long>(std::round(190463 * (180 + lon)));
 
-    result = char((num % 91) + 33);
+    result = static_cast<char>((num % 91) + 33);
     num /= 91;
-    result = char((num % 91) + 33) + result;
+    result = static_cast<char>((num % 91) + 33) + result;
     num /= 91;
-    result = char((num % 91) + 33) + result;
+    result = static_cast<char>((num % 91) + 33) + result;
     num /= 91;
-    result = char((num % 91) + 33) + result;
+    result = static_cast<char>((num % 91) + 33) + result;
 
     return result;
 }
@@ -1147,13 +1147,23 @@ APRS_TRACK_INLINE std::string encode_compressed_lat(double lat)
 
     long num = static_cast<long>(std::round(380926 * (90 - lat)));
 
-    result = char((num % 91) + 33);
+    result = static_cast<char>((num % 91) + 33);
     num /= 91;
-    result = char((num % 91) + 33) + result;
+    result = static_cast<char>((num % 91) + 33) + result;
     num /= 91;
-    result = char((num % 91) + 33) + result;
+    result = static_cast<char>((num % 91) + 33) + result;
     num /= 91;
-    result = char((num % 91) + 33) + result;
+    result = static_cast<char>((num % 91) + 33) + result;
+
+    return result;
+}
+
+APRS_TRACK_INLINE std::string encode_compressed_lat_lon(double lat, double lon)
+{
+    std::string result;
+
+    result.append(encode_compressed_lat(lat));
+    result.append(encode_compressed_lon(lon));
 
     return result;
 }

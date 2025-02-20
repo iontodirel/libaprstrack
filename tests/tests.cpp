@@ -29,10 +29,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-// APRS-IS test data
+// **************************************************************** //
+// APRS-IS test data                                                //
+// **************************************************************** //
 // 
 // Some of the packets used in these tests have been taken from APRS-IS
-// I do not not hold any copyright to them, they are in the public domain.
+// I do not not hold any copyright to them, the test data is in the public domain.
 
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
@@ -180,6 +182,64 @@ TEST(conversion, unit_conversions)
 {
     EXPECT_NEAR(meters_to_feet(1), 3.28084, 0.00001);
     EXPECT_NEAR(meters_s_to_knots(1), 1.94384, 0.00001);
+}
+
+TEST(position, encode_compressed_lat_lon)
+{
+    {
+        std::string lat_lon_str = encode_compressed_lat_lon(36.354730315074, -119.3034815161);
+        EXPECT_TRUE(lat_lon_str == "<+_*0@\"k");
+    }
+
+    {
+        std::string lat_lon_str = encode_compressed_lat_lon(48.374306295711, 14.424449893155);
+        EXPECT_TRUE(lat_lon_str == "6$h/R-fC");
+    }
+
+    {
+        std::string lat_lon_str = encode_compressed_lat_lon(42.543281372235, 1.7318376797593);
+        EXPECT_TRUE(lat_lon_str == "8{!lNuld");
+    }
+
+    {
+        std::string lat_lon_str = encode_compressed_lat_lon(-23.483196211338, 150.32534403007);
+        EXPECT_TRUE(lat_lon_str == "ZB5]tMLw");
+    }
+
+    {
+        std::string lat_lon_str = encode_compressed_lat_lon(42.116505568011, -71.687041577629);
+        EXPECT_TRUE(lat_lon_str == "93[=<C3#");
+    }
+
+    {
+        std::string lat_lon_str = encode_compressed_lat_lon(2.4028105196285, 102.19811196925);
+        EXPECT_TRUE(lat_lon_str == "M:Kmh>S\\");
+    }
+
+    {
+        std::string lat_lon_str = encode_compressed_lat_lon(-22.890086263474, -47.049936208082);
+        EXPECT_TRUE(lat_lon_str == "Z&vsBWnM");
+    }
+
+    {
+        std::string lat_lon_str = encode_compressed_lat_lon(51.048599990549, -0.0778523912781);
+        EXPECT_TRUE(lat_lon_str == "4_fTNL4&");
+    }
+
+    {
+        std::string lat_lon_str = encode_compressed_lat_lon(51.549272037089, 0.064085937951205);
+        EXPECT_TRUE(lat_lon_str == "4HceNOL-");
+    }
+
+    {
+        std::string lat_lon_str = encode_compressed_lat_lon(1.4840021421483, 103.93799320603);
+        EXPECT_TRUE(lat_lon_str == "MdcyhfU5");
+    }
+
+    {
+        std::string lat_lon_str = encode_compressed_lat_lon(-29.990935247266, -71.327365420055);
+        EXPECT_TRUE(lat_lon_str == "]\\V&<KKl");
+    }
 }
 
 TEST(mic_e, encode_mic_e_status)
@@ -1180,6 +1240,51 @@ TEST(position, encode_position_packet_with_timestamp_dhm_no_message_with_tracker
     }
 }
 
+TEST(position, encode_position_data_with_utc_timestamp_hms)
+{
+    {
+        std::string data = encode_position_data_with_utc_timestamp_hms('@', 12, 30, 00, 40.006333333333, -84.313166666667, '/', '-', 0);
+        EXPECT_TRUE(data == "@123000h4000.38N/08418.79W-");
+    }
+
+    {
+        std::string data = encode_position_data_with_utc_timestamp_hms('@', 21, 45, 07, 44.434666666667, 26.017833333333, '/', 'Z', 0);
+        EXPECT_TRUE(data == "@214507h4426.08N/02601.07EZ");
+    }
+}
+
+TEST(position, encode_position_packet_with_utc_timestamp_hms_no_message)
+{
+    {
+        // N4JAH-02>APWW10,TCPIP*,qAC,T2TAS:@041501h3355.09N/08318.37W#Athens Radio Club 145.330 (-) PL123.0
+        std::string packet = encode_position_packet_with_utc_timestamp_hms_no_message("N0CALL", "APRS", "WIDE1-1", true, 04, 15, 01, 33.918166666667, -83.306166666667, '/', '#', 0);
+        EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:@041501h3355.09N/08318.37W#");
+    }
+}
+
+TEST(position, encode_position_packet_with_utc_timestamp_hms_no_message_with_tracker_data)
+{
+    {
+        tracker t;
+        t.from("N0CALL");
+        t.to("APRS");
+        t.path("WIDE1-1");
+        t.symbol_table('/');
+        t.symbol_code('`');
+        t.messaging(true);
+
+        data d;
+        d.lat = 10.659666666667;
+        d.lon = 123.159;
+        d.hour = 23;
+        d.minute = 45;
+        d.second = 8;
+
+        std::string packet = encode_position_packet_with_utc_timestamp_hms_no_message(t, d);
+        EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:@234508h1039.58N/12309.54E`");
+    }
+}
+
 TEST(position, encode_position_data_with_utc_timestamp_dhm)
 {
     {
@@ -1357,7 +1462,7 @@ TEST(tracker, packet_string_no_message)
     }
 }
 
-TEST(tracker, update)
+TEST(tracker, position)
 {
     tracker t;
     t.from("N0CALL");
