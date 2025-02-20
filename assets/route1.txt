@@ -1,0 +1,272 @@
+Route from Seattle to Clyde Hill
+
+Valhalla Request:
+
+curl -X POST "http://192.168.1.190:8002/route" -H "Content-Type: application/json" -d '{
+  "locations": [
+    {"lat": 47.6080, "lon": -122.3130},
+    {"lat": 47.6320, "lon": -122.2091}
+  ],
+  "costing": "auto",
+  "directions_options": {"units": "miles"}
+}'
+
+Valhalla Response:
+
+{
+  "trip": {
+    "locations": [
+      {
+        "type": "break",
+        "lat": 47.608,
+        "lon": -122.313,
+        "original_index": 0
+      },
+      {
+        "type": "break",
+        "lat": 47.632,
+        "lon": -122.2091,
+        "original_index": 1
+      }
+    ],
+    "legs": [
+      {
+        "maneuvers": [
+          {
+            "type": 1,
+            "instruction": "Drive west on East Cherry Street.",
+            "verbal_succinct_transition_instruction": "Drive west.",
+            "verbal_pre_transition_instruction": "Drive west on East Cherry Street.",
+            "verbal_post_transition_instruction": "Continue for a half mile.",
+            "street_names": [
+              "East Cherry Street"
+            ],
+            "time": 118.645,
+            "length": 0.718,
+            "cost": 410.559,
+            "begin_shape_index": 0,
+            "end_shape_index": 69,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 10,
+            "instruction": "Turn right onto 7th Avenue.",
+            "verbal_transition_alert_instruction": "Turn right onto 7th Avenue.",
+            "verbal_succinct_transition_instruction": "Turn right. Then, in 300 feet, Take the I 5 North ramp.",
+            "verbal_pre_transition_instruction": "Turn right onto 7th Avenue. Then, in 300 feet, Take the I 5 North ramp.",
+            "verbal_post_transition_instruction": "Continue for 300 feet.",
+            "street_names": [
+              "7th Avenue"
+            ],
+            "time": 16.212,
+            "length": 0.058,
+            "cost": 90.613,
+            "begin_shape_index": 69,
+            "end_shape_index": 73,
+            "verbal_multi_cue": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 19,
+            "instruction": "Take the I 5 North ramp toward Vancouver British Columbia.",
+            "verbal_transition_alert_instruction": "Take the I 5 North ramp.",
+            "verbal_pre_transition_instruction": "Take the I 5 North ramp toward Vancouver British Columbia.",
+            "verbal_post_transition_instruction": "Continue for 2 miles.",
+            "street_names": [
+              "I 5 North"
+            ],
+            "time": 148.036,
+            "length": 2.414,
+            "cost": 294.663,
+            "begin_shape_index": 73,
+            "end_shape_index": 178,
+            "highway": true,
+            "sign": {
+              "exit_branch_elements": [
+                {
+                  "text": "I 5 North",
+                  "consecutive_count": 1
+                }
+              ],
+              "exit_toward_elements": [
+                {
+                  "text": "Vancouver British Columbia"
+                }
+              ]
+            },
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 20,
+            "instruction": "Take exit 168B on the right onto WA 520 toward Bellevue/Kirkland.",
+            "verbal_transition_alert_instruction": "Take exit 168B on the right.",
+            "verbal_pre_transition_instruction": "Take exit 168B on the right onto WA 520 toward Bellevue, Kirkland.",
+            "verbal_post_transition_instruction": "Continue for 4 miles.",
+            "street_names": [
+              "WA 520 East"
+            ],
+            "time": 282.153,
+            "length": 4.47,
+            "cost": 301.506,
+            "begin_shape_index": 178,
+            "end_shape_index": 266,
+            "toll": true,
+            "highway": true,
+            "sign": {
+              "exit_number_elements": [
+                {
+                  "text": "168B"
+                }
+              ],
+              "exit_branch_elements": [
+                {
+                  "text": "WA 520"
+                }
+              ],
+              "exit_toward_elements": [
+                {
+                  "text": "Bellevue"
+                },
+                {
+                  "text": "Kirkland"
+                }
+              ]
+            },
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 20,
+            "instruction": "Take the exit on the right toward 84th Avenue Northeast.",
+            "verbal_transition_alert_instruction": "Take the exit on the right toward 84th Avenue Northeast.",
+            "verbal_pre_transition_instruction": "Take the exit on the right toward 84th Avenue Northeast. Then Keep right toward Medina.",
+            "time": 11.803,
+            "length": 0.18,
+            "cost": 11.476,
+            "begin_shape_index": 266,
+            "end_shape_index": 276,
+            "toll": true,
+            "sign": {
+              "exit_toward_elements": [
+                {
+                  "text": "84th Avenue Northeast"
+                }
+              ]
+            },
+            "verbal_multi_cue": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 23,
+            "instruction": "Keep right toward Medina/Clyde Hill.",
+            "verbal_transition_alert_instruction": "Keep right toward Medina.",
+            "verbal_pre_transition_instruction": "Keep right toward Medina, Clyde Hill. Then Bear right onto 84th Avenue Northeast.",
+            "time": 6.702,
+            "length": 0.091,
+            "cost": 8.946,
+            "begin_shape_index": 276,
+            "end_shape_index": 290,
+            "toll": true,
+            "sign": {
+              "exit_toward_elements": [
+                {
+                  "text": "Medina"
+                },
+                {
+                  "text": "Clyde Hill"
+                }
+              ]
+            },
+            "verbal_multi_cue": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 9,
+            "instruction": "Bear right onto 84th Avenue Northeast.",
+            "verbal_transition_alert_instruction": "Bear right onto 84th Avenue Northeast.",
+            "verbal_succinct_transition_instruction": "Bear right.",
+            "verbal_pre_transition_instruction": "Bear right onto 84th Avenue Northeast.",
+            "verbal_post_transition_instruction": "Continue for a quarter mile.",
+            "street_names": [
+              "84th Avenue Northeast"
+            ],
+            "time": 22.582,
+            "length": 0.216,
+            "cost": 49.035,
+            "begin_shape_index": 290,
+            "end_shape_index": 302,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 15,
+            "instruction": "Turn left onto Northeast 24th Street.",
+            "verbal_transition_alert_instruction": "Turn left onto Northeast 24th Street.",
+            "verbal_succinct_transition_instruction": "Turn left.",
+            "verbal_pre_transition_instruction": "Turn left onto Northeast 24th Street.",
+            "verbal_post_transition_instruction": "Continue for 1 mile.",
+            "street_names": [
+              "Northeast 24th Street"
+            ],
+            "time": 101.2,
+            "length": 0.874,
+            "cost": 176.052,
+            "begin_shape_index": 302,
+            "end_shape_index": 337,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 4,
+            "instruction": "You have arrived at your destination.",
+            "verbal_transition_alert_instruction": "You will arrive at your destination.",
+            "verbal_pre_transition_instruction": "You have arrived at your destination.",
+            "time": 0.0,
+            "length": 0.0,
+            "cost": 0.0,
+            "begin_shape_index": 337,
+            "end_shape_index": 337,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          }
+        ],
+        "summary": {
+          "has_time_restrictions": false,
+          "has_toll": true,
+          "has_highway": true,
+          "has_ferry": false,
+          "min_lat": 47.604617,
+          "min_lon": -122.331015,
+          "max_lat": 47.64512,
+          "max_lon": -122.209099,
+          "time": 707.337,
+          "length": 9.026,
+          "cost": 1342.854
+        },
+        "shape": "ymwxyAnqkhhFElbA?xD?tDElcA?xEAfGAl]AbIAhV?bIA`IC~W@|k@A`E@lCDlCHlCJjCLjCPjCRhCVhCXlC^jC^jCd@hCd@fCj@bCj@bCn@`Cl@jBFRp@xBrHzU~O~g@tCzJHX`@nAJ^p@vBZtA^nAzAvEnLr^xAjEvF~PvDnLdDrKxCxJrAjEjB|FjDnK`EhMvKh]fAfDpAdErAhEvGbTbJxYhB~FtAfExLp_@zClJlDvKZ|@t@bCjApDvWfz@nAxDiDpCkQ|NeQvNiBzAaAhC_CnGgEzHuGnHwm@lh@sb@v_@{SnRsZpW_QvOuJbHmGfDeGpCmIvDeSzKiGfAkGz@mGn@mGb@mGXoGJsIFsIIsI[sIk@qI_AoIoAmIaBeGkAwkAa\\mc@mKkIyCcOcG{Ny@q^iMeOkEyD_AgM{Cat@iSe~@uVga@}Isa@eGg_@qEcMiAgIo@iQkAuPq@_n@eBet@_A_dJKcGKaGScG[_Gg@aGo@_Gw@_GaA}FkA{FsA{F}AyFgBwFmBuFyBsF_CqFiCoFsCkFyCiFcDgFkDeFsDaF}D}EcE{EkEsn@yn@qu@ww@sG_HuGwGsFiFyF_F{FuE{BeBaJmG{FmDwEmCyEgCyE_CuFeCuF}BwFsB{FkBu{Asd@_LcDcLuCcLiCgL}BgLqBgLeBkLwAkLkAkL_AmLq@mLg@gISyGKgp@y@}u@aAul@}Fs|@oCck@kCcDe@_Dk@wCy@eEwAsEyBiEqCwDuCyE{E{CqD{D_G{CoFaDgH_DuIoB_HaBiHoAwHuAiK_Juy@yAoOqAaQaDk_@aEsx@kCee@qHyxAkAsXsAqa@e@}WMsXmAyrDSwU_@qSa@eMeAgXcB_UiCwXw]mmCiDiXyD{\\sDy_@yDmc@{Fig@cDg^sA_Uc@}TiCsbAaAcPqAwVeBmWqBgg@aDcr@aJoaBoEckAkAgd@w@qd@Wkn@V{_@p@_a@bNkjFhMu{EzL}bFtAod@tBsc@hCgc@hDud@tKwfAvLwfAxZuuCbTe`ChE{j@pEkp@npA}oOj_Ea_e@l[crCtJg{@dWiyA`Ns{@~Fkb@p@_F~AeLpF}f@dByOpBaZ|@gM|KaeBrGc{@vGqc@vGqn@fBqNhFsh@rAwNfAsKjAwPpA_Rh@eLp@uMjA}HbAka@MgGY_DMkCFmC\\gCl@wB|@eBjAmArAu@zK_CpAk@tEkBzCGdHI~h@RdAHhBEtAEbmAHnKSpIItECjQS`DFAeH?cTA}VGq~ACsm@?_GCax@EqrAEqrAAqa@Cqh@Csy@Cgu@?kCAsD@qDA}DCoN?m@SklCC}{@Euv@Gsf@?sD?_D@yCBsDKwN@sHQswB?uEAyCAcE?{AM}_@"
+      }
+    ],
+    "summary": {
+      "has_time_restrictions": false,
+      "has_toll": true,
+      "has_highway": true,
+      "has_ferry": false,
+      "min_lat": 47.604617,
+      "min_lon": -122.331015,
+      "max_lat": 47.64512,
+      "max_lon": -122.209099,
+      "time": 707.337,
+      "length": 9.026,
+      "cost": 1342.854
+    },
+    "status_message": "Found route between points",
+    "status": 0,
+    "units": "miles",
+    "language": "en-US"
+  }
+}

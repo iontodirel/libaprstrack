@@ -1,0 +1,487 @@
+Route from Seattle to Lake Chelan
+
+Valhalla Request:
+
+curl -X POST "http://192.168.1.190:8002/route" -H "Content-Type: application/json" -d '{
+  "locations": [
+    {"lat": 47.6287, "lon": -122.3462},
+    {"lat": 47.8426, "lon": -120.0167}
+  ],
+  "costing": "auto",
+  "directions_options": {"units": "miles"}
+}' | jq
+
+Valhalla Response:
+
+{
+  "trip": {
+    "locations": [
+      {
+        "type": "break",
+        "lat": 47.6287,
+        "lon": -122.3462,
+        "original_index": 0
+      },
+      {
+        "type": "break",
+        "lat": 47.8426,
+        "lon": -120.0167,
+        "original_index": 1
+      }
+    ],
+    "legs": [
+      {
+        "maneuvers": [
+          {
+            "type": 1,
+            "instruction": "Drive south on Taylor Avenue North.",
+            "verbal_succinct_transition_instruction": "Drive south. Then, in 200 feet, Turn left onto Ward Street.",
+            "verbal_pre_transition_instruction": "Drive south on Taylor Avenue North. Then, in 200 feet, Turn left onto Ward Street.",
+            "verbal_post_transition_instruction": "Continue for 200 feet.",
+            "street_names": [
+              "Taylor Avenue North"
+            ],
+            "time": 6.694,
+            "length": 0.045,
+            "cost": 32.785,
+            "begin_shape_index": 0,
+            "end_shape_index": 3,
+            "verbal_multi_cue": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 15,
+            "instruction": "Turn left onto Ward Street.",
+            "verbal_transition_alert_instruction": "Turn left onto Ward Street.",
+            "verbal_succinct_transition_instruction": "Turn left. Then Enter the roundabout and take the 2nd exit onto Ward Street.",
+            "verbal_pre_transition_instruction": "Turn left onto Ward Street. Then Enter the roundabout and take the 2nd exit onto Ward Street.",
+            "verbal_post_transition_instruction": "Continue for 300 feet.",
+            "street_names": [
+              "Ward Street"
+            ],
+            "time": 12.502,
+            "length": 0.056,
+            "cost": 68.434,
+            "begin_shape_index": 3,
+            "end_shape_index": 7,
+            "verbal_multi_cue": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 26,
+            "instruction": "Enter the roundabout and take the 2nd exit onto Ward Street.",
+            "verbal_transition_alert_instruction": "Enter the roundabout and take the 2nd exit onto Ward Street.",
+            "verbal_succinct_transition_instruction": "Enter the roundabout and take the 2nd exit.",
+            "verbal_pre_transition_instruction": "Enter the roundabout and take the 2nd exit onto Ward Street.",
+            "time": 4.76,
+            "length": 0.012,
+            "cost": 14.675,
+            "begin_shape_index": 7,
+            "end_shape_index": 18,
+            "roundabout_exit_count": 2,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 27,
+            "instruction": "Exit the roundabout onto Ward Street.",
+            "verbal_succinct_transition_instruction": "Exit the roundabout. Then Turn right onto WA 99.",
+            "verbal_pre_transition_instruction": "Exit the roundabout onto Ward Street. Then Turn right onto WA 99.",
+            "verbal_post_transition_instruction": "Continue for 300 feet.",
+            "street_names": [
+              "Ward Street"
+            ],
+            "time": 11.238,
+            "length": 0.057,
+            "cost": 82.654,
+            "begin_shape_index": 18,
+            "end_shape_index": 22,
+            "verbal_multi_cue": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 10,
+            "instruction": "Turn right onto WA 99/Aurora Avenue North. Continue on WA 99.",
+            "verbal_transition_alert_instruction": "Turn right onto WA 99.",
+            "verbal_succinct_transition_instruction": "Turn right.",
+            "verbal_pre_transition_instruction": "Turn right onto WA 99, Aurora Avenue North.",
+            "verbal_post_transition_instruction": "Continue on WA 99 for 2 miles.",
+            "street_names": [
+              "WA 99"
+            ],
+            "begin_street_names": [
+              "WA 99",
+              "Aurora Avenue North"
+            ],
+            "time": 208.748,
+            "length": 2.336,
+            "cost": 292.031,
+            "begin_shape_index": 22,
+            "end_shape_index": 79,
+            "toll": true,
+            "highway": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 21,
+            "instruction": "Take the exit.",
+            "verbal_transition_alert_instruction": "Take the exit.",
+            "verbal_pre_transition_instruction": "Take the exit.",
+            "verbal_post_transition_instruction": "Continue for a quarter mile.",
+            "street_names": [
+              "Colorado Avenue South"
+            ],
+            "time": 38.583,
+            "length": 0.371,
+            "cost": 66.102,
+            "begin_shape_index": 79,
+            "end_shape_index": 100,
+            "toll": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 15,
+            "instruction": "Turn left onto South Atlantic Street.",
+            "verbal_transition_alert_instruction": "Turn left onto South Atlantic Street.",
+            "verbal_succinct_transition_instruction": "Turn left.",
+            "verbal_pre_transition_instruction": "Turn left onto South Atlantic Street.",
+            "verbal_post_transition_instruction": "Continue for 2 miles.",
+            "street_names": [
+              "South Atlantic Street"
+            ],
+            "time": 181.742,
+            "length": 2.107,
+            "cost": 269.053,
+            "begin_shape_index": 100,
+            "end_shape_index": 212,
+            "highway": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 24,
+            "instruction": "Keep left to take I 90.",
+            "verbal_transition_alert_instruction": "Keep left to take I 90.",
+            "verbal_pre_transition_instruction": "Keep left to take I 90.",
+            "verbal_post_transition_instruction": "Continue for 82 miles.",
+            "street_names": [
+              "I 90"
+            ],
+            "time": 4456.151,
+            "length": 82.109,
+            "cost": 4139.789,
+            "begin_shape_index": 212,
+            "end_shape_index": 1779,
+            "highway": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 20,
+            "instruction": "Take exit 85 on the right toward Cle Elum/Leavenworth.",
+            "verbal_transition_alert_instruction": "Take exit 85 on the right.",
+            "verbal_pre_transition_instruction": "Take exit 85 on the right toward Cle Elum, Leavenworth.",
+            "time": 13.616,
+            "length": 0.208,
+            "cost": 12.534,
+            "begin_shape_index": 1779,
+            "end_shape_index": 1792,
+            "sign": {
+              "exit_number_elements": [
+                {
+                  "text": "85"
+                }
+              ],
+              "exit_toward_elements": [
+                {
+                  "text": "Cle Elum"
+                },
+                {
+                  "text": "Leavenworth"
+                }
+              ]
+            },
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 15,
+            "instruction": "Turn left onto WA 970/Sunset Highway.",
+            "verbal_transition_alert_instruction": "Turn left onto WA 970.",
+            "verbal_succinct_transition_instruction": "Turn left.",
+            "verbal_pre_transition_instruction": "Turn left onto WA 970, Sunset Highway.",
+            "verbal_post_transition_instruction": "Continue for a half mile.",
+            "street_names": [
+              "WA 970",
+              "Sunset Highway"
+            ],
+            "time": 28.215,
+            "length": 0.403,
+            "cost": 35.716,
+            "begin_shape_index": 1792,
+            "end_shape_index": 1804,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 10,
+            "instruction": "Turn right toward Wenatchee/Leavenworth.",
+            "verbal_transition_alert_instruction": "Turn right toward Wenatchee.",
+            "verbal_succinct_transition_instruction": "Turn right toward Wenatchee, Leavenworth. Then Bear left to stay on WA 970.",
+            "verbal_pre_transition_instruction": "Turn right toward Wenatchee, Leavenworth. Then Bear left to stay on WA 970.",
+            "verbal_post_transition_instruction": "Continue for 600 feet.",
+            "street_names": [
+              "WA 970"
+            ],
+            "time": 13.549,
+            "length": 0.121,
+            "cost": 9.833,
+            "begin_shape_index": 1804,
+            "end_shape_index": 1812,
+            "sign": {},
+            "verbal_multi_cue": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 16,
+            "instruction": "Bear left to stay on WA 970.",
+            "verbal_transition_alert_instruction": "Bear left to stay on WA 970.",
+            "verbal_succinct_transition_instruction": "Bear left. Then Turn right to stay on WA 970.",
+            "verbal_pre_transition_instruction": "Bear left to stay on WA 970. Then Turn right to stay on WA 970.",
+            "verbal_post_transition_instruction": "Continue for 200 feet.",
+            "street_names": [
+              "WA 970"
+            ],
+            "time": 2.316,
+            "length": 0.034,
+            "cost": 2.095,
+            "begin_shape_index": 1812,
+            "end_shape_index": 1818,
+            "verbal_multi_cue": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 10,
+            "instruction": "Turn right to stay on WA 970.",
+            "verbal_transition_alert_instruction": "Turn right to stay on WA 970.",
+            "verbal_succinct_transition_instruction": "Turn right.",
+            "verbal_pre_transition_instruction": "Turn right to stay on WA 970.",
+            "verbal_post_transition_instruction": "Continue for 45 miles.",
+            "street_names": [
+              "WA 970"
+            ],
+            "time": 2708.854,
+            "length": 44.876,
+            "cost": 2357.14,
+            "begin_shape_index": 1818,
+            "end_shape_index": 3152,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 20,
+            "instruction": "Take the US 2 East/US 97 North exit on the right toward Wenatchee.",
+            "verbal_transition_alert_instruction": "Take the US 2 East exit on the right.",
+            "verbal_pre_transition_instruction": "Take the US 2 East, US 97 North exit on the right toward Wenatchee.",
+            "verbal_post_transition_instruction": "Continue for 15 miles.",
+            "street_names": [
+              "US 2",
+              "US 97"
+            ],
+            "time": 947.038,
+            "length": 14.834,
+            "cost": 887.908,
+            "begin_shape_index": 3152,
+            "end_shape_index": 3421,
+            "sign": {
+              "exit_branch_elements": [
+                {
+                  "text": "US 2 East"
+                },
+                {
+                  "text": "US 97 North"
+                }
+              ],
+              "exit_toward_elements": [
+                {
+                  "text": "Wenatchee"
+                }
+              ]
+            },
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 26,
+            "instruction": "Enter US2, US97 and take the 2nd exit onto US 2/US 97.",
+            "verbal_transition_alert_instruction": "Enter US2, US97 and take the 2nd exit onto US 2.",
+            "verbal_succinct_transition_instruction": "Enter the roundabout and take the 2nd exit.",
+            "verbal_pre_transition_instruction": "Enter US2, US97 and take the 2nd exit onto US 2, US 97.",
+            "street_names": [
+              "US2, US97"
+            ],
+            "time": 4.773,
+            "length": 0.024,
+            "cost": 10.211,
+            "begin_shape_index": 3421,
+            "end_shape_index": 3428,
+            "roundabout_exit_count": 2,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 27,
+            "instruction": "Exit the roundabout onto US 2/US 97.",
+            "verbal_succinct_transition_instruction": "Exit the roundabout. Then Take the exit on the right.",
+            "verbal_pre_transition_instruction": "Exit the roundabout onto US 2, US 97. Then Take the exit on the right.",
+            "verbal_post_transition_instruction": "Continue for 800 feet.",
+            "street_names": [
+              "US 2",
+              "US 97"
+            ],
+            "time": 11.86,
+            "length": 0.145,
+            "cost": 16.407,
+            "begin_shape_index": 3428,
+            "end_shape_index": 3434,
+            "verbal_multi_cue": true,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 20,
+            "instruction": "Take the exit on the right.",
+            "verbal_transition_alert_instruction": "Take the exit on the right.",
+            "verbal_pre_transition_instruction": "Take the exit on the right.",
+            "time": 28.041,
+            "length": 0.372,
+            "cost": 27.304,
+            "begin_shape_index": 3434,
+            "end_shape_index": 3471,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 15,
+            "instruction": "Turn left onto Euclid Avenue.",
+            "verbal_transition_alert_instruction": "Turn left onto Euclid Avenue.",
+            "verbal_succinct_transition_instruction": "Turn left.",
+            "verbal_pre_transition_instruction": "Turn left onto Euclid Avenue.",
+            "verbal_post_transition_instruction": "Continue for a half mile.",
+            "street_names": [
+              "Euclid Avenue"
+            ],
+            "time": 62.809,
+            "length": 0.732,
+            "cost": 77.347,
+            "begin_shape_index": 3471,
+            "end_shape_index": 3509,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 26,
+            "instruction": "Enter the roundabout and take the 2nd exit onto US 97 Alt.",
+            "verbal_transition_alert_instruction": "Enter the roundabout and take the 2nd exit onto US 97 Alt.",
+            "verbal_succinct_transition_instruction": "Enter the roundabout and take the 2nd exit.",
+            "verbal_pre_transition_instruction": "Enter the roundabout and take the 2nd exit onto US 97 Alt.",
+            "time": 3.586,
+            "length": 0.021,
+            "cost": 5.16,
+            "begin_shape_index": 3509,
+            "end_shape_index": 3520,
+            "roundabout_exit_count": 2,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 27,
+            "instruction": "Exit the roundabout onto US 97 Alt.",
+            "verbal_succinct_transition_instruction": "Exit the roundabout.",
+            "verbal_pre_transition_instruction": "Exit the roundabout onto US 97 Alt.",
+            "verbal_post_transition_instruction": "Continue for 34 miles.",
+            "street_names": [
+              "US 97 Alt"
+            ],
+            "time": 2304.199,
+            "length": 34.029,
+            "cost": 2089.954,
+            "begin_shape_index": 3520,
+            "end_shape_index": 4227,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 15,
+            "instruction": "Turn left onto East Allen Avenue.",
+            "verbal_transition_alert_instruction": "Turn left onto East Allen Avenue.",
+            "verbal_succinct_transition_instruction": "Turn left.",
+            "verbal_pre_transition_instruction": "Turn left onto East Allen Avenue.",
+            "verbal_post_transition_instruction": "Continue for 500 feet.",
+            "street_names": [
+              "East Allen Avenue"
+            ],
+            "time": 17.636,
+            "length": 0.093,
+            "cost": 22.754,
+            "begin_shape_index": 4227,
+            "end_shape_index": 4228,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          },
+          {
+            "type": 4,
+            "instruction": "You have arrived at your destination.",
+            "verbal_transition_alert_instruction": "You will arrive at your destination.",
+            "verbal_pre_transition_instruction": "You have arrived at your destination.",
+            "time": 0.0,
+            "length": 0.0,
+            "cost": 0.0,
+            "begin_shape_index": 4228,
+            "end_shape_index": 4228,
+            "travel_mode": "drive",
+            "travel_type": "car"
+          }
+        ],
+        "summary": {
+          "has_time_restrictions": false,
+          "has_toll": true,
+          "has_highway": true,
+          "has_ferry": false,
+          "min_lat": 47.174912,
+          "min_lon": -122.346238,
+          "max_lat": 47.842639,
+          "max_lon": -120.0147,
+          "time": 11066.92,
+          "length": 182.996,
+          "cost": 10519.897
+        },
+        "shape": "wx_zyAjnljhF~L@bWHbBB?aDNu`A?g@?}AVA`@SXa@Rm@Fs@Ac@?OMq@Wg@a@[e@I?o@Bkc@@__@@uF~u@h@zb@n@dSh@hK\\dUj@jQb@fi@PvJFpCNjMjBdIzAbIhBbItBzOvFju@~WjGfB`ElAvD~@zGbB`GhAxVlDx]nD`Fp@dYrCv^lBl^~@~_@?j`@Sxu@{Cve@aEvo@sI|v@qO~u@}Sdw@iYv{@ma@dr@ca@`i@y^~i@ic@xrC{eCld@k_@nc@}Zlg@yZvz@ob@bs@{Xf~@iX~o@kNfq@}Jbc@gEfl@cDzg@aAj{ABrd@u@hd@_Cbd@iEn`@uElK_AzOy@zK_AzXyBd_AiDbe@m@dOUzJDrH`@rBFnCVxBVlCr@nb@pOtb@dOdDhApDh@dF^hC?hHStCBbRFrHF@eFB_EBmBFiEJeP?iG?}D@aJ@mHJwWFyLDoLJwWHeS?qBAmW?aS?cJE}\\[}sB?uI?kGBuJFuS?sFAkVGiRi@gGc@yCk@sCeAyCyAsCsBiD{B}BiCuBcDqAgCy@oGP}ZfBuFKmEa@eEqAeDgBmFeEyDeF}CoGuBuHgCiLeAaLo@sJs@wHwBgZoFu^uFac@gHmc@sHqb@sjAclGgGm\\{Muq@sK}k@yAcJiAaH_AqHo@uFyAcQ}@{RFiSx@wR`@yHXiEfA_L`BeN~BeNbC}LvEwQpHsSrH{OvG}JrK}MpYqSlq@qe@tw@}h@pMaJdFwD~EiExEwEpEgFjEuF`EcGxDqGnD_HfDiHzCwHrCaIfCkI|BsIpB}IdBeJzAkJnAqJ`AwJv@{Jh@}J\\aKPcKYoqAyAi|CMcb@AkG?oh@Cc]iAktH`@{bFDgt@`@_|FRgU`DctBx@}e@~f@kww@tBw{ByAqvA}Am[yEqi@yF{_@gGqZiGgXwJ_\\yJs[an@g_Be]w_AcH_YyF_ZkEwZ}Ck[oB{[}@e\\Oi\\`@i\\nAc\\tAgRh@mHnDe[zEoZhGsYbGuTn@}B|ImWbKcVNWdLsSbToc@dIsRlMaXrLkWrJuSdMmZbCmGxEmMjHkTxFsRlFoRfI_\\hKsb@vIm]^_BdUs~@`Oem@nMyh@vKsb@jDiN|DwNnDmMfI}WdDeKzLu\\|Wiw@dTal@z`@}jAnZi}@v^ydAnNce@`Twp@nXgz@fi@aaBtYc~@xHiShKgWbKeT|OoWhb@us@nf@ax@tJqP~JuQ~IsSfIeTtEsMhDsJ|Iu[fG}VdEcUhCqPnCoRpFmd@~Ca]xBwWf@oFb\\cvEvCy_@dCs]vAgUh@_N^}KZmLXuNH}SGeQWaPa@kRi@{Nw@qOq@mK}@}KwAmOwBiR}B_Ogj@{_DiQ{cAoOw_AmJ_j@cAeHu@yFo@mFm@kFcA}HyAqMsBqU_@yFw@_Ro@gSEcX@kTj@qU`A{SrAqQ~BsSjFyd@~Ko}@pDaZbCgY`BgXj@gURoVOg\\_@gUkF_wA_f@qfMuF}oAiBgd@cHonBq@iR]qPUuN_@}OiAerAEoYFqSBqGFsMXq\\^wSn@oi@n@gc@Z{WdAupAbCev@bBmmAtAykAtAmsA~BotA~BwgBpFalC~BsuApGkvDjG{wDxKygGnAet@x@sv@j@kg@z@_e@zBklAlEq|CtGi~C`GcaDpA{\\lAsTxAqWrBoXzDia@~Dm]fIyk@jK{h@pNcp@fSmw@|Ta_A~kFexS|pEamQbv@mvCbOmj@hMc`@~Na`@bUqh@hpA}mCrlA}jCrf@wgApbCknF`nBwdEfoBmgEjUcl@lNab@tPsk@pR{q@vp@cbC|xFyfS|`A{iDbQyp@l^sqA~BmI~tA_aFj\\gjAltBsnHld@o_B~Mse@fJi\\rIa]fH}]`E{SlH{f@pH_k@pA}QxBuYhCea@hRw}EdBma@tBw^vBuWvF_g@|Ei^lIkf@vHa^nIm\\pMwb@hKgZ|o@udBvO_b@vm@}_Blg@mrAnJsUrMmZlGuMjGqLfI_OhZ{f@~[{d@bO_S~SkVj`@w_@~UuSph@ec@~bAsz@flCa{BrWyTtPiSjQyU~`@gu@fLyZzG_UbIm]pGs_@zAqKzCaWtC_\\|AyVfAc\\h@eW@qWg@m[aAsVcA_QY}Di@sHg@qG_CqScAgIiAgIeA{GgAuGyAaI{AuHaBsH_B_HiAuEuAgFuBeHkCyIiCcImByFiBcFsEuLgGgN_MoX_w@seBeh@ghAwUkg@wJqUgXio@yGyQkGeUkM}h@uGo^gH_f@mFwa@uCu]mBi^y@a]Ka\\f@sk@|A}_@`A{M|AqSzD_]rEk[T{ArIkc@pIm[l[uaA~kA{fDfa@ylAtMig@jXogAz[s}AzEiXxEeXpT{wAzOwsAzMwtAdIonArGevArCyz@lA_y@vBsqApHahEPyY_@oZmByl@gDyf@iGsf@iDiRqFc[_Mwe@oGkScIqUsKkVuTw_@gKuPiLoOmbA_kAqRmUyJuMsHaL{D_HyI_PwK{VgKgZaH_VaHuZsFc[uD_ZkCk]kBe^q@_[@c^fAid@rBq]pDa_@bEs[`FsWzl@yiCnl@olCrU_dAtGs\\bGs\\`Hqe@jH{r@bE_k@tAeZf@wKt`AsfTzBwa@vCs_@vDw\\jFs[nG}[dHyYvKo^hPwb@xIsRzM{VvIqMtGqJrNaR~MoOxRyQ`SwN~`Aup@|f@u\\vaCuaBh`@uXjf@a]hQeM`Q}N~L_M~K_MjJaMjMgShHoJjMaW`LoXjLs[jJ}[bIe_@`g@ypC~Hk`@hGgXpHyY`Ke^fy@uiCrh@gcBt`@_oA|h@sbB|Pkg@rV}q@tZkw@n]yy@ta@o~@`i@omAboCutGlU_i@rMiYvRe_@rRc]nTa^`Wg_@xPwUxm@ux@nq@c}@bRuXbKqPtHgNvNwZxNq]zL}]rK__@|Iy^zGw[bG}^nGwe@hEac@tC}f@nBwi@n@kj@Gad@w@eg@cBe`@_Ca_@{Ns~AcVuiCqI}_AsUodCwIcx@iu@}bIoGwq@u~AwzPcEsj@ap@cbHsDa_@cEwe@}AsT}AgYaAuV_@kL]iKs@m^a@i[KmYCqTDqSXc[fKawI?sVSiV_As]wBqc@{AqR}AiO}A_N{AaLeBaLko@_sDen@_nD{Gq^_lAi}GcF{\\qDa[kCo[sBu[wA_]w@g^WsVEu]XiZ`As]tA_]fCq^nCaZbE}^`Fu[`Go\\hF{V|F_V~Iq[~Ks\\~JgW`NuZnMuVpOcWvJkOjJmMfM{NfcCstC`oDwaErxC_kDtw@s`AbaAwkAli@{o@vl@ct@db@ai@zmBqgCx`@ah@zg@yn@vwAcfBfNoQ`MkQpLeRzJsQfIiPrKaVbMk[bJiXjJy[|H_[pmDowOpL{f@tG_W`Lc_@lKs[dIqUvGkQjHmQ`MoXxKqUtV{d@`Sc]bRwXbRkV~J}LdNoP`\\a]~yCazC~eAkfAl`GgaGt~Es~ElNcO`QqSdM{PvH_LfE_HvFoJdIcOtGmM~I}RtIaTRi@dGuPnG}RhGaTnFmT`EeRdE}SfHob@xCqTbCeTnB}Q~AwRnCid@`Bii@ZkTNgSOo~A@e]}@}uQOosJa@{hIIirEk@wdIb@qeAt@gr@zCey@~Ein@pI{o@hOg}@d_AkyExgAyvFp[iuAd[uoA`hB{wG|uBy_I|Ror@bQmq@hOgo@dPms@nJuh@tOw`AtKwu@vLq{@lL_aA|Jk_AvGmq@zIen@vLsl@lPum@pRok@zUgg@|Z_k@fc@cm@jd@od@th@_c@la@mTv`@uPli@oMbn@cHbi@}Eli@_Ft`@mEp^aGna@iKrg@eP~gDajA`XmLle@cWba@gX~[sWjXgXhc@ih@`]qd@b]{i@v\\or@nU_k@jXiw@lPsl@lPql@fWw{@pNgd@|]uaAjLqk@dIeg@`Hgn@hGuu@n@}x@Wkp@sB{i@gFo`AuKomBmDmq@sBok@W}i@Val@zAen@tEuq@~ZohDtMgeB`Dsm@rBkp@Hie@_@qe@uBym@sDquAm@qa@iDuvBNqiAdB}f@zAsl@FgAzCkj@xDql@vHst@xHsl@rNs{@hO_s@jP_r@dQ{i@tS}i@lYiw@xTqk@rlAccDvvBwuF|Ja]vK}[vLa]jt@uhBfc@sjAv`@yeAlXen@~[mq@xe@g}@le@q}@hVc`@pTo`@fYcn@nDmJtL}YjFkMpW_y@nOid@hLkg@fZa_BlLajAhMezB`Ecp@|NudDrWc~Ex@mj@UsbAwC_z@aHm`AsJytAuCkw@qA{p@l@_z@fFas@|Igv@h_AezDbgAwpElLum@lPqs@pVwdAnMi~@|IudAbEqaApE}gA`Hkx@nMmx@tSe}@tWio@xTg`@x]oc@`uAw_BrWuZtW{ZnUc^lXgg@tf@akA~cAm}BrOqV`V{Z|MuMhPuO`]kVlYcQlf@{Tne@cWt_@kSj`@sV~c@e_@`TyY~RwXhWmj@bbAggCtYa{@|Oce@la@wdA`d@ytA`Tgg@zQ{ZfRwXdb@}i@bi@en@vTsVpUo\\bQwXtWse@bQgg@lPgo@~Niw@bI}x@rJqaAhd@kjE`[}rC~F}i@tOiw@nU_z@dYk_A~[ut@f^_z@lmCmtFlUsf@lJkVhG_QlM_b@jGyWrEyS`Heb@rE{]xC}[pCwd@|Akd@jFklBzDgmA|Ckj@jCwe@rKeyAfIyeA`cAo_NrS}nCdJ{nAvGe|@bBsXdAsX`Ai\\f@w\\p@_tAqAwsAa@a{@UaiAiAk}Bu@gp@mCcz@aBq]qBo[kRa{BeIs|@}Dsf@}Col@iAkd@_@i`@s@_mA_DsrF_Aqz@iB{cA_HqhDwMkwGiPefIcAocAKycAPke@h@ke@`C_kAbFetA`Fqz@lIygAtKygAdM}cAxHci@|QqiAn[s~A|]yvA~FmTxRet@j\\wjA`Lc`@tFkT~Hq`@|Fm`@vDq^~Duj@jBux@Iyg@_Bar@eCm`@yDk_@sNs~@{uBomKkXmoAmL_z@wKmgAaHiw@wl@sfH_Gkq@eIcm@kL}i@_Sio@}BaHuRqd@}Zgg@ci@io@aiAukAwl@uf@}n@y`@arCcrA{nAgg@szEsoBus@s]gw@aVmaAmTw\\yJye@uIwSuHsWePa\\aV{kHc|EsQmLaRgNyi@sVcTwIic@}Oc]eJ_VuGaJoBwO_Ckg@gJib@cJoLoDcKyC{GqCgJ}FwJaGgJyI_J}JmIyJyKaQuI}OkEeK}F{NaJ}X{mAw~DkLqd@yE{UiEeTmj@ctCsDuVgBoSsBy`@Ue_@l@q]rBmb@jGod@dRas@t{@anC~Pkk@|{@}jC`\\gr@tNiQn]qd@xi@qd@lc@_Thc@sKbk@{It_@s@li@fC~o@vIzkAfXj_@~IbYhGvj@`Nd~@xNnT|Bdd@pAvk@uDpl@iQdn@wQf|Bio@xTaOjXcWnMyQlX{a@drAkhCtWie@|PuR|PaPtPmNtPaIrVmJf\\_Gf\\kBre@U~e@^hY_@hc@j@nPkB|U_E`X_LfRuHfOcLfMyNrNkStKyQrJwQjEuJp]ep@~R{a@jRw]lPuXrSkWfWwVz]eW`x@cq@bTsRnMqNhJqLnVka@jHyNxJ_U|GaS|Oei@pi@akBlsAm`FtNwj@pb@gfB~Kuc@zD}M|CyJtDcLvPqc@jQ_c@pP_`@hPi]zMkWrRw\\nQiZlRuYdMkRnVi[jPsQlS}RpVsTbScOvUmOrXcOnlB_u@|fAmb@`UuH|S}FxReExReDnZ{CrwF_UtfEsL|S_@bUuAhVoBzLmAfRoDvO_EfNcEb\\}KrMiFrHqD~O{HjPgJ`OsJxKyH|NeL`PwN|x@ow@zKmK~LaK|PaM|QeKnMoGfQaHdSiG~LoCpL}BpM{A`R}@tQYjXj@j{D`QnOFhO_@rMqAvMsBjMoCdLkD`MuExMgGhJ{FfMmJtImH~LiMvJ_LnHcKvHmLfcA_hBtQ_ZrOwUdL{OnNcR~MeP|OyQ`PmPpMwLnMsK|OyLfQ}KdN{HbQ}I|NoGlViJbUgHr^cKtiA}Y`NaEdLsDjSyGtIuCtcB{m@hQsEtNiCxOyAhL_@rNCjNd@pPtAjpDng@zOxAvMr@|PApN_@hNgA`O}BdMyCtOcFlOiHlK}FpOiKxPqNbN}MbMqNlKiOxJ}OfJ{PpKqVzIkVbIwY`Hm]zEaZfDcY`CyZhB}_@|@mn@d@sdBPsf@d@s^tAo_@jC_]rCgXjFa]b@_CpEeVrFiThHcVhJ_W`KsUnJuQfKoPtJkNhJyL`LsL`|DirDlL{JnK_InKiHdRyKnuBgfApQ_KdO{JrNgLxIqIfKyKrNkQnNoS~McWdMeWvIyShJ{V`L}]biAqpEf\\qyAhL}k@lKep@bK{o@|VgxA|Mit@`Ikb@bIi^nKy`@hKa^lKsZfM_\\lIiSnIiQjJcQbIkNjKwPnJuNtToYnNaQzEyFfP{Rhk@es@pRwUpRyUlT}W`sCgkDvlDgiEnl@ks@hZm_@bPcStl@ws@dVyWnWmWbSiPhR{MtNgJfWaNlq@{^dr@{]zl@_[`R_KnQcKjH_FlJ_IxMkNfJsLlJqNfs@amAptDmhGnlCskEdd@{t@hJgRdJeSdKqXpIaW~GcV|FwW`F{XfDkV`Eo[jJy{@xTeqBrIir@`Jwl@tKwl@lQwv@hLua@hN{f@j[ux@nZwp@`a@st@`_@mj@~S}XrUcYbVaVf\\sYrRoOlUkQh^oRlk@yWlrBs{@jjA{f@tt@u[dJaDpF_BhKoCdJwBlMsBhJeA|PoApd@uBrOu@dk@_BjMgAdMkAdK_BrKgCtLgDnkB_r@~Q{FhP{DjKeC`Gk@`Gs@pMyA`FF~H}@~~AuEtOw@bNwAjNgCpLqCnHsBhJiDbGiCzLeGjMyIzHyGtIkI`KkLtNcRj`KgxNdLmPrK_QnH_NzIiQ|DcK~EaO|EwPfHcYbHi]hHwb@`Hqh@~{@ekH~MujAfL_|@hPehAnMww@|^_qBtEgXtEqYjC{QjC{SxCg^jBy[x@o^Bm`@}Au[oCsXmEyZmGy[a`@mrB}G{a@oEe`@_BsT{@sUU}TFy_@`@m^nJc{Ft@}a@q@_]y@}[uAy[gB}WuC{Y_DcWaFoWcEqSqFmTcO{i@}Ie]_Ik^qI_d@uDu[cCuZsAc\\Gu\\\\_]vAiZ~Ce[`Fo]~H{`@tIi\\tMe`@bY{v@r^eeApjAcaDviAs_DpSqk@xMkb@xJ{]hLee@xIqc@nGu_@hFk_@dZe}BpCsRbEyTbE}RdGiWrJu\\`Li]`KoX`Oe^fMcXvMsUlLmRhL}P`QoW~Zu^vPqPtqA}gAtLgJvMkKvKgJbZw^tYsd@dTme@|Osi@rIob@bH_p@dFgt@lDuy@zC}`AhAk]zAae@hCkh@tDyp@vFcj@dLmx@nNks@vNaj@|Mob@nTcj@|S_e@hVic@hXo^|Xy\\jr@s}@zjA{uAv{AecBjcG{nHlmKmwMxj@ip@pK{MtnB{}B||@mgAn|AgrBzo@ey@rcCcvCrhBa}BnXo\\tVe_@xTqd@tu@gbBboA{wCfe@kgAnpEiiKdcBwzDtVsl@vS{w@|Nis@dOk|@jU_`Crl@}wGlUehCvHmz@lEeg@nGkbAz@iXx@im@pAgcAdBgl@|Cim@bGev@jCwYpFwj@`G_r@vJql@jOio@fQiw@vK_z@vKcjAfwB}}Uv_@c`ErMcrAjOcjAjZqoAj`@qbB~DwO~lBmbIxbKe_b@lB{HxxAibGd~Joga@nQst@vHe_@`Iif@zD}WlNyjAjGge@lI}f@~EqWbQ_u@zFcWl\\yoAdNma@jQw`@hXue@dNoStOsR~PoPv[aZv~@_r@~}DmcCdkBckAlf@{ZlqAg|@bg@{a@vLuOtNaV|Oo\\xLiZbJi[pHi_@nF{^vDea@zCom@]}cAqC}iA{TewHoQieGqOewEmD}nA_m@ekTiAaq@eTuhHuCefAqUmsIwFwrA{JwwAgMmtAqRwyAeTypAg{@kgEu{Kgxh@{Pez@s[gzA_Kah@}Gud@_Eg\\{Bm]cA}W{@ua@Ie^f@}a@tAs[rBqZpBqSbGce@nEuXxHk^zKsd@fSsy@|Jme@jFs\\hD}XnC{[dBu\\bQajD|IwjBd}@{yPdLwtAtL_gAdqAs{Jhl@{hEhbF{ja@hWufBfLmo@hPmw@jNiY`G}PdGcS~FcPrGiNpGgI`I{Gp[wT|JqHxDoDlDmElGwLtE{LoW{Xem@_q@kHiI{GiG}GyFgI_GyMgHiz@u_@qM_GybAci@iVkM_c@iTdHw`@nCaM`EsNbDaJ`DmIrH_P~HyOpHqNfAaG`@qDGiDe@iDy@_D_FiJ~Xwi@hLcX|F_TbI{\\zoAk}Gl@}CdSidAzd@qbCdaAwfF`Nus@xnBieKtbA_mF|eBifJhPy{@ny@}jElZ{~A|Jsh@~e@ahC~DwWhEg\\hE}e@vB__@xAkY`Cyj@rAwo@Lik@]qf@u@}f@}Aic@eAiReBc[iG_x@uEeb@cJgn@}EwWkIqb@mGaXaH_XuRso@{CeJif@}xAwj@kcBud@kuAoMi`@o}@enCk}@_nCel@qfBwPsg@kZ}}@qLk^urCmqIw`A}uCoQoi@eqA}{DyeAw`De\\ccA{Oae@}l@siBy|Bc_Hi\\iaAwHaVmFcRoEmRsDwRqD}SuCcT}CwWuAgRoAgRyDgs@kDwo@uV_vE{[ufG_OinCuXkiFkLuxBmOuvCkI_yAyFkkAgCud@iFifAqUuiEgGsnA}Aye@C}Aa@}\\A{VJeVn@q_@nAa`@zCai@nEoj@xFsi@h@eDrIkh@|Kok@lJe`@hTou@v~@ywCpf@m|A~kAyxDtFcThC}M`DsSnBmRdBySt@mRNmODcUe@cWaAwPiAyNoBgQ{BwOcDgPiEcQgFwPgI{SoMgXysBy_EkY_k@sg@ebAsa@_x@mQs`@oIyTiHmS{FsRmFsRmRwv@mHk^iDyR{Hmm@eN_oAc\\oyCqb@ivD}_@umDsd@ecEiXqdCyC_ZcCk[gAwTcAySkAge@i@cj@Xsi@x@ac@zBgj@zC{b@rDy`@rK}y@`Nqu@|Kqm@jIoc@|F}]xE}]zDma@nCkb@lA{b@f@{^Imc@kAok@{Ag[gBwXqEsc@gFi^kHk`@_FqUcGsUml@upByv@ykCuOqh@uQwe@}t@{fBg`@g`AynAwtCcf@mhA{|@muB}HcQk^oz@cZ_s@wIuRmDoHcEkIgG_KiHyKsTyVoSmQaSaMsEyBkLqEcWaHeK}AiJw@qJq@}GEiGHsJd@_Kp@kIpAeEp@}D|@aGhB_H`CuQtHsOlKaXpS}KrI{s@zj@}`@dXaZjL{TtDuL?mV_BkOkCmLiE{TwLg[cSc\\wOkWaHuQaDig@kFsTeDcHeAgSuGyF}BoHyCc\\aPeMaGcf@cUkyA_t@yhAqi@}cA{f@q]cQ}O{GkF{ByPuE}NkCiRUiSj@mQ~CkTvHep@vSi_@`Hib@tDsOt@mSIsOuA}NuByMuCa~Ay_@aYcHmh@kJ_e@uDmeAoFkDQyf@cCgh@gCsYmAqDDaI?qDLcETcPdA}HfAiJlBuObD}PnF}G|BcHtCwIpEuTzLmf@hZom@n^{c@~X{PpKkMjGeEvBqEvBeCfA}IhCmDt@wBb@oCh@q@LcJdAyLx@gHA{DAgO{@gRoDuNkE}RcKoTqNyWiTqZgVgYgUgHyFwu@gm@uk@ud@}x@op@eZcVuEuDoOwLaNwJqMaIgJ_EwKeDsOeDcOu@yLN{NdBkQnEgPpHwIfFcUjN_R|Lc[hUyVfQmSfLu`@bWy[hTyJdG_HjDkJdEcR`H}KdD{MdDwEjAaPzCwOzBqIx@wXt@iV?em@eAyo@{@}NSoPKgID_Nn@iOzAoKnBaP`EyTdHmg@bQg{@xXeUpGaJvB{PbEid@fJmTvEuVbEmVjEuSlC_UlBkV`BeT~@ms@hBeTt@k]zBuk@tAgt@tCyk@zBuy@xCk`ArEm\\|Ac^vAos@jDk^`BgQ`@yOMwRo@{He@gIc@uRoCmPaC_x@_Nab@oGeHgAaVoC_VqAuXi@_\\d@qa@hByhAvFss@zCkSh@oNDeM[_SeAkWuBk]kFk{@qN}g@kIkYwDmSiA}RNgOdBaK~A{LzD{NpGaP`J{QvLyp@pf@qg@x^sT|OyZvT_JrGgK`H}DpB{H~DuNdFgOjDqQtB_EHsLZ_Rk@yHu@qD_@}PkDw]eI_NaCeMeAqN_@mUt@cOdCuS`Fe}@lU{gAxYmQjDgPpBaTx@qTUgOyA{TeEoTqGa[gOeWoSmUsUcSyXeRu]sc@ucAeWsk@qGwLoLgQyKwN}IaJ}NgKuSmLgH{CuCy@uWaHimAyYa{A{^cqB{e@_K}BgZqHke@_Ioc@gHkk@yFsn@yDq_CeN{fByJom@mDw\\yCaYaIm[gQsWoUcUa[oKuSyGgNiFaPwJc_@sXinAwZoxAsn@ovC}~@sfE}bAavEcz@uyDah@c_C{Ogt@yVmjAiPoz@aZ}mByJuo@al@yyDkj@omDoI}j@oS}tAgPefAiIwn@qEmj@kC{h@aOotDoVm`GoHqlB{Cso@aDsl@iDu_@{Dc[wD_TeFqXgDsNcDuLgKa]sG}Q_I{QiX_j@oTkd@{Xgs@oL}`@yJkd@aEmWwCyTgDs[iCu\\}Bu^}MozB_I{iAiOyuAcSolAm\\scBgKqn@gF}h@_Be_@m@}[L}S\\mVpCch@lLyiBdHqcA|F_w@tCgYrFec@rH_d@jPkz@`aBo~HvJod@`YstAjKcv@n@{NnBsc@Xeq@mDyoAeR{yGuIaoC}C{q@eIkz@_Hwb@gRkp@uQkg@yUyc@stAmoBgm@g{@eXae@_Ne\\wJu[_Kqd@aFu_@_D{d@m@w]f@eh@nCqi@rI{q@pJka@pLm_@pSog@r]_bAfKqb@hHin@fCke@Rm]cAed@oImz@qKu~@gBwRiAaSO{LMmKBiSj@aR|@qPfCoVdFsY`D_PdEmPfGwNfIeQzU_e@xLeV|IgRdGgOxFiQ`EwOtDmSzCyTvB}X~@uX?_[y@_ZyBsYwEiZcFsUqGiSwHcSyKcTuNsTkZ{d@mq@qbAg^aj@oEwGuXo^}LqNmL}LaLgKmJkHsRsMuGoEaR{JaQ}H}UkImWqGyJsBgL_BaK}@eLo@uL]sLQqTJuYh@q\\tA{qC`Jaj@dBeb@~AwIdAyNpCiRtGqNfIkKjIiM|MgKpNuHpMqHrPeHxTiDzMuE~TyEnZyDrTgE|PaGlQ{HfReFvJ{JfOgOvPcNlLgNjIuLjE}MpDcJnAsLx@cPCeMkAqN_CgOqFiQaJmMmJ_BgBcIwIqIaLoKyQgFgLmOu`@mL_[mOea@oImU_S}g@yQkf@i\\_|@uSah@yKiTyPoXeWsZyNcMyPqLkOqI{NkGkTkG{NuC_OaBwQy@qRTcO~@qUjDcNdDmMjEcPzI_OpJ{LpLeNxPiBtCqEjHsJfQiJhTaKrWiGxReEfQyDxQyE~ZeRbwAoe@`rDm^tqCuR~yAqDxV}ErT}F|RaFhM_A~BaKbRcKfOyJjKkLfJaKjGoKzEeMtDsMjC}e@`Iaj@fJgVdGaRvHuNjHgP`MqNlNkPbTcOxWwHpP{Kd[c\\vjAo^nnAwGbSuK|W{MdW{NlTsQvSyKbKoPzLsQvK}Q`Hu]`KifAdZa{@fUka@bMgTlIqOhHa]rRsQpLqDtCyI`HiSfQaThTmQ|Rk[`c@{|@dxA{y@htAuy@~sAm^ll@yJpPyPnXk`@xn@em@pbAa\\jh@oVpa@qNbWkdA`eB{o@bhAyYje@uOlTkPrSwNfPcP|OwL`KucAht@_d@`]k[xZcJzJ}LlNeg@bu@kaAl~A_t@`kA__AtzAi]ll@kJlR_L~WaLt\\iI~YkJ~`@yErVuZj}A}`@tsBuJ`g@}F`_@mEx]yCd`@sB`c@c@~\\C~`@|@lg@jA|V`BnVh@~HnGrk@vDtVnGrY`EvPfVz~@bU~y@`I~[pHx^bE`ZxAnMdBhNpCt^lAt[b@dV\\rp@XxaB`Alg@dB~`@rCd_@nEd`@~EzZbIza@`GrXbJn`@hTj`AjIh_@rHv\\hIzc@|Fza@zCh\\|BzZrAn\\f@rZFz^o@d_@u@xVsBt^oDr`@_E`\\mIld@qJ|_@cOrf@_KtW{m@ruAiVnj@mGvMoN`Z{^ln@wO|TaZl_@qZj\\e\\xY}[xU_XrTuXxU_\\|YiJ`KoMtN{KvN}oAhnByR~UeXhW{YdQejBzq@{wAbb@caAxN{}@tHaq@`@wU@_Rm@c^kBy_@gCyZuAwMJaPhByOjEsN`Gm`@nS}U`KqMvCyQhBiM?iM_@}I_AuKaCiUuHmPwDyHi@sQI_NhB{L`FiO`Jm[zVoM`IoK`F}ItCiM~AmITgK_@wKuBcOwF}KkGaWeUeMgMwFiF_HaGiIeFeF}B}FqBiOuCqMU_StAqJtA}K`FsJjE_i@zYwWlMmVvIiYtGsOjCyOhAcBJsOT_HUuBIaEMmJ]gUqB_DWqFeAgRqDsLuD{DmAkG{B_LcFeTaMmPsKsGgFsLaLoKcK{Xq_@{`@}i@eQcQoKcIkLuG{LaD}MuB}b@UwaB`BmV^oMjBcOjFwR`KaNfIie@hXoW`KuPjF_ZdEobAjIsLzAyTvFsS`IeSvKqO`LgK`KuKlMuzAryBci@jw@qObRaO`NsQlLaOjFaMjC{StBuN?_TgBgdAgPu^kH{SuH{NwHsNaJiMwJaeAkdA{SyQc]aSw\\yTqLaLiHmKeImP}FwNiHcZyJgg@eIo\\mKoXuIcQsNmRwc@{f@uZe\\c`@{a@gMcI}NkH_RkHiO_BwLNgBBgZjDsu@`KoYjGuNjFkNlJ}KjLuKxQmDzHmDfLqEbSqCvQ{Ifn@aHp_@oFvQeIlRoRnWeL`JmKjGaOtEmN`Awj@hA{i@j@kS~AmS~DmR`HyVlMwYvRo\\dWmUvMkV`K{P`FkS~CiR~A{U?aR_BsPuCcVwG{aAmYunAa_@icBkg@u_@aLqXmI}}A{e@gcAoYkGiB_oAe_@chBsj@_fAeZqKwCqMuDqg@qLaWyFqKiCcQoEgg@iLqc@uJ}a@yJmOiDuj@eMeyAa\\ugAyVuZaHuWcGoa@kJgw@}PoAY_l@kMkd@mMeUaJmUmMuPaKmUcSsPmSwTc[mNeXyJwSwJoXgKo[sPsu@sR{z@iK_e@cl@ylC{Nip@cp@syC}^{cBaR_x@{Kea@sL{]oHmScEaLoR{a@cIsOmL}T}HaM}KcQ_d@ik@}XmXgJiI_MiK}L{ImQeL_JgFqEyByAu@yEyBoNoGgW_KgKeDeOeEyO_DmVoD{LkAoMkA}Ga@qNm@aCEyMC{GFiKPaLh@uHh@iEX}LlAmJnA{J|AuN|BcOpCuCj@oOvCi]jGmVlEeKhB{AXiDn@oR|Ca]dHsTxD}UjEs@L_O~B{FdAeTvDqGhAgKxB}N|CsMpBmPpBuJz@{ALyKx@oLPyII_Ow@{Go@kGm@sKeBeLgCoMyDcOoFoLcFqTuK_g@eYqEgCwTkMagA_m@mNoIso@g_@oMcIwl@_\\oe@{Wse@qXuJsFm`@{TwQeKiSeLe`@gTka@aTe^uPgN}FiN_GwNkF_IiCqSgG_HoBmJeCot@kRua@uKww@wSum@_P{a@wKmt@gR{_@{Jy^wJyK_Dk]wIeMeDkz@uTq{Au`@qdA_Xmc@gLeLyCiuAa_@uFsAsk@{N{pA{\\eSkFgNoDwh@cN}_@{J_q@gQsMgD_\\qIm^oJsEmAsO}D_EeAw`@oKaMcDoRoFu\\mIoZ_IaR{EsI}BkHmBa_@uJes@wRuAe@_UeIkPsGyB}@{FaCkEsBuN{G{UmMqL{GoEqCwEwC}HcFuFuDkOaLaTuPwQyOaIiHuFmFaJcJoJ}JmP_ReJ{KsG}HeEiFaFuGaEwF_FeHcV}]k\\kf@cTyZgg@ou@_y@klA}MoRaB_Ckn@{~@gXw`@}D_G{NoTsUi]_E_GuNcTmMcR_Z_c@sLoQ_FqHiQiWyEkHeG}ImFaI}H}LmHiLkFoIkE{HsDgHmH_OmBwDoEuIyG{N{E_KoFiN_EuJkC}GwByFkGoQ{CcJaDwJkBeGmA}D}EqP_AaDeA}DkEsPoCoKuCyLoCcMaJkc@cLwe@kHk]_J{c@_N_p@kDuM_DgLyCcKkEkNuDyJaDkIkFyLcDqHgDaHkDsG}EoIoEoH_FsHeH_KiIsLyf@s|@{DwLiC_NsAwN[eO\\gOrAwNpLkn@vZifAvRgo@fPcd@xVyj@`NwXfTib@|[qq@|uCmnGnHeP~k@aoArJsSrM}XnVoi@pPg[xMqUrK_Q|McRhOoQbgAecAhv@yv@jP_Q`TgU|QgU`M_Q`NySrZ}g@ji@caArrBorDfYwh@xHcPdJ}Tva@weAv^kbAvgCyqGhtBuuFpVur@tPag@hUwr@bM}`@tJy[xJw[vJ_\\xI_[tVg`AvNqq@xK_j@xD}TbFq[fHid@~CaVfBeO|BoRpDi\\dDi]dEcf@jC{\\dBs[nDer@jB_e@jAe_@x@gf@t@a}@@ip@Se\\c@k]k@_\\kAyh@kAi^gBye@yFepA}Aa]{Ae]oDs{@wDy|@qBmf@wD_z@kIamByFssA_FcjAyBye@mGizAsK_dCmJk|BuDa{@mBeh@qAag@y@gd@e@ei@KyRCsVHgTXgc@Zk^~A}q@d@_Sp@oR~Ai^bA}S`AkInCu`@|IyeAfQc~AjLmx@vNiy@jP_|@`d@agBtvBk{G~rB}nGb]qrAdTmhA~QmhApK{}@pJaz@lTqlCnYeuDnEoXrGoZ|IyXxUwd@z[m`@fs@wt@bR_UxN{TvN}]pJid@~DqZdCo\\b@}ODcUu@c_@aCa_@s_@u|Cs{@kpHs@iMw@cPwAceAp@st@pCkr@lGkv@tMe~@`i@ekCrpAupGtMeb@pOe`@zn@eiAn`@gq@zZck@|]in@|EuIhG{KpGwJnUa^r]ma@~c@yb@nZ}Sd\\oTtdAqp@r`@{\\p^kb@l`@_h@n\\yi@nZum@vM_]bXoz@dv@}~BtmFc_Qj_A{wCpx@ecCti@{kArU_a@zVw_@jz@ieA|n@{j@v^}W`_CqkBpnCuxBbX}Rl^eUxQuI`VeH|XqHpi@yHjyByPjc@yFf`@aMxa@mQfVaNfX_Rva@m_@|_@ye@|d@yw@rb@yx@ddAeiBxo@qcApv@{oApHwL`|@e`Bf`@u}@zh@etAxl@_sBtZ}sA|D}SlHg`@d\\ezBr[efCh}AicMbdDs|V|OslA|BgNx~AozLnc@itDbw@mlG|VqgBr\\geCpYmfBpt@yeEncBezJraAk`G|f@_pCzKco@pR}{@fMmg@zOeg@r\\kr@`Ra\\hWa`@~RwWxQcPfG{DnDsAdDIfD^bC|ApDzD`BtEdAfIDxGg@vGaBvFyGtIkEjBqEt@sG_AgIgEqOcR}QwTw`@kf@gh@sp@_KqMwF{KeEgHwFkG}@cAy@oAu@eBm@oB_@iDKoD?_CH_CR}BHu@T}BG{Dk@aDkAeCaB_BoBq@gEwGiAgFuCkMeIua@wPm~@mKsn@kByQeAeJsBoOqCeRiCwOkCyOoFyZoCsP_BgKyA}KaA}Iw@kJ_@}Ga@iIWcKGkIC_J@oJPmId@{Kv@oLh@oG|@sJjBaR`CgUdB}Pj@qG`@uFReFJ}EHeJAuJ@uNDqN?aFCaLAqDkC?mDAoZNob@?cWT_e@Fch@Uu^@}R_@_Li@aIw@uKoAiLwByLkCaKsCkJkDcN}FeK}EsH{DyJcGed@_YwRwLeViO_a@eVgUqN{X}Pe]_TgS}JqE{G}E}GcFcEwG{CcEe@sCg@mBgAqAsAm@eAgAmBEyAQ_BYkA_@m@a@c@SU_@USSyA{@cBFsAT_BGoAEoD}@iGoDgHgF{I{D{MkEem@s^qvBupAsz@wg@_|De`CaiAea@em@yQwl@uL_OwCkaA{R_d@cJchBu^ia@eK}bAcVsdAqX}lAu\\}d@eMce@qLmo@}PskBwd@avCwt@_hA_YuhAgY}eAaVcSoCeDc@kZuCct@iGm_BuM_`B}Myr@uF_l@sEeq@iFgn@kFi}@{Fu|@{Fqa@kCcc@aA}Fi@aOkAgU_Dmp@iK{}@aPmc@qHip@aLgc@qH}`@sHgm@uJw\\eG_^{JqV_HgQsFal@qT_i@_V{KuEw]}Nqc@}QqSoH{t@aZqp@sj@cY_\\cNqUql@k`Akd@{p@wSaT}SiOeQsI_T{I}UwEcXeFiXgEaw@kM}^cKk]gN_]}Pe[aSoYcTiw@oh@_n@sc@_k@{d@sk@wi@eg@qg@sd@qc@eO{OkK{MgRcYcPkXwXu|@qMao@eKmZuUwo@uTm_@{WyWw`@c]s_@kTyY{Puf@uYqaBq|@m|@{i@az@eh@w\\wSo`@w]i\\yd@mW_j@cRkm@sr@spC{_@czAq^quAwKm[uJyXcK}V_Ni\\{Na[}O_[yLwRuNqTiVw\\mPsRcOeQsX{XoNgNmQkPkR_SmVwVaJeIuUcVss@st@skC{}Bg~@qz@uNyMcnCycCaMuMikA_iAy\\yWul@y[grBmgAqmEa~BejBkx@ekBq{@eVeO{T}OgY_VcWmTkr@ql@gaAuy@ikA_}@eg@q^cc@k]o_Agt@sd@_]oe@wYkJcFcLaF_TaHqPoEsOkDuYoEkv@aM_rAqVskAoSgY}EwTcFy^uKaYaKmvCevAaoA{o@q{@}c@em@k[g]qQgb@ySmPuGsW_I_TmDoVeDma@kAux@jEckB|KaYl@ai@aEseFov@mxDgk@k}HimAu_@iGcaBkVsf@eIgl@}HyTeBmS]eRl@}]`Hy\\hLcUnM{]|TmX~QiUrLsVfKkRzEuYfFaz@zHoz@fH}g@zD{]tD_c@vCiWRa]uAaScCk]mIu\\wK{_@wLggAyb@gm@w[qyBkpAweSsrLaw@wd@wRkM{a@{^_l@so@uh@ym@kHmE{OqLyVqMoSiHqTcF{[sDci@{Dyi@eGufCw\\cs@mK}j@}OcZaJyUwLay@_b@sb@}RmZ_GkS_CgtAeOodAkIat@yEcYmGaQiGyb@sS{Q}OwT}Su^{i@i`Ai|Awr@uaAcsBqtBqMoL{e@ye@_u@ax@uXk]uUk^{_@mq@__@{_AsmAaiDiO{`@gNo_@qKsTaJoP{Zqc@_RwQ{AyAkUaPsTaLk^yO_XeE}V}@gf@[oy@iAilBqEc|@eB{~@\\}KAkPGiRGgJG_a@McQGiGCmXI_MYo`DqBk_CQcy@|A{WnC}C^eJzAq\\tGmaBfb@{h@`Niz@jTefAbXqBh@clArZsgAdYeEpAyd@pNi_@tOwVzMyZxRgQfN{QhPk`@t^ga@j_@sDbDqN~LsVdRgKfH_SrLua@zPmjBnp@wfCv}@}b@rOuRzImPtJsNjK}LlL}LjMshAxkAcj@|j@yhD`oDcQjPeR|OqOrKePxIedB`u@i^dSsXhTkj@pl@}|AheBoSlTsRbQcL~HwJrEsVvJeNxDwF|A{VzCi]j@ko@mFgyB_V}d@aFubCkX}_AmKq|A{Pgm@mH{TcG{HgCiHcCwI{CirFewCeMeGoQsHgUcJwXaKq]kLy`@aOwE{BoNuHgNaIqWiQswAacAuDsCgz@gs@udA_~@}b@a`@ed@k]iNaK_XsQghA}n@gk@iVwUgJieAo`@iEuBkdAcg@mYiTqY{Ti[iYiWyZwWq`@}\\wn@cY_u@{]cfAkm@idBe\\sv@iZgn@cg@q~@ok@s`Awz@oqAu`@ep@kXic@ix@qyA}eAohC_c@q}Aqy@wjEgN{s@wd@iwB}S}cAa_BgyI_z@giEyK}k@uKqk@s[ikAwNab@wWer@gl@euAa]k`AiPyk@qf@}dB{TwnAaLmu@g_@kdDkFa]qEuYoIc`@iKma@qr@kcCaZq{@kVam@qw@afBitAmwCkL}WoIoYkCmN}AwLaBoOiAmO_AgSWsKGuG@eQdAcaAFmQAsJm@aVg@kLkC_[wAcLwCeQyCcM}DaMmD}JaEgK{Mu[{Mk[kLoX}B{F_Uer@kH_S}Tui@ypA{_Dum@ysA}LqSsKwOqXeYeqAglAwmAggAsTqQi`A{v@{tAwdAiyAkjAct@kl@{\\yUq_@}To_@iNs`@oJkg@uFanMi}Ac^eBmn@mA_tBbD{r@hA}rErFioBdCyyCpCuc@]mSq@eT{Be^oJgqBkr@g`FyeBk|Amh@e\\gQoJwGqQmP_KkJo]of@wbBgmCcs@y`A_QiPwOkM_VaP}xA{}@}OsNyVmZ}`@{i@w`AkbBc`GcaKmScWmSiT_l@ka@gGiEcTwPmRyR_Y_`@_pAycBg^{e@oj@ul@odA}gAwYsXopAg}@}h@gd@ySwQkQmQyJcMyHkLyIiQwGaPsEgN_F}QaE}RyCyUyAyPwA}Se@{o@hCkf@vCiYnGab@~HmZlnBuwEdGkPhGcX|D}^bAqc@}@uSiAySi@uCs\\eiBiGko@_@ud@PsQ|@iPnDiYbEkVpGq]nSubAnR}}@d@{B|Qk_AlNko@lKug@pKsg@|EwUvDyQxIwa@|Juf@fA_FlDkPlDgPdG{YzGy[lGwZrHa]xAmIrBuLlDySdE_TnEmZhEe\\xE_g@`Dwf@rB}b@nAyc@rAyh@X}i@c@ub@qA{h@y@kTuAo_@yB{q@cBod@w@yUgAuv@i@ko@i@_|@aAsq@o@o_Ay@{t@]gn@wA}fCIkm@Cs]Aq^UuXSwRm@y_@yA{s@s@u^E}QHiM\\cP|As]|Bme@z@iQJeBjK}dBlEo{@lGogAnGqhAfHgoArFe{@v@gQzCc^xRk{AlEi`@nIyrAbH_hAvA{TvCk}@p@sVSgMw@eK_DcNwBmImJeQgHkGe\\wRqIyFaJgGuDcFuDyH}DeI}DiPMu@m@{Dc@qCeAaNSoKJ}EDkC`Dat@P{D`Bce@ZiJv@yTIuHe@uIgAcLeBuJgXwqAUsA_CiNeBmPYcXbBav@|Gg{CxAwp@`Ck~@lAct@n@s]xAu|@v@i]j@sVZ_Sl@ySH_F\\cQb@}S|@gd@FmD|@yc@hAmh@bAab@t@{XNoI\\aRJ}F?sDEeD_@cH_BaL}k@s`C{G}PyIeFiSmCw[cAi[gAg\\_@_[Qk[m@q[eAmZi@oS]kGKkEIaTa@kS]mGM{A?kWI{\\]sBl}B"
+      }
+    ],
+    "summary": {
+      "has_time_restrictions": false,
+      "has_toll": true,
+      "has_highway": true,
+      "has_ferry": false,
+      "min_lat": 47.174912,
+      "min_lon": -122.346238,
+      "max_lat": 47.842639,
+      "max_lon": -120.0147,
+      "time": 11066.92,
+      "length": 182.996,
+      "cost": 10519.897
+    },
+    "status_message": "Found route between points",
+    "status": 0,
+    "units": "miles",
+    "language": "en-US"
+  }
+}
