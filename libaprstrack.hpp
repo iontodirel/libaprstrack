@@ -1116,7 +1116,12 @@ APRS_TRACK_INLINE position_ddm_string to_ddm_short_string(const position_ddm& p)
 
 APRS_TRACK_INLINE void add_position_ambiguity(std::string& position, int ambiguity)
 {
-    for (size_t i = position.size() - 2, count = 0; i > 0 && count < ambiguity; i--)
+    if (!(ambiguity > 0))
+    {
+        return;
+    }
+
+    for (size_t i = position.size() - 2, count = 0; i > 0 && count < static_cast<size_t>(ambiguity); i--)
     {
         if (position[i] == '.')
         {
@@ -1773,7 +1778,12 @@ APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp(con
 
 APRS_TRACK_INLINE void add_mic_e_position_ambiguity(std::string& destination_address, int ambiguity)
 {
-    for (size_t i = destination_address.size() - 1, count = 0; count < ambiguity && i < destination_address.size(); i--, count++)
+    if (!(ambiguity > 0))
+    {
+        return;
+    }
+
+    for (size_t i = destination_address.size() - 1, count = 0; count < static_cast<size_t>(ambiguity) && i < destination_address.size(); i--, count++)
     {
         if (destination_address[i] >= 'P' && destination_address[i] <= 'Y')
         {
@@ -2469,8 +2479,6 @@ APRS_TRACK_INLINE std::string encode_compressed_course_speed(double course_degre
     return course_speed;
 }
 
-#endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
-
 APRS_TRACK_INLINE std::string encode_compressed_altitude(double altitude_feet)
 {
     int cs = static_cast<int>(std::round(std::log(altitude_feet) / std::log(1.002)));
@@ -2485,6 +2493,8 @@ APRS_TRACK_INLINE std::string encode_compressed_altitude(double altitude_feet)
 
     return out;
 }
+
+#endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 // **************************************************************** //
 //                                                                  //
