@@ -44,7 +44,7 @@ std::string packet = t.packet_string(packet_type::mic_e);
 assert(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}");
 ```
 
-### Specifying other packet types
+### Encoding other packet types
 
 Position packet with UTC DMS timestamp:
 
@@ -56,8 +56,8 @@ assert(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W_");
 Compressed position packet:
 
 ``` cpp
-std::string packet = t.packet_string(packet_type::position_with_timestamp_utc);
-assert(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W_");
+std::string packet = t.packet_string(packet_type::position_compressed);
+assert(packet == "N0CALL>APRS,WIDE1-1:!/A2hQ5`8vp!!Y");
 ```
 
 ### Smart beaconing
@@ -110,9 +110,45 @@ while (true)
 }
 ```
 
+### Binary and UTF-8 support
+
+The string functions are provided for convenience, the library can be used directly with binary data.
+
+The library is string encoding agnostic, and can work with UTF-8 or any other encoding, when encoding packets.
+
+``` cpp
+tracker t;
+t.from("N0CALL");
+t.to("APRS");
+t.path("WIDE1-1");
+t.symbol_table('/');
+t.symbol_code('_');
+
+struct s
+{
+    double lat = 0.0;
+    double lon = 0.0;
+};
+
+s data{ 39.751166666667, -75.085333333333 };
+
+t.position(data);
+
+// set message using a vector of bytes, by passing in the range
+std::vector<unsigned char> message_bytes = { 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64 };
+t.message(message_bytes);
+
+// get packet bytes, by passing in an output iterator
+std::vector<unsigned char> packet_bytes;
+t.packet(packet_type::position, std::back_inserter(packet_bytes));
+
+std::string packet_string_from_bytes(packet_bytes.begin(), packet_bytes.end());
+assert(packet_string_from_bytes == "N0CALL>APRS,WIDE1-1:!3945.07N/07505.12W_Hello World");
+```
+
 ### Encoding a mic-e packet:
 
-Lower level functions in the library can also be used for convenience or utility:
+The library is modular with no coupling. Lower level functions in the library can also be used standalone for convenience or utility:
 
 ``` cpp
 std::string packet = aprs::track::detail::encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 35.449666666667, 140.2685, mic_e_status::custom6, 257, 5.999, '/', '>', 0, 9.84);
