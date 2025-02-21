@@ -33,7 +33,7 @@
 // APRS-IS test data                                                //
 // **************************************************************** //
 // 
-// Some of the packets used in these tests have been taken from APRS-IS
+// Some of the packets and data used in these tests have been taken from APRS-IS.
 // I do not not hold any copyright to them, the test data is in the public domain.
 
 #include <gtest/gtest.h>
@@ -182,6 +182,24 @@ TEST(conversion, unit_conversions)
 {
     EXPECT_NEAR(meters_to_feet(1), 3.28084, 0.00001);
     EXPECT_NEAR(meters_s_to_knots(1), 1.94384, 0.00001);
+}
+
+TEST(time, encode_timestamp_dhm)
+{
+    EXPECT_TRUE(encode_timestamp_dhm(1, 2, 3) == "010203/");
+    EXPECT_TRUE(encode_timestamp_dhm(10, 20, 30) == "102030/");
+}
+
+TEST(time, encode_utc_timestamp_dhm)
+{
+    EXPECT_TRUE(encode_utc_timestamp_dhm(1, 2, 3) == "010203z");
+    EXPECT_TRUE(encode_utc_timestamp_dhm(10, 20, 30) == "102030z");
+}
+
+TEST(time, encode_utc_timestamp_hms)
+{
+    EXPECT_TRUE(encode_utc_timestamp_hms(1, 2, 3) == "010203h");
+    EXPECT_TRUE(encode_utc_timestamp_hms(10, 20, 30) == "102030h");
 }
 
 TEST(position, encode_compressed_lat_lon)
@@ -1382,7 +1400,15 @@ TEST(position, encode_position_packet_with_utc_timestamp_dhm_no_message_with_tra
     }
 }
 
-TEST(tracker, packet_string_no_message)
+TEST(position, encode_position_data_compressed_no_timestamp)
+{
+    {
+        std::string data = encode_position_data_compressed_no_timestamp('!', 50.006266308942, 20.168111391714, '/', 'u', 120, 45.90, 0b01001000);
+        EXPECT_TRUE(data == "!/54agSVoou?SH");
+    }
+}
+
+TEST(tracker, various_anonymous_structs)
 {
     {
         tracker t;
@@ -1438,6 +1464,33 @@ TEST(tracker, packet_string_no_message)
         std::string packet = t.packet_string_no_message(packet_type::position_with_timestamp_utc);
 
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W_");
+    }
+
+    {
+        tracker t;
+        t.from("N0CALL");
+        t.to("APRS");
+        t.path("WIDE1-1");
+        t.symbol_table('/');
+        t.symbol_code('_');
+
+        struct s
+        {
+            double lat = 0.0;
+            double lon = 0.0;
+            int day = -1;
+            int hour = -1;
+            int minute = -1;
+            // int second = -1; - required even if not used
+        };
+
+        s data{ 39.751166666667, -75.085333333333, 18, 16, 13 };
+
+        t.position(data);
+
+        std::string packet = t.packet_string_no_message(packet_type::position_with_timestamp_utc);
+
+        EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:/000000z3945.07N/07505.12W_");
     }
 
     {
@@ -1574,6 +1627,7 @@ TEST(tracker, position)
     data.lon = -123.94916666667;
 
     t.mic_e_status(mic_e_status::in_service);
+
     t.position(data);
 
     packet = t.packet_string_no_message(packet_type::mic_e);

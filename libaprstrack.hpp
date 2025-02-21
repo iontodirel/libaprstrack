@@ -135,15 +135,15 @@ constexpr bool has_altitude_v = has_altitude<T>::value;
 
 struct data
 {
-    double lat;
-    double lon;
+    double lat = 0.0;
+    double lon = 0.0;
     std::optional<double> speed_knots;
     std::optional<double> track_degrees;
     std::optional<double> alt_feet;
-    int day = -1;
-    int hour = -1; // 24 hour format, 0-23
-    int minute = -1;
-    int second = -1;
+    int day = 0;
+    int hour = 0; // 24 hour format, 0-23
+    int minute = 0;
+    int second = 0;
 };
 
 std::string encode_header(std::string_view from, std::string_view to, std::string_view path);
@@ -176,9 +176,9 @@ std::string encode_position_packet_with_utc_timestamp_dhm_no_message(std::string
 std::string encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet);
 std::string encode_position_packet_with_utc_timestamp_dhm_no_message(const tracker& t, const data& d);
 std::string encode_position_packet_with_utc_timestamp_dhm(const tracker& t, const data& d);
-std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, char compression_type);
-std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, char compression_type);
-std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, char compression_type, double alt_feet);
+std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type);
+std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type);
+std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, double alt_feet);
 std::string encode_position_packet_compressed_no_timestamp_no_message(const tracker& t, const data& d);
 std::string encode_position_packet_compressed_no_timestamp(const tracker& t, const data& d);
 std::string encode_mic_e_data(char type, double lat, double lon, double course_degrees, double speed_knots, char symbol_table, char symbol_code);
@@ -1178,6 +1178,51 @@ APRS_TRACK_INLINE std::string encode_compressed_lat_lon(double lat, double lon)
 
 // **************************************************************** //
 //                                                                  //
+// timestamp                                                        //
+//                                                                  //
+// **************************************************************** //
+
+APRS_TRACK_INLINE std::string encode_timestamp_dhm(int day, int hour, int min)
+{
+    std::string dhm;
+
+    dhm.append(format_two_digits_string(day));
+    dhm.append(format_two_digits_string(hour));
+    dhm.append(format_two_digits_string(min));
+
+    dhm.append("/");
+
+    return dhm;
+}
+
+APRS_TRACK_INLINE std::string encode_utc_timestamp_dhm(int day, int hour, int min)
+{
+    std::string dhm;
+
+    dhm.append(format_two_digits_string(day));
+    dhm.append(format_two_digits_string(hour));
+    dhm.append(format_two_digits_string(min));
+
+    dhm.append("z");
+
+    return dhm;
+}
+
+APRS_TRACK_INLINE std::string encode_utc_timestamp_hms(int hour, int min, int sec)
+{
+    std::string dhm;
+
+    dhm.append(format_two_digits_string(hour));
+    dhm.append(format_two_digits_string(min));
+    dhm.append(format_two_digits_string(sec));
+
+    dhm.append("h");
+
+    return dhm;
+}
+
+// **************************************************************** //
+//                                                                  //
 // header                                                           //
 //                                                                  //
 // **************************************************************** //
@@ -1342,10 +1387,7 @@ APRS_TRACK_INLINE std::string encode_position_data_with_timestamp_dhm(char type,
 
     data.append(1, type);
 
-    data.append(format_two_digits_string(day));
-    data.append(format_two_digits_string(hour));
-    data.append(format_two_digits_string(min));
-    data.append("/");
+    data.append(encode_timestamp_dhm(day, hour, min));
 
     position_ddm ddm = dd_to_ddm(lat, lon);
     position_ddm_string ddm_str = to_ddm_short_string(ddm, ambiguity);
@@ -1463,11 +1505,7 @@ APRS_TRACK_INLINE std::string encode_position_data_with_utc_timestamp_hms(char t
 
     data.append(1, type);
 
-    data.append(format_two_digits_string(hour));
-    data.append(format_two_digits_string(min));
-    data.append(format_two_digits_string(sec));
-
-    data.append("h");
+    data.append(encode_utc_timestamp_hms(hour, min, sec));
 
     position_ddm ddm = dd_to_ddm(lat, lon);
     position_ddm_string ddm_str = to_ddm_short_string(ddm, ambiguity);
@@ -1585,10 +1623,7 @@ APRS_TRACK_INLINE std::string encode_position_data_with_utc_timestamp_dhm(char t
 
     data.append(1, type);
 
-    data.append(format_two_digits_string(day));
-    data.append(format_two_digits_string(hour));
-    data.append(format_two_digits_string(min));
-    data.append("z");
+    data.append(encode_utc_timestamp_dhm(day, hour, min));
 
     position_ddm ddm = dd_to_ddm(lat, lon);
     position_ddm_string ddm_str = to_ddm_short_string(ddm, ambiguity);
@@ -1686,7 +1721,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_dhm(cons
 //                                                                  //
 // **************************************************************** //
 
-APRS_TRACK_INLINE std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, char compression_type)
+APRS_TRACK_INLINE std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type)
 {
     // 
     //  Data Format:
@@ -1714,12 +1749,12 @@ APRS_TRACK_INLINE std::string encode_position_data_compressed_no_timestamp(char 
 
     data.append(encode_compressed_course_speed(course_degrees, speed_knots));
 
-    data.append(1, compression_type);
+    data.append(1, static_cast<char>(compression_type));
 
     return data;
 }
 
-APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, char compression_type)
+APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type)
 {
     std::string packet;
 
@@ -1730,7 +1765,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_
     return packet;
 }
 
-APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, char compression_type, double alt_feet)
+APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, double alt_feet)
 {
     std::string packet;
 
