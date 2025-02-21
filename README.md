@@ -14,6 +14,33 @@ SmartBeaconing (TM) is a beaconing algorithm invented by Tony Arnerich KD7TA and
 
 APRS is a registered trademark of Bob Bruninga, WB4APR.
 
+## Features
+
+- Comprehensive APRS packet encoding support suitable for APRS tracking:
+  - Mic-E position packets with optional altitude and course/speed
+  - Position packets with/without timestamps (DHM/HMS formats) 
+  - Compressed position packets
+  - UTC and local timestamp support
+  - Position ambiguity control
+  - Message/comment field support
+- Binary and string support, including UTF-8 support.
+- Supports the Smart Beaconing (TM) algorithm, with full configurability.
+- Cross platform and Cross Toolchain
+  - Runs on Windows, Linux, OSX, and ESP32 platforms
+  - Tested with MSVC, GCC, and Clang toolsets.
+- Header only library, no dependencies.
+  - Requires C++ 20 and a small subset of the C++ Standard Library.
+- Comprehensive tests and examples
+  - All functions are comprehensively tested with real packets and data.
+  - The tests provide an important insight into how the APRS protocol works.
+  - The tracker is fully tested with data from OSM and Valhalla
+- Modular achitecture
+  - No coupling!
+  - Low level functions can be used standalone
+  - All the code is testable inside or outside the library
+  - Packet and data encoding can be used without the tracker class
+  - Minimal OO design
+
 ## Examples
 
 ### Updating the position and encoding a packet
@@ -44,25 +71,9 @@ std::string packet = t.packet_string(packet_type::mic_e);
 assert(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}");
 ```
 
-### Encoding other packet types
-
-Position packet with UTC DMS timestamp:
-
-``` cpp
-std::string packet = t.packet_string(packet_type::position_with_timestamp_utc);
-assert(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W_");
-```
-
-Compressed position packet:
-
-``` cpp
-std::string packet = t.packet_string(packet_type::position_compressed);
-assert(packet == "N0CALL>APRS,WIDE1-1:!/A2hQ5`8vp!!Y");
-```
-
 ### Smart beaconing
 
-An external GNSS client is used in this example to supply position inforomation to the tracker library, there is no coupling between the *gpsd_client* and the library.
+An external GNSS client is used in this example to supply position information to the tracker library, there is no coupling between the *gpsd_client* and the library.
 
 ``` cpp
 // using an GNSS client to supply the position info to the library
@@ -110,11 +121,27 @@ while (true)
 }
 ```
 
+### Encoding other packet types
+
+Position packet with UTC DMS timestamp:
+
+``` cpp
+std::string packet = t.packet_string(packet_type::position_with_timestamp_utc);
+assert(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W_");
+```
+
+Compressed position packet:
+
+``` cpp
+std::string packet = t.packet_string(packet_type::position_compressed);
+assert(packet == "N0CALL>APRS,WIDE1-1:!/A2hQ5`8vp!!Y");
+```
+
 ### Binary and UTF-8 support
 
 The string functions are provided for convenience, the library can be used directly with binary data.
 
-The library is string encoding agnostic, and can work with UTF-8 or any other encoding, when encoding packets.
+The library is string encoding agnostic, and can work with UTF-8 or any other encoding when encoding packets.
 
 ``` cpp
 tracker t;
@@ -148,7 +175,7 @@ assert(packet_string_from_bytes == "N0CALL>APRS,WIDE1-1:!3945.07N/07505.12W_Hell
 
 ### Encoding a mic-e packet:
 
-The library is modular with no coupling. Lower level functions in the library can also be used standalone for convenience or utility:
+The library is modular with no internal coupling. Lower level functions in the library can also be used standalone for convenience or utility:
 
 ``` cpp
 std::string packet = aprs::track::detail::encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 35.449666666667, 140.2685, mic_e_status::custom6, 257, 5.999, '/', '>', 0, 9.84);
