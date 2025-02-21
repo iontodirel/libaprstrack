@@ -1677,6 +1677,7 @@ std::string encode_position_packet_with_utc_timestamp_dhm_no_message(std::string
 std::string encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet);
 std::string encode_position_packet_with_utc_timestamp_dhm_no_message(const tracker& t, const data& d);
 std::string encode_position_packet_with_utc_timestamp_dhm(const tracker& t, const data& d);
+int compression_type_to_int(compression_type type);
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
@@ -1890,6 +1891,86 @@ APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp(con
     packet.append(t.message());
 
     return packet;
+}
+
+APRS_TRACK_INLINE int compression_type_to_int(compression_type type)
+{
+    switch (type)
+    {
+    case compression_type::old_other_compressed: return 0b00000000;
+    case compression_type::old_other_tnc_b_text: return 0b00000001;
+    case compression_type::old_other_software: return 0b00000010;
+    case compression_type::old_other_tbd_1: return 0b00000011;
+    case compression_type::old_other_kpc3: return 0b00000100;
+    case compression_type::old_other_pico: return 0b00000101;
+    case compression_type::old_other_other_tracker: return 0b00000110;
+    case compression_type::old_other_digipeater: return 0b00000111;
+
+    case compression_type::old_gll_compressed: return 0b00001000;
+    case compression_type::old_gll_tnc_b_text: return 0b00001001;
+    case compression_type::old_gll_software: return 0b00001010;
+    case compression_type::old_gll_tbd_1: return 0b00001011;
+    case compression_type::old_gll_kpc3: return 0b00001100;
+    case compression_type::old_gll_pico: return 0b00001101;
+    case compression_type::old_gll_other_tracker: return 0b00001110;
+    case compression_type::old_gll_digipeater: return 0b00001111;
+
+    case compression_type::old_gga_compressed: return 0b00010000;
+    case compression_type::old_gga_tnc_b_text: return 0b00010001;
+    case compression_type::old_gga_software: return 0b00010010;
+    case compression_type::old_gga_tbd_1: return 0b00010011;
+    case compression_type::old_gga_kpc3: return 0b00010100;
+    case compression_type::old_gga_pico: return 0b00010101;
+    case compression_type::old_gga_other_tracker: return 0b00010110;
+    case compression_type::old_gga_digipeater: return 0b00010111;
+
+    case compression_type::old_rmc_compressed: return 0b00011000;
+    case compression_type::old_rmc_tnc_b_text: return 0b00011001;
+    case compression_type::old_rmc_software: return 0b00011010;
+    case compression_type::old_rmc_tbd_1: return 0b00011011;
+    case compression_type::old_rmc_kpc3: return 0b00011100;
+    case compression_type::old_rmc_pico: return 0b00011101;
+    case compression_type::old_rmc_other_tracker: return 0b00011110;
+    case compression_type::old_rmc_digipeater: return 0b00011111;
+
+    case compression_type::current_other_compressed: return 0b00100000;
+    case compression_type::current_other_tnc_b_text: return 0b00100001;
+    case compression_type::current_other_software: return 0b00100010;
+    case compression_type::current_other_tbd_1: return 0b00100011;
+    case compression_type::current_other_kpc3: return 0b00100100;
+    case compression_type::current_other_pico: return 0b00100101;
+    case compression_type::current_other_other_tracker: return 0b00100110;
+    case compression_type::current_other_digipeater: return 0b00100111;
+
+    case compression_type::current_gll_compressed: return 0b00101000;
+    case compression_type::current_gll_tnc_b_text: return 0b00101001;
+    case compression_type::current_gll_software: return 0b00101010;
+    case compression_type::current_gll_tbd_1: return 0b00101011;
+    case compression_type::current_gll_kpc3: return 0b00101100;
+    case compression_type::current_gll_pico: return 0b00101101;
+    case compression_type::current_gll_other_tracker: return 0b00101110;
+    case compression_type::current_gll_digipeater: return 0b00101111;
+
+    case compression_type::current_gga_compressed: return 0b00110000;
+    case compression_type::current_gga_tnc_b_text: return 0b00110001;
+    case compression_type::current_gga_software: return 0b00110010;
+    case compression_type::current_gga_tbd_1: return 0b00110011;
+    case compression_type::current_gga_kpc3: return 0b00110100;
+    case compression_type::current_gga_pico: return 0b00110101;
+    case compression_type::current_gga_other_tracker: return 0b00110110;
+    case compression_type::current_gga_digipeater: return 0b00110111;
+
+    case compression_type::current_rmc_compressed: return 0b00111000;
+    case compression_type::current_rmc_tnc_b_text: return 0b00111001;
+    case compression_type::current_rmc_software: return 0b00111010;
+    case compression_type::current_rmc_tbd_1: return 0b00111011;
+    case compression_type::current_rmc_kpc3: return 0b00111100;
+    case compression_type::current_rmc_pico: return 0b00111101;
+    case compression_type::current_rmc_other_tracker: return 0b00111110;
+    case compression_type::current_rmc_digipeater: return 0b00111111;
+    }
+
+    return 0;
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
@@ -2680,87 +2761,6 @@ APRS_TRACK_INLINE double meters_s_to_knots(double meters_s)
 {
     return meters_s * 1.94384;
 }
-
-APRS_TRACK_INLINE int compression_type_to_int(compression_type type)
-{
-    switch (type)
-    {
-        case compression_type::old_other_compressed: return 0b00000000;
-        case compression_type::old_other_tnc_b_text: return 0b00000001;
-        case compression_type::old_other_software: return 0b00000010;
-        case compression_type::old_other_tbd_1: return 0b00000011;
-        case compression_type::old_other_kpc3: return 0b00000100;
-        case compression_type::old_other_pico: return 0b00000101;
-        case compression_type::old_other_other_tracker: return 0b00000110;
-        case compression_type::old_other_digipeater: return 0b00000111;
-
-        case compression_type::old_gll_compressed: return 0b00001000;
-        case compression_type::old_gll_tnc_b_text: return 0b00001001;
-        case compression_type::old_gll_software: return 0b00001010;
-        case compression_type::old_gll_tbd_1: return 0b00001011;
-        case compression_type::old_gll_kpc3: return 0b00001100;
-        case compression_type::old_gll_pico: return 0b00001101;
-        case compression_type::old_gll_other_tracker: return 0b00001110;
-        case compression_type::old_gll_digipeater: return 0b00001111;
-
-        case compression_type::old_gga_compressed: return 0b00010000;
-        case compression_type::old_gga_tnc_b_text: return 0b00010001;
-        case compression_type::old_gga_software: return 0b00010010;
-        case compression_type::old_gga_tbd_1: return 0b00010011;
-        case compression_type::old_gga_kpc3: return 0b00010100;
-        case compression_type::old_gga_pico: return 0b00010101;
-        case compression_type::old_gga_other_tracker: return 0b00010110;
-        case compression_type::old_gga_digipeater: return 0b00010111;
-
-        case compression_type::old_rmc_compressed: return 0b00011000;
-        case compression_type::old_rmc_tnc_b_text: return 0b00011001;
-        case compression_type::old_rmc_software: return 0b00011010;
-        case compression_type::old_rmc_tbd_1: return 0b00011011;
-        case compression_type::old_rmc_kpc3: return 0b00011100;
-        case compression_type::old_rmc_pico: return 0b00011101;
-        case compression_type::old_rmc_other_tracker: return 0b00011110;
-        case compression_type::old_rmc_digipeater: return 0b00011111;
-
-        case compression_type::current_other_compressed: return 0b00100000;
-        case compression_type::current_other_tnc_b_text: return 0b00100001;
-        case compression_type::current_other_software: return 0b00100010;
-        case compression_type::current_other_tbd_1: return 0b00100011;
-        case compression_type::current_other_kpc3: return 0b00100100;
-        case compression_type::current_other_pico: return 0b00100101;
-        case compression_type::current_other_other_tracker: return 0b00100110;
-        case compression_type::current_other_digipeater: return 0b00100111;
-
-        case compression_type::current_gll_compressed: return 0b00101000;
-        case compression_type::current_gll_tnc_b_text: return 0b00101001;
-        case compression_type::current_gll_software: return 0b00101010;
-        case compression_type::current_gll_tbd_1: return 0b00101011;
-        case compression_type::current_gll_kpc3: return 0b00101100;
-        case compression_type::current_gll_pico: return 0b00101101;
-        case compression_type::current_gll_other_tracker: return 0b00101110;
-        case compression_type::current_gll_digipeater: return 0b00101111;
-
-        case compression_type::current_gga_compressed: return 0b00110000;
-        case compression_type::current_gga_tnc_b_text: return 0b00110001;
-        case compression_type::current_gga_software: return 0b00110010;
-        case compression_type::current_gga_tbd_1: return 0b00110011;
-        case compression_type::current_gga_kpc3: return 0b00110100;
-        case compression_type::current_gga_pico: return 0b00110101;
-        case compression_type::current_gga_other_tracker: return 0b00110110;
-        case compression_type::current_gga_digipeater: return 0b00110111;
-
-        case compression_type::current_rmc_compressed: return 0b00111000;
-        case compression_type::current_rmc_tnc_b_text: return 0b00111001;
-        case compression_type::current_rmc_software: return 0b00111010;
-        case compression_type::current_rmc_tbd_1: return 0b00111011;
-        case compression_type::current_rmc_kpc3: return 0b00111100;
-        case compression_type::current_rmc_pico: return 0b00111101;
-        case compression_type::current_rmc_other_tracker: return 0b00111110;
-        case compression_type::current_rmc_digipeater: return 0b00111111;
-    }
-
-    return 0;
-}
-
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
