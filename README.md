@@ -31,13 +31,13 @@ APRS is a registered trademark of Bob Bruninga, WB4APR.
 - Header only library, no dependencies.
   - Requires C++ 20 and a small subset of the C++ Standard Library.
 - Comprehensive tests and examples
-  - All functions are comprehensively tested with real packets and data.
+  - All functions are comprehensively tested with real world packets and data.
   - The tests provide an important insight into how the APRS protocol works.
   - The tracker is fully tested with data from OSM and Valhalla
 - Modular achitecture
   - No coupling!
-  - Low level functions can be used standalone
-  - All the code is testable inside or outside the library
+  - Low level functions can be (re)used standalone or outside the library
+  - All the code is testable
   - Packet and data encoding can be used without the tracker class
   - Minimal OO design
 
@@ -200,11 +200,33 @@ On Linux systems, install the dependencies listed in `install_dependencies.sh`, 
 
 ### Dependencies
 
-This library uses C++ 20, and C++ 20 language features, and the C++ Standard Library. It has no other dependencies.
+This library uses C++ 20, C++ 20 language features, and the C++ Standard Library. It has no other dependencies.
 
 The library is cross platform, and can run on Windows, Linux, and OSX. The library is supported and tested with MSVC, GCC and Clang toolsets. It also has been tested successfully on the ESP32 platform.
 
 This library can in theory work on the Arduino platform, using AndroidSTL, but it has not been tested.
+
+### Integration with CMake
+
+As this is a header only library, you can simple download the header and use it without anything else.
+
+You can do this is CMake with the following command:
+
+`file(DOWNLOAD
+    https://raw.githubusercontent.com/iontodirel/libaprstrack/refs/heads/main/libaprstrack.hpp
+    ${CMAKE_SOURCE_DIR}/external/libaprstrack.hpp)`
+
+Include the header in your source file:
+
+`#include "external/libaprstrack.hpp"`
+
+### Compiling in a TU
+
+The library can be compiled in a translation unit (TU) to reduce compile time. This is done by including the header file in a TU, and then using the `#include` directive to include the header file in other source files.
+
+Use `APRS_TRACK_INLINE` and `APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY` to control the compilation of the library in a TU.
+
+An example is provided in the tests library.
 
 # License
 
