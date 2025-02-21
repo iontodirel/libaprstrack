@@ -127,14 +127,6 @@ Use the tests as examples of how to use the library. The tests also provide a co
 
 The ***assets*** directory contains route information generated from OSM and Valhalla, and is used to simulate and test tracking.
 
-### Dependencies
-
-This library uses C++ 20 and the C++ Standard Library, and it has no other dependencies.
-
-The library is cross platform, and can run on Windows, Linux, and OSX. It also has been tested on the ESP32 platform.
-
-This library can in theory work on the Arduino platform, using AndroidSTL, but it has not been tested.
-
 ## Development
 
 The test project can be opened in Visual Studio or VSCode. And it will work out of the box if the dependencies are installed.
@@ -142,6 +134,14 @@ The test project can be opened in Visual Studio or VSCode. And it will work out 
 Install the CMake and C++ extensions in VSCode, or the Native Desktop workload inside Visual Studio (*if using Visual Studio*).
 
 On Linux systems, install the dependencies listed in `install_dependencies.sh`, which include a compiler, the CMake build system, and a native build system like make. Example for Debian systems: `apt-get install -y gcc g++ gcc-13 g++-13 clang make cmake ninja-build`.
+
+### Dependencies
+
+This library uses C++ 20, and C++ 20 language features, and the C++ Standard Library. It has no other dependencies.
+
+The library is cross platform, and can run on Windows, Linux, and OSX. The library is supported and tested with MSVC, GCC and Clang toolsets. It also has been tested successfully on the ESP32 platform.
+
+This library can in theory work on the Arduino platform, using AndroidSTL, but it has not been tested.
 
 # License
 
