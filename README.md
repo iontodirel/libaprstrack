@@ -4,6 +4,8 @@ C++ header only standalone APRS encoding library for APRS tracking.
 
 This libary is designed for implementing APRS trackers, and contains an implementation of the Smart Beaconing (TM) algorithm.
 
+The library is cross platform, and can run on Windows, Linux, and OSX. It also has been tested on the ESP32 platform. 
+
 Automatic Packet Reporting System (APRS) (TM) is a system for real-time digital data communication over ham radio.
 
 See more info at http://www.aprs.org/ and https://groups.io/g/APRS.
@@ -124,6 +126,22 @@ The ***tests*** directory contain the tests. `tests/tests.cpp` contains a compre
 Use the tests as examples of how to use the library. The tests also provide a comprehensive insight into how the APRS protocol works, and will help other implementers test or implement APRS solutions.
 
 The ***assets*** directory contains route information generated from OSM and Valhalla, and is used to simulate and test tracking.
+
+### Dependencies
+
+This library uses C++ 20 and the C++ Standard Library, and it has no other dependencies.
+
+The library is cross platform, and can run on Windows, Linux, and OSX. It also has been tested on the ESP32 platform.
+
+This library can in theory work on the Arduino platform, using AndroidSTL, but it has not been tested.
+
+## Development
+
+The test project can be opened in Visual Studio or VSCode. And it will work out of the box if the dependencies are installed.
+
+Install the CMake and C++ extensions in VSCode, or the Native Desktop workload inside Visual Studio (*if using Visual Studio*).
+
+On Linux systems, install the dependencies listed in `install_dependencies.sh`, which include a compiler, the CMake build system, and a native build system like make. Example for Debian systems: `apt-get install -y gcc g++ gcc-13 g++-13 clang make cmake ninja-build`.
 
 # License
 
