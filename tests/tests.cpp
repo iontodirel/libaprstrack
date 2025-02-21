@@ -1589,6 +1589,29 @@ TEST(tracker, various_anonymous_structs)
 
         EXPECT_TRUE(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwl \x1c>/");
     }
+
+    {
+        tracker t;
+        t.from("N0CALL");
+        t.to("APRS");
+        t.path("WIDE1-1");
+        t.symbol_table('/');
+        t.symbol_code('p');
+
+        struct s
+        {
+            double lat = 0.0;
+            double lon = 0.0;
+        };
+
+        s data{ 26.308999648226, -98.118999490715 };
+
+        t.position(data);
+
+        std::string packet = t.packet_string_no_message(packet_type::position_compressed);
+
+        EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!/A2hQ5`8vp!!Y");
+    }
 }
 
 TEST(tracker, position)
