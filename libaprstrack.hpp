@@ -31,8 +31,6 @@
 
 #pragma once
 
-#ifndef APRS_TRACK_DISABLE_STL
-
 #include <string>
 #include <iostream>
 #include <optional>
@@ -44,8 +42,6 @@
 #include <iterator>
 #include <ranges>
 #include <cmath>
-
-#endif
 
 #ifndef APRS_TRACK_NAMESPACE
 #define APRS_TRACK_NAMESPACE aprs::track
@@ -168,7 +164,6 @@ double meters_s_to_knots(double meters_s);
 APRS_TRACK_NAMESPACE_END
 
 APRS_TRACK_DETAIL_NAMESPACE_END
-
 
 // **************************************************************** //
 //                                                                  //
@@ -364,6 +359,8 @@ struct tracker
     template <class Rep, class Period>
     void interval(std::chrono::duration<Rep, Period> interval);
 
+    void interval_seconds(int interval);
+
     template <Position T>
     void position(const T& p);
 
@@ -408,7 +405,7 @@ private:
     size_t message_data_length_ = 0;
     char symbol_code_;
     char symbol_table_;
-    unsigned int interval_seconds = 30;
+    unsigned int interval_seconds_ = 30;
     unsigned int last_update_seconds = 0;
     std::chrono::time_point<std::chrono::high_resolution_clock> last_time;
     int low_speed_ = 5;
@@ -660,7 +657,7 @@ APRS_TRACK_INLINE std::u8string tracker::u8message() const
 template <class Rep, class Period>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::interval(std::chrono::duration<Rep, Period> interval)
 {
-    interval_seconds = static_cast<int>(std::chrono::duration_cast<std::chrono::seconds>(interval).count());
+    interval_seconds_ = static_cast<int>(std::chrono::duration_cast<std::chrono::seconds>(interval).count());
 }
 
 template <Position T>
@@ -696,6 +693,11 @@ APRS_TRACK_DETAIL_NAMESPACE_USE
 }
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
+
+APRS_TRACK_INLINE void tracker::interval_seconds(int interval)
+{
+    interval_seconds_ = interval;
+}
 
 APRS_TRACK_INLINE void tracker::position(double lat, double lon)
 {
@@ -787,7 +789,7 @@ APRS_TRACK_INLINE void tracker::update()
     }
     else if (algorithm_ == algorithm::periodic)
     {
-        if (last_update_seconds >= interval_seconds)
+        if (last_update_seconds >= interval_seconds_)
         {
             last_time = std::chrono::high_resolution_clock::now();
             updated_ = true;
@@ -909,6 +911,246 @@ APRS_TRACK_INLINE bool tracker::smart_beaconing_test()
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 APRS_TRACK_NAMESPACE_END
+
+// **************************************************************** //
+//                                                                  //
+//                                                                  //
+// private definitions                                              //
+//                                                                  //
+//                                                                  //
+// **************************************************************** //
+
+APRS_TRACK_NAMESPACE_BEGIN
+
+APRS_TRACK_DETAIL_NAMESPACE_BEGIN
+
+std::string encode_position_packet_no_timestamp_no_message(const tracker& t, const data& d);
+std::string encode_position_packet_no_timestamp(const tracker& t, const data& d);
+std::string encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
+std::string encode_course_speed(double course_degrees, double speed_knots);
+std::string encode_altitude(double altitude_feet);
+
+std::string encode_position_packet_with_timestamp_dhm_no_message(const tracker& t, const data& d);
+std::string encode_position_packet_with_timestamp_dhm(const tracker& t, const data& d);
+std::string encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
+std::string encode_course_speed(double course_degrees, double speed_knots);
+std::string encode_altitude(double altitude_feet);
+char packet_type_2(bool m);
+
+std::string encode_position_packet_with_utc_timestamp_hms_no_message(const tracker& t, const data& d);
+std::string encode_position_packet_with_utc_timestamp_hms(const tracker& t, const data& d);
+std::string encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
+std::string encode_course_speed(double course_degrees, double speed_knots);
+std::string encode_altitude(double altitude_feet);
+
+std::string encode_position_packet_with_utc_timestamp_dhm_no_message(const tracker& t, const data& d);
+std::string encode_position_packet_with_utc_timestamp_dhm(const tracker& t, const data& d);
+std::string encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
+std::string encode_course_speed(double course_degrees, double speed_knots);
+std::string encode_altitude(double altitude_feet);
+
+std::string encode_position_packet_compressed_no_timestamp_no_message(const tracker& t, const data& d);
+std::string encode_position_packet_compressed_no_timestamp(const tracker& t, const data& d);
+std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type);
+std::string encode_compressed_course_speed(double course_degrees, double speed_knots);
+std::string encode_compressed_altitude(double altitude_feet);
+
+std::string encode_mic_e_packet_no_message(const tracker& t, const data& d);
+std::string encode_mic_e_packet(const tracker& t, const data& d);
+std::string encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity);
+std::string encode_mic_e_alt(double alt_feet);
+
+#ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
+
+APRS_TRACK_INLINE std::string encode_position_packet_no_timestamp_no_message(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    packet.append(encode_position_packet_no_timestamp_no_message(t.from(), t.to(), t.path(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+
+    if (d.speed_knots.has_value() && d.track_degrees.has_value())
+    {
+        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
+    }
+
+    if (d.alt_feet.has_value())
+    {
+        packet.append(encode_altitude(d.alt_feet.value()));
+    }
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_position_packet_no_timestamp(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    packet.append(encode_position_packet_no_timestamp_no_message(t, d));
+
+    packet.append(t.message());
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_position_packet_with_timestamp_dhm_no_message(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    packet.append(encode_position_packet_with_timestamp_dhm_no_message(t.from(), t.to(), t.path(), packet_type_2(t.messaging()), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+
+    if (d.speed_knots.has_value() && d.track_degrees.has_value())
+    {
+        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
+    }
+
+    if (d.alt_feet.has_value())
+    {
+        packet.append(encode_altitude(d.alt_feet.value()));
+    }
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_position_packet_with_timestamp_dhm(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    packet.append(encode_position_packet_with_timestamp_dhm_no_message(t, d));
+
+    packet.append(t.message());
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_hms_no_message(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message(t.from(), t.to(), t.path(), t.messaging(), d.hour, d.minute, d.second, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+
+    if (d.speed_knots.has_value() && d.track_degrees.has_value())
+    {
+        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
+    }
+
+    if (d.alt_feet.has_value())
+    {
+        packet.append(encode_altitude(d.alt_feet.value()));
+    }
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_hms(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message(t, d));
+
+    packet.append(t.message());
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_dhm_no_message(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message(t.from(), t.to(), t.path(), t.messaging(), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+
+    if (d.speed_knots.has_value() && d.track_degrees.has_value())
+    {
+        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
+    }
+
+    if (d.alt_feet.has_value())
+    {
+        packet.append(encode_altitude(d.alt_feet.value()));
+    }
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_dhm(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message(t, d));
+
+    packet.append(t.message());
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_message(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    char compression_type = 0b00111000 + 33; // current, RMC, compressed
+
+    packet.append(encode_position_packet_compressed_no_timestamp_no_message(t.from(), t.to(), t.path(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), compression_type));
+
+    if (d.alt_feet.has_value())
+    {
+        packet.append(encode_altitude(d.alt_feet.value()));
+    }
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    packet.append(encode_position_packet_compressed_no_timestamp_no_message(t, d));
+
+    packet.append(t.message());
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_mic_e_packet_no_message(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    packet.append(encode_mic_e_packet_no_message(t.from(), t.path(), d.lat, d.lon, t.mic_e_status(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), t.symbol_table(), t.symbol_code(), t.ambiguity()));
+
+    if (d.alt_feet.has_value())
+    {
+        packet.append(encode_mic_e_alt(d.alt_feet.value()));
+    }
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_mic_e_packet(const tracker& t, const data& d)
+{
+    std::string packet;
+
+    packet.append(encode_mic_e_packet_no_message(t, d));
+
+    packet.append(t.message());
+
+    return packet;
+}
+
+#endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
+
+APRS_TRACK_DETAIL_NAMESPACE_END
+
+APRS_TRACK_NAMESPACE_END
+
+// **************************************************************** //
+//                                                                  //
+//                                                                  //
+//                                                                  //
+//                                                                  //
+// encoding library                                                 //
+//                                                                  //
+//                                                                  //
+//                                                                  //
+//                                                                  //
+// **************************************************************** //
 
 // **************************************************************** //
 //                                                                  //
@@ -1257,8 +1499,6 @@ std::string encode_position_packet_no_timestamp_no_message(std::string_view from
 std::string encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees);
 std::string encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet);
 std::string encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet);
-std::string encode_position_packet_no_timestamp_no_message(const tracker& t, const data& d);
-std::string encode_position_packet_no_timestamp(const tracker& t, const data& d);
 std::string encode_course_speed(double course_degrees, double speed_knots);
 std::string encode_altitude(double altitude_feet);
 
@@ -1343,36 +1583,6 @@ APRS_TRACK_INLINE std::string encode_position_packet_no_timestamp_no_message(std
     return packet;
 }
 
-APRS_TRACK_INLINE std::string encode_position_packet_no_timestamp_no_message(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    packet.append(encode_position_packet_no_timestamp_no_message(t.from(), t.to(), t.path(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
-
-    if (d.speed_knots.has_value() && d.track_degrees.has_value())
-    {
-        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
-    }
-
-    if (d.alt_feet.has_value())
-    {
-        packet.append(encode_altitude(d.alt_feet.value()));
-    }
-
-    return packet;
-}
-
-APRS_TRACK_INLINE std::string encode_position_packet_no_timestamp(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    packet.append(encode_position_packet_no_timestamp_no_message(t, d));
-
-    packet.append(t.message());
-
-    return packet;
-}
-
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 // **************************************************************** //
@@ -1386,8 +1596,6 @@ std::string encode_position_packet_with_timestamp_dhm_no_message(std::string_vie
 std::string encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees);
 std::string encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet);
 std::string encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet);
-std::string encode_position_packet_with_timestamp_dhm_no_message(const tracker& t, const data& d);
-std::string encode_position_packet_with_timestamp_dhm(const tracker& t, const data& d);
 std::string encode_course_speed(double course_degrees, double speed_knots);
 std::string encode_altitude(double altitude_feet);
 
@@ -1475,36 +1683,6 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_timestamp_dhm_no_messa
     return packet;
 }
 
-APRS_TRACK_INLINE std::string encode_position_packet_with_timestamp_dhm_no_message(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(t.from(), t.to(), t.path(), packet_type_2(t.messaging()), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
-
-    if (d.speed_knots.has_value() && d.track_degrees.has_value())
-    {
-        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
-    }
-
-    if (d.alt_feet.has_value())
-    {
-        packet.append(encode_altitude(d.alt_feet.value()));
-    }
-
-    return packet;
-}
-
-APRS_TRACK_INLINE std::string encode_position_packet_with_timestamp_dhm(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(t, d));
-
-    packet.append(t.message());
-
-    return packet;
-}
-
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 // **************************************************************** //
@@ -1518,8 +1696,6 @@ std::string encode_position_packet_with_utc_timestamp_hms_no_message(std::string
 std::string encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees);
 std::string encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet);
 std::string encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet);
-std::string encode_position_packet_with_utc_timestamp_hms_no_message(const tracker& t, const data& d);
-std::string encode_position_packet_with_utc_timestamp_hms(const tracker& t, const data& d);
 std::string encode_course_speed(double course_degrees, double speed_knots);
 std::string encode_altitude(double altitude_feet);
 
@@ -1607,36 +1783,6 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_hms_no_m
     return packet;
 }
 
-APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_hms_no_message(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message(t.from(), t.to(), t.path(), t.messaging(), d.hour, d.minute, d.second, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
-
-    if (d.speed_knots.has_value() && d.track_degrees.has_value())
-    {
-        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
-    }
-
-    if (d.alt_feet.has_value())
-    {
-        packet.append(encode_altitude(d.alt_feet.value()));
-    }
-
-    return packet;
-}
-
-APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_hms(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message(t, d));
-
-    packet.append(t.message());
-
-    return packet;
-}
-
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 // **************************************************************** //
@@ -1650,8 +1796,6 @@ std::string encode_position_packet_with_utc_timestamp_dhm_no_message(std::string
 std::string encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees);
 std::string encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet);
 std::string encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet);
-std::string encode_position_packet_with_utc_timestamp_dhm_no_message(const tracker& t, const data& d);
-std::string encode_position_packet_with_utc_timestamp_dhm(const tracker& t, const data& d);
 std::string encode_course_speed(double course_degrees, double speed_knots);
 std::string encode_altitude(double altitude_feet);
 
@@ -1739,36 +1883,6 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_dhm_no_m
     return packet;
 }
 
-APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_dhm_no_message(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message(t.from(), t.to(), t.path(), t.messaging(), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
-    
-    if (d.speed_knots.has_value() && d.track_degrees.has_value())
-    {
-        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
-    }
-    
-    if (d.alt_feet.has_value())
-    {
-        packet.append(encode_altitude(d.alt_feet.value()));
-    }
-    
-    return packet;
-}
-
-APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_dhm(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message(t, d));
-
-    packet.append(t.message());
-
-    return packet;
-}
-
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 // **************************************************************** //
@@ -1780,8 +1894,6 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_dhm(cons
 std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type);
 std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type);
 std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, double alt_feet);
-std::string encode_position_packet_compressed_no_timestamp_no_message(const tracker& t, const data& d);
-std::string encode_position_packet_compressed_no_timestamp(const tracker& t, const data& d);
 std::string encode_compressed_course_speed(double course_degrees, double speed_knots);
 std::string encode_compressed_altitude(double altitude_feet);
 int compression_type_to_int(compression_type type);
@@ -1841,33 +1953,6 @@ APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_
     packet.append(encode_position_data_compressed_no_timestamp(packet_type_1(messaging), lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type));
 
     packet.append(encode_altitude(alt_feet));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_message(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    char compression_type = 0b00111000 + 33; // current, RMC, compressed
-
-    packet.append(encode_position_packet_compressed_no_timestamp_no_message(t.from(), t.to(), t.path(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), compression_type));
-
-    if (d.alt_feet.has_value())
-    {
-        packet.append(encode_altitude(d.alt_feet.value()));
-    }
-
-    return packet;
-}
-
-APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    packet.append(encode_position_packet_compressed_no_timestamp_no_message(t, d));
-
-    packet.append(t.message());
 
     return packet;
 }
@@ -1998,8 +2083,6 @@ APRS_TRACK_INLINE int compression_type_to_int(compression_type type)
 std::string encode_mic_e_data(char type, double lat, double lon, double course_degrees, double speed_knots, char symbol_table, char symbol_code);
 std::string encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity);
 std::string encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity, double alt_feet);
-std::string encode_mic_e_packet_no_message(const tracker& t, const data& d);
-std::string encode_mic_e_packet(const tracker& t, const data& d);
 void add_mic_e_position_ambiguity(std::string& destination_address, int ambiguity);
 void encode_mic_e_status(int a, int b, int c, bool custom, std::string& destination_address);
 void encode_mic_e_lat_direction(char direction, std::string& destination_address);
@@ -2059,32 +2142,6 @@ APRS_TRACK_INLINE std::string encode_mic_e_packet_no_message(std::string_view fr
 
     return packet;
 }
-
-APRS_TRACK_INLINE std::string encode_mic_e_packet_no_message(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    packet.append(encode_mic_e_packet_no_message(t.from(), t.path(), d.lat, d.lon, t.mic_e_status(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), t.symbol_table(), t.symbol_code(), t.ambiguity()));
-    
-    if (d.alt_feet.has_value())
-    {
-        packet.append(encode_mic_e_alt(d.alt_feet.value()));
-    }
-
-    return packet;
-}
-
-APRS_TRACK_INLINE std::string encode_mic_e_packet(const tracker& t, const data& d)
-{
-    std::string packet;
-
-    packet.append(encode_mic_e_packet_no_message(t, d));
-
-    packet.append(t.message());
-
-    return packet;
-}
-
 
 APRS_TRACK_INLINE void add_mic_e_position_ambiguity(std::string& destination_address, int ambiguity)
 {
@@ -2579,81 +2636,6 @@ APRS_TRACK_INLINE std::string encode_mic_e_alt(double alt_feet)
 
 // **************************************************************** //
 //                                                                  //
-// smart beaconing                                                  //
-//                                                                  //
-// **************************************************************** //
-
-bool smart_beaconing_test(int speed, int course, int low_speed, int high_speed, int slow_rate, int fast_rate, int turn_time, int turn_angle, int turn_slope, int last_update);
-
-#ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
-
-APRS_TRACK_INLINE bool smart_beaconing_test(int speed, int course, int low_speed, int high_speed, int slow_rate, int fast_rate, int turn_time, int turn_angle, int turn_slope, int last_update)
-{
-    //
-    // Smart Beaconing Algorithm (TM)
-    // The Smart Beaconing Algorithm (TM) is a trademark of Tony Arnerich and Steve Bragg.
-    //
-    // Parameters:
-    //
-    //   speed - speed, unit independent, ex: 50 mph
-    //   course - course in degrees, ex: 200 degrees
-    //   low_speed - when the speed is lower than "low_speed", the tracker will update (transmit packet) at the slow_interval_seconds
-    //   high_speed - when the speed is higher than "high_speed", the tracker will update (transmit packet) at the fast_interval_seconds
-    //   slow_rate - seconds, low speed transmission interval time
-    //   fast_rate - seconds, high speed transmission interval time
-    //   turn_time - the minimum number of degrees the tracker must turn before it will transmit a packet
-    //   turn_angle - 
-    //   turn_slope - the number of seconds since the last update
-    //
-    // Returns:
-    //
-    //   true - if the tracker was updated and should transmit a packet
-    //   false - if the tracker was not updated, and no packet should be transmitted
-    //
-    // References:
-    //
-    //   https://www.w8wjb.com/qth/QTHHelp/English.lproj/adv-smartbeaconing.html
-    //   https://thelifeofkenneth.com/files/thesis_aprs_finnegan_final.pdf
-    //   https://n3ujj.com/manuals/SmartBeaconing.pdf
-    //   https://github.com/wb2osz/direwolf/blob/master/src/beacon.c
-
-    int interval = 0;
-
-    if (speed < low_speed)
-    {
-        interval = slow_rate;
-    }
-    else
-    {
-        if (speed > high_speed)
-        {
-            interval = fast_rate;
-        }
-        else
-        {
-            interval = fast_rate * (high_speed / speed);
-        }
-
-        int turn_threshold = turn_angle + (turn_slope / speed);
-        
-        if (course > turn_threshold)
-        {
-            interval = turn_time;
-        }
-    }
-
-    if (last_update >= interval)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-#endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
-
-// **************************************************************** //
-//                                                                  //
 //  common data extensions                                          //
 //                                                                  //
 // **************************************************************** //
@@ -2714,6 +2696,89 @@ APRS_TRACK_INLINE std::string encode_altitude(double alt_feet)
     altitude.append("/A=");
     altitude.append(format_n_digits_string(alt_feet_int, 6));
     return altitude;
+}
+
+#endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
+
+APRS_TRACK_DETAIL_NAMESPACE_END
+
+APRS_TRACK_NAMESPACE_END
+
+// **************************************************************** //
+//                                                                  //
+// smart beaconing                                                  //
+//                                                                  //
+// **************************************************************** //
+
+APRS_TRACK_NAMESPACE_BEGIN
+
+APRS_TRACK_DETAIL_NAMESPACE_BEGIN
+
+bool smart_beaconing_test(int speed, int course, int low_speed, int high_speed, int slow_rate, int fast_rate, int turn_time, int turn_angle, int turn_slope, int last_update);
+
+#ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
+
+APRS_TRACK_INLINE bool smart_beaconing_test(int speed, int course, int low_speed, int high_speed, int slow_rate, int fast_rate, int turn_time, int turn_angle, int turn_slope, int last_update)
+{
+    //
+    // Smart Beaconing Algorithm (TM)
+    // The Smart Beaconing Algorithm (TM) is a trademark of Tony Arnerich and Steve Bragg.
+    //
+    // Parameters:
+    //
+    //   speed - speed, unit independent, ex: 50 mph
+    //   course - course in degrees, ex: 200 degrees
+    //   low_speed - when the speed is lower than "low_speed", the tracker will update (transmit packet) at the slow_interval_seconds
+    //   high_speed - when the speed is higher than "high_speed", the tracker will update (transmit packet) at the fast_interval_seconds
+    //   slow_rate - seconds, low speed transmission interval time
+    //   fast_rate - seconds, high speed transmission interval time
+    //   turn_time - the minimum number of degrees the tracker must turn before it will transmit a packet
+    //   turn_angle - 
+    //   turn_slope - the number of seconds since the last update
+    //
+    // Returns:
+    //
+    //   true - if the tracker was updated and should transmit a packet
+    //   false - if the tracker was not updated, and no packet should be transmitted
+    //
+    // References:
+    //
+    //   https://www.w8wjb.com/qth/QTHHelp/English.lproj/adv-smartbeaconing.html
+    //   https://thelifeofkenneth.com/files/thesis_aprs_finnegan_final.pdf
+    //   https://n3ujj.com/manuals/SmartBeaconing.pdf
+    //   https://github.com/wb2osz/direwolf/blob/master/src/beacon.c
+
+    int interval = 0;
+
+    if (speed < low_speed)
+    {
+        interval = slow_rate;
+    }
+    else
+    {
+        if (speed > high_speed)
+        {
+            interval = fast_rate;
+        }
+        else
+        {
+            interval = fast_rate * (high_speed / speed);
+        }
+
+        int turn_threshold = turn_angle + (turn_slope / speed);
+
+        if (course > turn_threshold)
+        {
+            interval = turn_time;
+        }
+    }
+
+    if (last_update >= interval)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
