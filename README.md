@@ -315,10 +315,10 @@ The library can be compiled in a translation unit (TU) to reduce compile time. T
 
 Use `APRS_TRACK_INLINE` and `APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY` to control the compilation of the library in a TU.
 
-An example is provided in the tests library.
+An example is provided with the tests.
 
 # License
 
 MIT License, Copyright (C) 2025 Ion Todirel
 
-Test data and assets used by tests was obtained from APRS-IS. I do not hold any copyright or license claim over this data, the data is in the public domain.
+Some of the test data and assets used by tests was obtained from APRS-IS. I do not hold any copyright or license claim over this data, the data is in the public domain.
