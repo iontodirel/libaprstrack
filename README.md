@@ -250,11 +250,50 @@ namespace std
 }
 ```
 
+#### Teensy
+
+The library has been tested successfully on the Teensy platform.
+
+The Teensy toolchain has to first be configured to use C++ 20. This can be done by updating the `teensy\hardware\avr\1.59.0\boards.txt` file.
+
+Change `gnu++17` to `gnu++20` for your board. This would typically look like this:
+
+``` text
+teensy41.build.flags.cpp=-std=gnu++20 -fno-exceptions -fpermissive -fno-rtti -fno-threadsafe-statics -felide-constructors -Wno-error=narrowing
+```
+
+If you are getting compilation errors after this change, you likely did not change the language standard in all of the places.
+
+In addition, there seems to be some issues with the C libraries when targeting C++ 20, the compiler could not find implementations for few C functions.
+
+I had to fix it by adding the following code before including the header in the sketch:
+
+``` cpp
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+void _exit(int status) { while (1) {} }
+int _close(int file) { return -1; }
+int _fstat(int file, struct stat *st) { st->st_mode = S_IFCHR; return 0; }
+int _isatty(int file) { return 1; }
+int _lseek(int file, int ptr, int dir) { return 0; }
+int _read(int file, char *ptr, int len) { return 0; }
+int _write(int file, char *ptr, int len) { return len; }
+int _kill(int pid, int sig) { return -1; }
+int _getpid(void) { return 1; }
+int _sbrk(int incr) { return -1; }
+```
+
+These functions should not be needed on an embedded platform anyway.
+
+Lastly, I had to save the libaprstrack.hpp file in the sketch folder in plain ASCII, it seems that this toolchain does not support UTF-8 source files with a BOM.
+
 #### Arduino
 
 At the moment the library is not supported on the Arduino platform.
 
-The Arduino platform has limited C++ support. The toolchain is limited to C++ 11. There is no C++ standard library support, and AndroidSTL does not work with the Arduino IDE 2.0.
+The Arduino platform has limited C++ support. The toolchain is outdated (2014) and limited to C++ 11. There is no C++ standard library support, and AndroidSTL does not work with the Arduino IDE 2.0.
 
 ### Integration with CMake
 

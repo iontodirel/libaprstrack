@@ -38,6 +38,7 @@
 #include <optional>
 #include <tuple>
 #include <sstream>
+#include <iomanip>
 #include <chrono>
 #include <array>
 #include <iterator>
@@ -996,7 +997,6 @@ APRS_TRACK_INLINE std::tuple<int, int, double> dd_to_dms(double dd)
     s = std::modf(dm, &m);
     s = s * 60.0;
     return std::make_tuple(static_cast<int>(d), static_cast<int>(m), s);
-    return std::make_tuple((int)d, (int)m, s);
 }
 
 APRS_TRACK_INLINE std::tuple<int, double> dd_to_ddm(double dd)
