@@ -293,7 +293,7 @@ Lastly, I had to save the libaprstrack.hpp file in the sketch folder in plain AS
 
 At the moment the library is not supported on the Arduino platform.
 
-The Arduino platform has limited C++ support. The toolchain is outdated (2014) and limited to C++ 11. There is no C++ standard library support, and AndroidSTL does not work with the Arduino IDE 2.0.
+The Arduino platform has limited C++ 20 support. Depending on the board used, the toolchain might be outdated (2014) and limited to C++ 11. There isn't always C++ standard library availability, and AndroidSTL does not work with the Arduino IDE 2.0.
 
 ### Integration with CMake
 
