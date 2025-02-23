@@ -4,7 +4,7 @@ C++ header only standalone APRS encoding library for APRS tracking.
 
 This libary is designed for implementing APRS trackers, and contains an implementation of the Smart Beaconing (TM) algorithm.
 
-The library is cross platform, and can run on Windows, Linux, and OSX. It also has been tested on the ESP32 platform. 
+The library is cross platform, and can run on Windows, Linux, and OSX. It also has been tested on the ESP32 and other embedded platform. 
 
 Automatic Packet Reporting System (APRS) (TM) is a system for real-time digital data communication over ham radio.
 
@@ -26,7 +26,7 @@ APRS is a registered trademark of Bob Bruninga, WB4APR.
 - Binary and string support, including UTF-8 support.
 - Supports the Smart Beaconing (TM) algorithm, with full configurability.
 - Cross platform and Cross Toolchain
-  - Runs on Windows, Linux, OSX, and ESP32 platforms
+  - Runs on Windows, Linux, OSX, ESP32, Pico and Teensy platforms
   - Tested with MSVC, GCC, and Clang toolsets.
 - Header only library, no dependencies.
   - Requires C++ 20 and a small subset of the C++ Standard Library.
@@ -55,7 +55,7 @@ APRS is a registered trademark of Bob Bruninga, WB4APR.
   - Democratize APRS through easy to follow tests and examples.
   - Ready-to-reuse test data sets.
 - Create a modern C++20 APRS tracker implementation
-- Cross Plaform: Windows, Linux, OSX, ESP32
+- Cross Plaform: Windows, Linux, OSX, ESP32, Pico, Teensy
 
 ## Examples
 
