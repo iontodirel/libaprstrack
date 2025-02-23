@@ -17,7 +17,7 @@ APRS is a registered trademark of Bob Bruninga, WB4APR.
 ## Features
 
 - Comprehensive APRS packet encoding support suitable for APRS tracking:
-  - Mic-E position packets with optional altitude and course/speed
+  - Mic-E position packets with configurable Mic-E Status and optional altitude and course/speed
   - Position packets with/without timestamps (DHM/HMS formats) 
   - Compressed position packets
   - UTC and local timestamp support
@@ -30,16 +30,32 @@ APRS is a registered trademark of Bob Bruninga, WB4APR.
   - Tested with MSVC, GCC, and Clang toolsets.
 - Header only library, no dependencies.
   - Requires C++ 20 and a small subset of the C++ Standard Library.
+  - No package manager required!
 - Comprehensive tests and examples
   - All functions are comprehensively tested with real world packets and data.
   - The tests provide an important insight into how the APRS protocol works.
-  - The tracker is fully tested with data from OSM and Valhalla
+  - The tracker is fully tested with data from OSM and Valhalla.
+  - Ready-to-use test data sets for APRS encoder verification.
 - Modular achitecture
   - No coupling!
   - Low level functions can be (re)used standalone or outside the library
   - All the code is testable
   - Packet and data encoding can be used without the tracker class
   - Minimal OO design
+
+## Goals
+
+- Make it easy to implement APRS trackers. The library is designed to be simple and easy to use.
+- No coupling, no dependencies, easy to reuse by the community outside the library and its intended use.
+  - The APRS encoding is implemented as a set of easily reusable functions, which can be used standalone or outside the library.
+  - Individual functions can be copied and used without the rest of the library trivially.
+  - Easy to port to other languages or platforms.
+  - Clean separation of concerns and between encoding logic and tracking functionality.
+- Comprehensive tests and examples to help other implementers test or implement APRS encoders.
+  - Democratize APRS through easy to follow tests and examples.
+  - Ready-to-reuse test data sets.
+- Create a modern C++20 APRS tracker implementation
+- Cross Plaform: Windows, Linux, OSX, ESP32
 
 ## Examples
 
@@ -137,6 +153,8 @@ std::string packet = t.packet_string(packet_type::position_compressed);
 assert(packet == "N0CALL>APRS,WIDE1-1:!/A2hQ5`8vp!!Y");
 ```
 
+Other examples are available in the tests.
+
 ### Binary and UTF-8 support
 
 The string functions are provided for convenience, the library can be used directly with binary data.
@@ -200,11 +218,43 @@ On Linux systems, install the dependencies listed in `install_dependencies.sh`, 
 
 ### Dependencies
 
-This library uses C++ 20, C++ 20 language features, and the C++ Standard Library. It has no other dependencies.
+This library uses C++ 20, C++ 20 language features, and a small part of the C++ Standard Library. It has no other dependencies.
 
-The library is cross platform, and can run on Windows, Linux, and OSX. The library is supported and tested with MSVC, GCC and Clang toolsets. It also has been tested successfully on the ESP32 platform.
+The library is cross platform, and can run on Windows, Linux, and OSX. The library is supported and tested with MSVC, GCC and Clang toolsets.
 
-This library can in theory work on the Arduino platform, using AndroidSTL, but it has not been tested.
+
+### Embedded platforms
+
+#### ESP32
+
+The library has been tested successfully on the ESP32 platform.
+
+#### Raspberry Pi Pico 2
+
+The library has been tested successfully on the Pico 1 and 2 platforms.
+
+Please make sure to set the C++ language standard to C++ 20 in your CMake project:
+
+``` cmake
+set(CMAKE_CXX_STANDARD 20)
+```
+
+There seems to be a problem on the Pico 2 platform where `round` is not part of the `std` namespace.
+
+This is a bug in the toolchain, and can be fixed by adding this portion of code before the including the header:
+
+``` cpp
+namespace std
+{
+    using ::round;
+}
+```
+
+#### Arduino
+
+At the moment the library is not supported on the Arduino platform.
+
+The Arduino platform has limited C++ support. The toolchain is limited to C++ 11. There is no C++ standard library support, and AndroidSTL does not work with the Arduino IDE 2.0.
 
 ### Integration with CMake
 

@@ -64,6 +64,7 @@ TEST(data_ext, encode_altitude)
 TEST(data_ext, encode_speed_course)
 { 
     EXPECT_TRUE(encode_course_speed(88, 36) == "088/036");
+    EXPECT_TRUE(encode_course_speed(0, 0) == "000/000");
 }
 
 TEST(packet_type, packet_type_1_2)
@@ -291,6 +292,11 @@ TEST(position, encode_compressed_course_speed)
         std::string course_speed_str = encode_compressed_course_speed(72, 42.43);
         EXPECT_TRUE(course_speed_str == "3R");
     }
+
+    {
+        std::string course_speed_str = encode_compressed_course_speed(360, 0.166383);
+        EXPECT_TRUE(course_speed_str == "!#");
+    }
 }
 
 TEST(position, encode_compressed_altitude)
@@ -308,6 +314,24 @@ TEST(position, encode_compressed_altitude)
     {
         std::string alt_str = encode_compressed_altitude(427.50);
         EXPECT_TRUE(alt_str == "B>");
+    }
+}
+
+TEST(position, compression_type_to_int)
+{
+    {
+        int type = compression_type_to_int(compression_type::current_gga_compressed);
+        EXPECT_TRUE(type == 0b00110000);
+    }
+
+    {
+        int type = compression_type_to_int(compression_type::current_rmc_digipeater);
+        EXPECT_TRUE(type == 0b00111111);
+    }
+
+    {
+        int type = compression_type_to_int(compression_type::old_other_compressed);
+        EXPECT_TRUE(type == 0b00000000);
     }
 }
 
@@ -1596,21 +1620,23 @@ TEST(tracker, various_anonymous_structs)
         t.to("APRS");
         t.path("WIDE1-1");
         t.symbol_table('/');
-        t.symbol_code('p');
+        t.symbol_code('[');
 
         struct s
         {
             double lat = 0.0;
             double lon = 0.0;
+            double speed = 0.0;
+            double track = 0.0;
         };
 
-        s data{ 26.308999648226, -98.118999490715 };
+        s data{ 50.656773231546 , 6.4228800344424, 0.0856036, 360 };
 
         t.position(data);
 
-        std::string packet = t.packet_string_no_message(packet_type::position_compressed);
-
-        EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!/A2hQ5`8vp!!Y");
+        // Y - compression type
+        std::string packet = t.packet_string(packet_type::position_compressed);
+        EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!/4qheP+c)[!#Y");
     }
 }
 

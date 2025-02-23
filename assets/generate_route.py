@@ -115,7 +115,7 @@ def process_shape_in_batches(trace_url, shape):
 def save_to_file(data, filename):
     """Writes lat, lon, speed to a text file."""
     with open(filename, "w") as f:
-        for lat, lon, speed in data:
+        for lon, lat, speed in data:
             f.write(f"{lat}, {lon}, {speed}\n")
     print(f"Data saved to {filename}")
 
@@ -171,6 +171,37 @@ def generate_geojson_with_speed(lat_lon_speed, output_file="route.geojson"):
     with open(output_file, "w") as f:
         json.dump(geojson_data, f, indent=2)
 
+def generate_geojson(lat_lon_speed, output_file="route.geojson"):
+    """Generates a GeoJSON file with speed labels at points where speed changes."""
+
+    # Extract coordinates and speeds
+    shape_coordinates = [(lat, lon) for lat, lon, _ in lat_lon_speed]
+
+    # LineString for the route
+    line_feature = {
+        "type": "Feature",
+        "geometry": {
+            "type": "LineString",
+            "coordinates": [[lon, lat] for lon, lat in shape_coordinates]  # Swap lat/lon to lon/lat
+        },
+        "properties": {
+            "name": "Generated Route",
+            "stroke": "blue",
+            "stroke-opacity": 0.6,
+            "stroke-width": 3
+        }
+    }
+
+    # Combine all features
+    geojson_data = {
+        "type": "FeatureCollection",
+        "features": [line_feature]
+    }
+
+    # Save to file
+    with open(output_file, "w") as f:
+        json.dump(geojson_data, f, indent=2)
+
 def main():
     """Main function with predefined variables."""
     route_url = "http://192.168.1.190:8002/route"  # Set your Valhalla server URL
@@ -196,10 +227,11 @@ def main():
     lat_lon_speed = process_shape_in_batches(trace_url, shape)
 
     # Step 4: Save data to a file
-    save_to_file(lat_lon_speed, "speed_data.txt")
+    save_to_file(lat_lon_speed, "route.txt")
 
     # Step 5: Generate GeoJSON file
-    generate_geojson_with_speed(lat_lon_speed, "route.geojson")
+    generate_geojson(lat_lon_speed, "route.geojson")
+    generate_geojson_with_speed(lat_lon_speed, "route_speed.geojson")
 
 if __name__ == "__main__":
     main()

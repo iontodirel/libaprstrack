@@ -995,6 +995,7 @@ APRS_TRACK_INLINE std::tuple<int, int, double> dd_to_dms(double dd)
     dm = dm * 60.0;
     s = std::modf(dm, &m);
     s = s * 60.0;
+    return std::make_tuple(static_cast<int>(d), static_cast<int>(m), s);
     return std::make_tuple((int)d, (int)m, s);
 }
 
