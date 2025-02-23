@@ -38,7 +38,7 @@ APRS is a registered trademark of Bob Bruninga, WB4APR.
   - Ready-to-use test data sets for APRS encoder verification.
 - Modular achitecture
   - No coupling!
-  - Low level functions can be (re)used standalone or outside the library
+  - Low level functions can be (re)used standalone or outside the library. The entire encoding core library can be extracted as-is with two copy-pastes.
   - All the code is testable
   - Packet and data encoding can be used without the tracker class
   - Minimal OO design
@@ -299,7 +299,7 @@ The Arduino platform has limited C++ 20 support. Depending on the board used, th
 
 As this is a header only library, you can simple download the header and use it without anything else.
 
-You can do this is CMake with the following command:
+You can do this in CMake with the following command:
 
 `file(DOWNLOAD
     https://raw.githubusercontent.com/iontodirel/libaprstrack/refs/heads/main/libaprstrack.hpp
