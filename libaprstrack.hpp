@@ -38,11 +38,8 @@
 #pragma once
 
 #include <string>
-#include <iostream>
 #include <optional>
 #include <tuple>
-#include <sstream>
-#include <iomanip>
 #include <chrono>
 #include <iterator>
 #include <ranges>
@@ -199,21 +196,21 @@ enum class packet_type
 
 enum class mic_e_status
 {
-    off_duty,
-    en_route,
-    in_service,
-    returning,
-    commited,
-    special,
-    priority,
-    emergency,
-    custom0,
-    custom1,
-    custom2,
-    custom3,
-    custom4,
-    custom5,
-    custom6,
+    off_duty,   // 1 1 1
+    en_route,   // 1 1 0
+    in_service, // 1 0 1
+    returning,  // 1 0 0
+    commited,   // 0 1 1
+    special,    // 0 1 0
+    priority,   // 0 0 1
+    emergency,  // 0 0 0
+    custom0,    // 1 1 1
+    custom1,    // 1 1 0
+    custom2,    // 1 0 1
+    custom3,    // 1 0 0
+    custom4,    // 0 1 1
+    custom5,    // 0 1 0
+    custom6,    // 0 0 1
     unknown
 };
 
@@ -1483,16 +1480,16 @@ APRS_TRACK_INLINE std::string encode_header(std::string_view from, std::string_v
     std::string packet;
 
     packet.append(from);
-    packet.append(">");
+    packet.append(1, '>');
     packet.append(to);
 
     if (path.empty() == false)
     {
-        packet.append(",");
+        packet.append(1, ',');
         packet.append(path);
     }
 
-    packet.append(":");
+    packet.append(1, ':');
 
     return packet;
 }
