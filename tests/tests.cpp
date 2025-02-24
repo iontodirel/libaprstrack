@@ -80,6 +80,8 @@ TEST(packet, encode_header)
     EXPECT_TRUE(encode_header("N0CALL", "APRS", "WIDE1-1,WIDE2-2") == "N0CALL>APRS,WIDE1-1,WIDE2-2:");
     EXPECT_TRUE(encode_header("N0CALL", "APRS", "WIDE1-1") == "N0CALL>APRS,WIDE1-1:");
     EXPECT_TRUE(encode_header("N0CALL", "APRS", "") == "N0CALL>APRS:");
+    EXPECT_TRUE(encode_header("N0CALL", "", "") == "N0CALL>:");
+    EXPECT_TRUE(encode_header("", "", "") == ">:");
 }
 
 TEST(position, dd_to_dms)
@@ -89,6 +91,34 @@ TEST(position, dd_to_dms)
         EXPECT_TRUE(d == 37);
         EXPECT_TRUE(m == 46);
         EXPECT_NEAR(s, 29.64, 0.01);
+    }
+
+    {
+        auto [d, m, s] = dd_to_dms(42.15188);
+        EXPECT_TRUE(d == 42);
+        EXPECT_TRUE(m == 9);
+        EXPECT_NEAR(s, 6.768, 0.001);
+    }
+
+    {
+        auto [d, m, s] = dd_to_dms(47.636453031500814);
+        EXPECT_TRUE(d == 47);
+        EXPECT_TRUE(m == 38);
+        EXPECT_NEAR(s, 11.23091, 0.00001);
+    }
+
+    {
+        auto [d, m, s] = dd_to_dms(-122.28699440021819);
+        EXPECT_TRUE(d == -122);
+        EXPECT_TRUE(m == 17);
+        EXPECT_NEAR(s, 13.17984, 0.00001);
+    }
+
+    {
+        auto [d, m, s] = dd_to_dms(-0.12967150593338872);
+        EXPECT_TRUE(d == 0);
+        EXPECT_TRUE(m == 7);
+        EXPECT_NEAR(s, 46.81742, 0.00001);
     }
 }
 
@@ -101,6 +131,12 @@ TEST(position, dd_to_ddm)
     }
 
     {
+        auto [dd, m] = dd_to_ddm(-37.7749);
+        EXPECT_TRUE(dd == -37);
+        EXPECT_NEAR(m, 46.494, 0.001);
+    }
+
+    {
         auto ddm = dd_to_ddm(37.7749, -122.4194);
         EXPECT_TRUE(ddm.lat == 'N');
         EXPECT_TRUE(ddm.lat_d == 37);
@@ -108,6 +144,46 @@ TEST(position, dd_to_ddm)
         EXPECT_TRUE(ddm.lon == 'W');
         EXPECT_TRUE(ddm.lon_d == 122);
         EXPECT_NEAR(ddm.lon_m, 25.164, 0.001);
+    }
+
+    {
+        auto ddm = dd_to_ddm(51.469041, -0.038108);
+        EXPECT_TRUE(ddm.lat == 'N');
+        EXPECT_TRUE(ddm.lat_d == 51);
+        EXPECT_NEAR(ddm.lat_m, 28.1425, 0.0001);
+        EXPECT_TRUE(ddm.lon == 'W');
+        EXPECT_TRUE(ddm.lon_d == 0);
+        EXPECT_NEAR(ddm.lon_m, 2.2865, 0.0001);
+    }
+
+    {
+        auto ddm = dd_to_ddm(-0.775198, -77.707248);
+        EXPECT_TRUE(ddm.lat == 'S');
+        EXPECT_TRUE(ddm.lat_d == 0);
+        EXPECT_NEAR(ddm.lat_m, 46.5119, 0.0001);
+        EXPECT_TRUE(ddm.lon == 'W');
+        EXPECT_TRUE(ddm.lon_d == 77);
+        EXPECT_NEAR(ddm.lon_m, 42.4349, 0.0001);
+    }
+
+    {
+        auto ddm = dd_to_ddm(1.464833, 103.737833);
+        EXPECT_TRUE(ddm.lat == 'N');
+        EXPECT_TRUE(ddm.lat_d == 1);
+        EXPECT_NEAR(ddm.lat_m, 27.89, 0.001);
+        EXPECT_TRUE(ddm.lon == 'E');
+        EXPECT_TRUE(ddm.lon_d == 103);
+        EXPECT_NEAR(ddm.lon_m, 44.27, 0.001);
+    }
+
+    {
+        auto ddm = dd_to_ddm(-0.987982, 16.276024);
+        EXPECT_TRUE(ddm.lat == 'S');
+        EXPECT_TRUE(ddm.lat_d == 0);
+        EXPECT_NEAR(ddm.lat_m, 59.2789, 0.0001);
+        EXPECT_TRUE(ddm.lon == 'E');
+        EXPECT_TRUE(ddm.lon_d == 16);
+        EXPECT_NEAR(ddm.lon_m, 16.5614, 0.001);
     }
 }
 
@@ -186,6 +262,7 @@ TEST(format, format_n_digits_string)
     EXPECT_TRUE(format_two_digits_string(9) == "09");
     EXPECT_TRUE(format_two_digits_string(10) == "10");
     EXPECT_TRUE(format_two_digits_string(99) == "99");
+    EXPECT_TRUE(format_two_digits_string(199) == "199");
 
     EXPECT_TRUE(format_n_digits_string(0, 2) == "00");
     EXPECT_TRUE(format_n_digits_string(1, 2) == "01");
@@ -353,6 +430,11 @@ TEST(position, compression_type_to_int)
     {
         int type = compression_type_to_int(compression_type::old_other_compressed);
         EXPECT_TRUE(type == 0b00000000);
+    }
+
+    {
+        int type = compression_type_to_int(compression_type::current_gga_tbd_1);
+        EXPECT_TRUE(type == 0b00110011);
     }
 }
 

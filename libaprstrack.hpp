@@ -367,17 +367,17 @@ struct tracker
     void position(const T& p);
 
     void position(double lat, double lon);
-    void position(double lat, double lon, double speed, double track);
-    void position(double lat, double lon, double speed, double track, double alt);
-    void position(double lat, double lon, double speed, double track, double alt, int day, int hour, int minute, int second);
+    void position(double lat, double lon, double speed, double track_degrees);
+    void position(double lat, double lon, double speed, double track_degrees, double alt_meters);
+    void position(double lat, double lon, double speed, double track_degrees, double alt_meters, int day, int hour, int minute, int second);
 
     void time(int day, int hour, int minute, int second);
     void time(int hour, int minute, int second);
     void time(int minute, int second);
 
-    void speed(double speed);
-    void alt(double alt);
-    void track(double track);
+    void speed(double speed_mps);
+    void alt(double alt_meters);
+    void track(double track_degrees);
 
     void update();
     bool updated() const;
@@ -707,29 +707,35 @@ APRS_TRACK_INLINE void tracker::position(double lat, double lon)
     data_.lon = lon;
 }
 
-APRS_TRACK_INLINE void tracker::position(double lat, double lon, double speed, double track)
+APRS_TRACK_INLINE void tracker::position(double lat, double lon, double speed_mps, double track_degrees)
 {
+APRS_TRACK_DETAIL_NAMESPACE_USE
+
     data_.lat = lat;
     data_.lon = lon;
-    data_.speed_knots = speed;
-    data_.track_degrees = track;
+    data_.speed_knots = meters_s_to_knots(speed_mps);
+    data_.track_degrees = track_degrees;
 }
 
-APRS_TRACK_INLINE void tracker::position(double lat, double lon, double speed, double track, double alt)
+APRS_TRACK_INLINE void tracker::position(double lat, double lon, double speed_mps, double track_degrees, double alt)
 {
+APRS_TRACK_DETAIL_NAMESPACE_USE
+
     data_.lat = lat;
     data_.lon = lon;
-    data_.speed_knots = speed;
-    data_.track_degrees = track;
+    data_.speed_knots = meters_s_to_knots(speed_mps);
+    data_.track_degrees = track_degrees;
     data_.alt_feet = alt;
 }
 
-APRS_TRACK_INLINE void tracker::position(double lat, double lon, double speed, double track, double alt, int day, int hour, int minute, int second)
+APRS_TRACK_INLINE void tracker::position(double lat, double lon, double speed_mps, double track_degrees, double alt, int day, int hour, int minute, int second)
 {
+APRS_TRACK_DETAIL_NAMESPACE_USE
+
     data_.lat = lat;
     data_.lon = lon;
-    data_.speed_knots = speed;
-    data_.track_degrees = track;
+    data_.speed_knots = meters_s_to_knots(speed_mps);
+    data_.track_degrees = track_degrees;
     data_.alt_feet = alt;
     data_.day = day;
     data_.hour = hour;
@@ -758,19 +764,23 @@ APRS_TRACK_INLINE void tracker::time(int minute, int second)
     data_.second = second;
 }
 
-APRS_TRACK_INLINE void tracker::speed(double speed)
+APRS_TRACK_INLINE void tracker::speed(double speed_mps)
 {
-    data_.speed_knots = speed;
+APRS_TRACK_DETAIL_NAMESPACE_USE
+
+    data_.speed_knots = meters_s_to_knots(speed_mps);
 }
 
-APRS_TRACK_INLINE void tracker::alt(double alt)
+APRS_TRACK_INLINE void tracker::alt(double alt_meters)
 {
-    data_.alt_feet = alt;
+APRS_TRACK_DETAIL_NAMESPACE_USE
+
+    data_.alt_feet = meters_to_feet(alt_meters);
 }
 
-APRS_TRACK_INLINE void tracker::track(double track)
+APRS_TRACK_INLINE void tracker::track(double track_degrees)
 {
-    data_.track_degrees = track;
+    data_.track_degrees = track_degrees;
 }
 
 APRS_TRACK_INLINE void tracker::update()
@@ -1240,8 +1250,12 @@ APRS_TRACK_INLINE std::tuple<int, int, double> dd_to_dms(double dd)
     // Output DMS = 37° 46' 29.64"
 
     double d, dm, m, s;
-    dd = std::abs(dd);
-    dm = std::modf(dd, &d);
+    double dd_abs = std::abs(dd);
+    dm = std::modf(dd_abs, &d);
+    if (dd < 0)
+    {
+        d = -d;
+    }
     dm = dm * 60.0;
     s = std::modf(dm, &m);
     s = s * 60.0;
@@ -1262,6 +1276,8 @@ APRS_TRACK_INLINE position_ddm dd_to_ddm(double lat, double lon)
     position_ddm ddm;
     std::tie(ddm.lat_d, ddm.lat_m) = dd_to_ddm(lat);
     std::tie(ddm.lon_d, ddm.lon_m) = dd_to_ddm(lon);
+    ddm.lat_d = std::abs(ddm.lat_d);
+    ddm.lon_d = std::abs(ddm.lon_d);
     ddm.lat = lat > 0 ? 'N' : 'S';
     ddm.lon = lon > 0 ? 'E' : 'W';
     return ddm;
