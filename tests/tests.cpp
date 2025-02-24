@@ -161,6 +161,22 @@ TEST(format, format_number_to_string)
     EXPECT_TRUE(format_number_to_string(0.07749, 5, 2) == "000.08");
     EXPECT_TRUE(format_number_to_string(37, 0) == "37");
     EXPECT_TRUE(format_number_to_string(37, 3, 0) == "037");
+    EXPECT_TRUE(format_number_to_string(999999.9999, 4) == "999999.9999");
+    EXPECT_TRUE(format_number_to_string(999999.9999, 2) == "1000000.00");
+    EXPECT_TRUE(format_number_to_string(0.000001, 6) == "0.000001");
+    EXPECT_TRUE(format_number_to_string(0.000001, 3) == "0.000");
+    EXPECT_TRUE(format_number_to_string(-37.7749, 4) == "-37.7749");
+    EXPECT_TRUE(format_number_to_string(-37.7749, 2) == "-37.77");
+    EXPECT_TRUE(format_number_to_string(-0.7749, 5, 2) == "-00.77");
+    EXPECT_TRUE(format_number_to_string(0.0, 4) == "0.0000");
+    EXPECT_TRUE(format_number_to_string(0.0, 0) == "0");
+    EXPECT_TRUE(format_number_to_string(0.0, 5, 2) == "000.00");
+    EXPECT_TRUE(format_number_to_string(1.5555, 3) == "1.556");
+    EXPECT_TRUE(format_number_to_string(1.5555, 0) == "1");
+    EXPECT_TRUE(format_number_to_string(-1.5555, 3) == "-1.556");
+    EXPECT_TRUE(format_number_to_string(5.5, 8, 4) == "0005.5000");
+    EXPECT_TRUE(format_number_to_string(0.5, 8, 4) == "0000.5000");
+    EXPECT_TRUE(format_number_to_string(-5.5, 8, 4) == "-005.5000");
 }
 
 TEST(format, format_n_digits_string)
@@ -177,6 +193,11 @@ TEST(format, format_n_digits_string)
     EXPECT_TRUE(format_n_digits_string(10, 2) == "10");
     EXPECT_TRUE(format_n_digits_string(99, 2) == "99");
     EXPECT_TRUE(format_n_digits_string(12, 6) == "000012");
+    EXPECT_TRUE(format_n_digits_string(12, 0) == "12");
+    EXPECT_TRUE(format_n_digits_string(12, 1) == "12");
+    EXPECT_TRUE(format_n_digits_string(12, 2) == "12");
+    EXPECT_TRUE(format_n_digits_string(12, -1) == "12");
+    EXPECT_TRUE(format_n_digits_string(12, -2) == "12");
 }
 
 TEST(conversion, unit_conversions)

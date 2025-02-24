@@ -28,6 +28,12 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+//
+// This library is reusing code from position-lib: https://github.com/iontodirel/position-lib
+// Copyright (C) 2023 Ion Todirel
+//
+// This library is reusing code from libaprs: https://github.com/iontodirel/libaprs
+// Copyright (C) 2023 Ion Todirel
 
 #pragma once
 
@@ -38,7 +44,6 @@
 #include <sstream>
 #include <iomanip>
 #include <chrono>
-#include <array>
 #include <iterator>
 #include <ranges>
 #include <cmath>
@@ -1160,6 +1165,11 @@ APRS_TRACK_NAMESPACE_END
 //                                                                  //
 // **************************************************************** //
 
+#include <string> // for std::string and std::string_view.
+#include <tuple> // for std::tuple and std::tie.
+#include <cmath> // for mathematical functions like std::abs, std::modf, and std::round.
+#include <cstdio> // for std::snprintf.
+
 APRS_TRACK_NAMESPACE_BEGIN
 
 APRS_TRACK_DETAIL_NAMESPACE_BEGIN
@@ -1268,38 +1278,34 @@ APRS_TRACK_INLINE std::string format_number_to_string(double number, int width, 
     {
         double i;
         std::modf(number, &i);
-        pretty_number_str = std::to_string((int)i);
-    }
-    else
-    {
-        std::stringstream ss;
-        ss << std::fixed << std::setprecision(precision) << number;
-        pretty_number_str = ss.str();
-    }
 
-    if (width > 0)
-    {
-        // use index of '.' to determine how many digits to add
-        size_t dot_index = pretty_number_str.find('.');
-        if (dot_index != std::string::npos)
+        char buffer[32];
+
+        if (width > 0)
         {
-            size_t digits_after_dot = pretty_number_str.size() - dot_index - 1;
-            size_t digits_before_dot = dot_index;
-            int total_digits = static_cast<int>(digits_after_dot + digits_before_dot);
-            if (total_digits < width)
-            {
-                int digits_to_add = width - total_digits;
-                pretty_number_str.insert(0, digits_to_add, '0');
-            }
+            std::snprintf(buffer, sizeof(buffer), "%0*d", width, static_cast<int>(i));
         }
         else
         {
-            int total_digits = width - static_cast<int>(pretty_number_str.size());
-            if (total_digits > 0)
-            {
-                pretty_number_str.insert(0, total_digits, '0');
-            }
+            std::snprintf(buffer, sizeof(buffer), "%d", static_cast<int>(i));
         }
+
+        pretty_number_str = buffer;
+    }
+    else
+    {
+        char buffer[32];
+
+        if (width > 0)
+        {
+            std::snprintf(buffer, sizeof(buffer), "%0*.*f", width + 1, precision, number);
+        }
+        else
+        {
+            std::snprintf(buffer, sizeof(buffer), "%.*f", precision, number);
+        }
+
+        pretty_number_str = buffer;
     }
 
     return pretty_number_str;
@@ -1310,11 +1316,16 @@ APRS_TRACK_INLINE std::string format_number_to_string(double number, int precisi
     return format_number_to_string(number, 0, precision);
 }
 
-APRS_TRACK_INLINE std::string format_n_digits_string(int number, int digits)
+APRS_TRACK_INLINE std::string format_n_digits_string(int number, int width)
 {
-    std::ostringstream oss;
-    oss << std::setw(digits) << std::setfill('0') << number;
-    return oss.str();
+    if (width <= 0)
+    {
+        return std::to_string(number);
+    }
+
+    char buffer[32];
+    std::snprintf(buffer, sizeof(buffer), "%0*d", width, number);
+    return std::string(buffer);
 }
 
 APRS_TRACK_INLINE std::string format_two_digits_string(int number)
@@ -2169,7 +2180,7 @@ APRS_TRACK_INLINE void add_mic_e_position_ambiguity(std::string& destination_add
 
 APRS_TRACK_INLINE void encode_mic_e_status(int a, int b, int c, bool custom, std::string& destination_address)
 {
-    std::array<int, 3> message_bits = { a, b, c };
+    int message_bits[3] = {a, b, c};
 
     for (size_t i = 0; i < 3; i++)
     {
