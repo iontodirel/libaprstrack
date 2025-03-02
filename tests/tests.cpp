@@ -1119,7 +1119,7 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         // VE7JAI-7>T9QPVP,WIDE1-1,WIDE2-1,qAR,VA7PF:`3T{m\<0x1f>[/`"4F}VE7JAI_$
         //                                                         ~    ~~~~~~~~
         // NOTE: '`' inserted in the 10th position is part of the message: `VE7JAI_$
-        // This what APRS spec has to say about it:
+        // This is what APRS spec has to say about it:
         // 
         // It is envisaged that other Mic-E-compatible devices will be allocated their
         // own type codes in future. (10th byte)
@@ -1212,6 +1212,12 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         // NOTE: '`' inserted in the 10th position is part of the message
         std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 51.6145, -0.0485, mic_e_status::en_route, 297, 7, '/', '>', 0, 108.27);
         EXPECT_TRUE(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}");
+    }
+
+    {
+        // K2EHE>S9UW2T,W2ZQ*,WIDE2-1,qAO,W2ZQ:`fPel+L-/>"3e}=
+        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 39.954, -74.878833333333, mic_e_status::in_service, 148, 1, '/', '-', 0, -42.65);
+        EXPECT_TRUE(packet == "N0CALL>S9UW2T,WIDE1-1:`fPel+L-/>\"3e}");
     }
 }
 
