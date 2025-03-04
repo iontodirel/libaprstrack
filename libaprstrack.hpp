@@ -180,6 +180,9 @@ enum class packet_type
     position_with_timestamp,
     position_with_timestamp_utc,
     position_with_timestamp_utc_hms,
+    position_compressed_with_timestamp,
+    position_compressed_with_timestamp_utc,
+    position_compressed_with_timestamp_utc_hms,
 };
 
 enum class mic_e_status
@@ -2158,6 +2161,7 @@ char encode_mic_e_lon_minutes(int lon_m);
 char encode_mic_e_lon_hundred_minutes(int lon_h);
 std::string encode_mic_e_lon(double lon);
 std::string encode_mic_e_course_speed(double course_degrees, double speed_knots);
+std::string encode_mic_e_course_speed_alternate(double course_degrees, double speed_knots);
 std::string encode_mic_e_alt(double alt_feet);
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
@@ -2672,6 +2676,49 @@ APRS_TRACK_INLINE std::string encode_mic_e_course_speed(double course_degrees, d
     return course_speed;
 }
 
+APRS_TRACK_INLINE std::string encode_mic_e_course_speed_alternate(double course_degrees, double speed_knots)
+{
+    std::string course_speed;
+
+    int course = static_cast<int>(std::round(course_degrees));
+    int speed = static_cast<int>(std::round(speed_knots));
+
+    int sp = (speed / 10) + 28; // or  l
+    int se = (course % 100) + 28;
+
+    int dc = 0;
+
+    if (course >= 0 && course <= 99)
+    {
+        dc = 28; // or ' '
+    }
+    else if (course >= 100 && course <= 199)
+    {
+        dc = 29; // or !
+    }
+    else if (course >= 200 && course <= 299)
+    {
+        dc = 30; // or "
+    }
+    else if (course >= 300 && course <= 360)
+    {
+        dc = 31; // or #
+    }
+
+    int speed_units = speed % 10;
+
+    if (speed_units > 0)
+    {
+        dc = dc + speed_units * 10;
+    }
+
+    course_speed.append(1, static_cast<char>(sp));
+    course_speed.append(1, static_cast<char>(dc));
+    course_speed.append(1, static_cast<char>(se));
+
+    return course_speed;
+}
+
 APRS_TRACK_INLINE std::string encode_mic_e_alt(double alt_feet)
 {
     std::string alt_str(4, '\0');
@@ -2861,7 +2908,7 @@ APRS_TRACK_INLINE double meters_to_feet(double meters)
 
 APRS_TRACK_INLINE double meters_s_to_knots(double meters_s)
 {
-    return meters_s * 1.94384;
+    return meters_s * 1.9438444924406;
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
