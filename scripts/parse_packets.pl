@@ -11,26 +11,28 @@ use HTTP::Request;
 use Try::Tiny;
 
 # Constants
-my $INPUT_FILE = 'aprsis_seattle_1/mice.txt';
-my $OUTPUT_FILE = 'output.json';
+my $INPUT_FILE = 'aprsis_seattle_1/other.txt';
+my $OUTPUT_FILE = 'output2.json';
 my $API_TIMEOUT = 10; # seconds
 my $USER_AGENT = 'APRSParserScript/1.0';
 
-# Main execution
 process_packets_from_file($INPUT_FILE, $OUTPUT_FILE);
 print "Processing complete! JSON saved to $OUTPUT_FILE\n";
 
-# Functions
 sub process_packets_from_file {
     my ($input_file, $output_file) = @_;
 
     my @packets = read_packets_from_file($input_file);
     my @parsed_packets;
+    my $packet_index = 0;
 
     foreach my $packet (@packets) {
         next if $packet =~ /^\s*$/;  # Skip empty lines
-        my $parsed_data = parse_and_format_packet($packet);
-        push @parsed_packets, $parsed_data if $parsed_data;
+        my $parsed_data = parse_and_format_packet($packet, $packet_index);
+        if ($parsed_data) {
+            push @parsed_packets, $parsed_data;
+            $packet_index++;  # Increment only for valid packets
+        }
     }
 
     # Convert the array of data structures to a single JSON string
@@ -46,7 +48,7 @@ sub read_packets_from_file {
 }
 
 sub parse_and_format_packet {
-    my ($packet) = @_;
+    my ($packet, $index) = @_;
     my %packetdata;
 
     my $retval = parseaprs($packet, \%packetdata);
@@ -56,37 +58,42 @@ sub parse_and_format_packet {
     }
 
     my $packet_type = determine_packet_type(\%packetdata);
+    if ($packet_type eq 'unknown') {
+        warn "Unknown packet type for packet: $packet\n";
+        return;
+    }
+
     my $digipeaters_string = format_digipeater_path(\%packetdata);
     my $mic_e_status = ($packet_type eq 'mic_e' && exists $packetdata{'mbits'})
                       ? get_mic_e_status($packetdata{'mbits'})
                       : '';
 
-    # Get location information if we have coordinates
-    #my $location_info = get_location_info(
-    #    $packetdata{'latitude'},
-    #    $packetdata{'longitude'}
-    #);
-
     return format_custom_data(
         \%packetdata,
         $digipeaters_string,
         $mic_e_status,
-        $packet_type
+        $packet_type,
+        $index
     );
 }
 
 sub format_custom_data {
-    my ($packetdata, $digipeaters_string, $mic_e_status, $packet_type) = @_;
+    my ($packetdata, $digipeaters_string, $mic_e_status, $packet_type, $index) = @_;
 
-    # Build the base data structure
+    my $from_ssid = extract_ssid($packetdata->{'srccallsign'});
+    my $to_ssid = extract_ssid($packetdata->{'dstcallsign'});
+
     tie my %custom_data, 'Tie::IxHash';
     %custom_data = (
+        index => "" . $index,
         packet => $packetdata->{'origpacket'} // '',
         packet_base64 => encode_base64($packetdata->{'origpacket'} // '', ''),
         data => $packetdata->{'body'} // '',
         data_base64 => encode_base64($packetdata->{'body'} // '', ''),
         from => $packetdata->{'srccallsign'} // '',
+        from_ssid => $from_ssid,
         to => $packetdata->{'dstcallsign'} // '',
+        to_ssid => $to_ssid,
         path => $digipeaters_string,
         lat => "" . ($packetdata->{'latitude'} // ''),
         lon => "" . ($packetdata->{'longitude'} // ''),
@@ -99,18 +106,9 @@ sub format_custom_data {
         mic_e_status => $mic_e_status,
         packet_type => $packet_type,
         comment => $packetdata->{'comment'} // '',
-        comment_base64 => encode_base64($packetdata->{'comment'} // '', '')
+        comment_base64 => encode_base64($packetdata->{'comment'} // '', ''),
+        ambiguity => "" . ($packetdata->{'posambiguity'} // ''),
     );
-
-    # Add location information if available
-    #if ($location_info) {
-    #    $custom_data{country} = $location_info->{country};
-    #    $custom_data{city} = $location_info->{city};
-    #    $custom_data{county} = $location_info->{county};
-    #    $custom_data{state} = $location_info->{state};
-    #    $custom_data{postcode} = $location_info->{postcode};
-    #    $custom_data{display_name} = $location_info->{display_name};
-    #}
 
     return \%custom_data;
 }
@@ -160,28 +158,39 @@ sub get_location_info {
 
 sub determine_packet_type {
     my ($packetdata) = @_;
-    my $packet_type = 'position'; # Default
+    my $packet_type = 'unknown'; # Default
 
-    if ($packetdata->{'format'} eq 'compressed' && $packetdata->{'type'} eq 'location') {
-        $packet_type = 'position_compressed';
+    if (defined $packetdata->{'format'} && defined $packetdata->{'type'}) {
+        if ($packetdata->{'format'} eq 'mice' && $packetdata->{'type'} eq 'location') {
+            $packet_type = 'mic_e';
+        }
+        elsif ($packetdata->{'format'} eq 'compressed' && $packetdata->{'type'} eq 'location') {
+            $packet_type = 'position_compressed';
+        }
+        elsif ($packetdata->{'format'} eq 'uncompressed' && $packetdata->{'type'} eq 'location') {
+            $packet_type = 'position';
+        }
     }
-    elsif ($packetdata->{'format'} eq 'mice' && $packetdata->{'type'} eq 'location') {
-        $packet_type = 'mic_e';
-    }
-    elsif ($packetdata->{'format'} eq 'uncompressed' && $packetdata->{'type'} eq 'location') {
-        if ($packetdata->{'timestamp'}) {
-            my $ts_type = $packetdata->{'timestamp_type'} || '';
-            if ($ts_type eq 'DHM') {
-                $packet_type = 'position_with_timestamp';
+
+    # if after :!, :/, :@, := contents starts with:
+    #   ddddddz - position_with_timestamp_utc
+    #   dddddd/ - position_with_timestamp
+    #   ddddddh - position_with_timestamp_utc_mhs
+
+    if ($packet_type =~ /^position(_compressed)?$/) {
+        if (defined $packetdata->{'body'}) {
+            if ($packetdata->{'body'} =~ /^[!\/@=]\d{6}z/) {
+                $packet_type .= '_with_timestamp_utc';
             }
-            elsif ($ts_type eq 'HMS') {
-                $packet_type = 'position_with_timestamp_utc_mhs';
+            elsif ($packetdata->{'body'} =~ /^[!\/@=]\d{6}\//) {
+                $packet_type .= '_with_timestamp';
             }
-            elsif ($ts_type eq 'zDHM') {
-                $packet_type = 'position_with_timestamp_utc';
+            elsif ($packetdata->{'body'} =~ /^[!\/@=]\d{6}h/) {
+                $packet_type .= '_with_timestamp_utc_hms';
             }
         }
     }
+
 
     return $packet_type;
 }
@@ -227,4 +236,12 @@ sub get_mic_e_status {
     );
 
     return $status_map{$pattern} // 'unknown';
+}
+
+sub extract_ssid {
+    my ($callsign) = @_;
+    if ($callsign =~ /-(\d+)$/) {
+        return $1;
+    }
+    return '';
 }

@@ -207,8 +207,8 @@ def main():
     route_url = "http://192.168.1.190:8002/route"  # Set your Valhalla server URL
     trace_url = "http://192.168.1.190:8002/trace_attributes"
     locations = [
-        (47.6287, -122.3462),
-        (33.7654, -118.1757)
+        (47.635623, -122.238615),
+        (47.611309, -122.206913)
     ]  # Set route points
 
     # Step 1: Get route data
