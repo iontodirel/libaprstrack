@@ -1,0 +1,17 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "project": "tests\\CMakeLists.txt",
+      "projectTarget": "generate_test_json.exe",
+      "name": "generate_test_json.exe",
+      "args": [
+        "${workspaceRoot}\\assets\\output.json",
+        "${workspaceRoot}\\assets\\output2.json",
+        "${workspaceRoot}\\assets\\packets.json"
+      ]
+    }
+  ]
+}

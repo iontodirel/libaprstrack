@@ -1936,9 +1936,11 @@ TEST(tracker, u8packet_string)
 
 TEST(tracker, auto_tests)
 {
-    std::string file_path = R"(C:\Users\ionto\source\repos\libaprstrack\assets\success.json)";
+    std::string file_path = INPUT_TEST_FILE;
 
     std::vector<packet_data> packets = parse_json_basic(file_path);
+
+    EXPECT_TRUE(!packets.empty());
 
     for (const auto& packet : packets)
     {

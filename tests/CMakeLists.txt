@@ -5,7 +5,7 @@
 # Copyright (c) 2025 Ion Todirel                                   #
 # **************************************************************** #
 #
-# libaprstrack.hpp
+# CMakeLists.txt
 # 
 # MIT License
 # 
@@ -67,12 +67,25 @@ if(NOT fmt_POPULATED)
   add_subdirectory(${fmt_SOURCE_DIR} ${fmt_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+set(BOOST_INCLUDE_LIBRARIES asio beast)
+set(BOOST_ENABLE_CMAKE ON)
+set(BOOST_USE_STATIC_LIBS ON)
+
+FetchContent_Declare(
+  Boost
+  URL https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.tar.xz
+  URL_MD5 d55d43218e81ca3d0fc14436b7665bf1
+  DOWNLOAD_EXTRACT_TIMESTAMP ON
+)
+FetchContent_MakeAvailable(boost)
+
 enable_testing()
 
-set(INPUT_TEST_FILE ${CMAKE_SOURCE_DIR}/routes.json)
+set(INPUT_TEST_FILE ${CMAKE_SOURCE_DIR}/../assets/packets.json)
 
 add_executable(aprsroute_tests "tests.cpp" "../libaprstrack.hpp")
-target_link_libraries(aprsroute_tests GTest::gtest_main gtest gtest_main nlohmann_json::nlohmann_json fmt::fmt)
+target_link_libraries(aprsroute_tests GTest::gtest_main gtest gtest_main nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
+
 add_definitions(-DINPUT_TEST_FILE="${INPUT_TEST_FILE}")
 
 set_property(TARGET aprsroute_tests PROPERTY CXX_STANDARD 20)
@@ -85,6 +98,17 @@ endif()
 
 add_executable (aprsroute_use_in_tu "use_in_tu.h" "use_in_tu.cpp" "compile_in_tu.cpp")
 set_property(TARGET aprsroute_use_in_tu PROPERTY CXX_STANDARD 20)
+
+add_executable (aprsroute_route "routing.cpp")
+set_property(TARGET aprsroute_route PROPERTY CXX_STANDARD 20)
+
+add_executable (generate_test_json "generate_test_json.cpp")
+target_link_libraries(generate_test_json nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
+set_property(TARGET generate_test_json PROPERTY CXX_STANDARD 20)
+
+add_executable(aprsroute_basic_periodic_test "basic_periodic_test.cpp" "../libaprstrack.hpp")
+target_link_libraries(aprsroute_basic_periodic_test GTest::gtest_main gtest gtest_main nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
+set_property(TARGET aprsroute_basic_periodic_test PROPERTY CXX_STANDARD 20)
 
 include(GoogleTest)
 
