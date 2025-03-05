@@ -185,6 +185,16 @@ TEST(position, dd_to_ddm)
         EXPECT_TRUE(ddm.lon_d == 16);
         EXPECT_NEAR(ddm.lon_m, 16.5614, 0.001);
     }
+
+    {
+        auto ddm = dd_to_ddm(0.0, 0.0);
+        EXPECT_TRUE(ddm.lat == 'N'); // or 'S', but typically 'N' is used for 0 latitude
+        EXPECT_TRUE(ddm.lat_d == 0);
+        EXPECT_NEAR(ddm.lat_m, 0.0, 0.001);
+        EXPECT_TRUE(ddm.lon == 'E'); // or 'W', but typically 'E' is used for 0 longitude
+        EXPECT_TRUE(ddm.lon_d == 0);
+        EXPECT_NEAR(ddm.lon_m, 0.0, 0.001);
+    }
 }
 
 TEST(position, to_ddm_short_string)

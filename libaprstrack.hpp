@@ -454,7 +454,7 @@ APRS_TRACK_INLINE std::string to_string(mic_e_status status)
         default:
             break;
     }
-    return "";
+    return "unknown";
 }
 
 APRS_TRACK_INLINE std::string to_string(packet_type type)
@@ -934,6 +934,7 @@ APRS_TRACK_INLINE_NO_DISABLE void tracker::packet(packet_type p, OutputIterator 
     std::string packet = packet_string_no_message(p);
 
     OutputIterator current = std::copy(reinterpret_cast<const unsigned char*>(packet.data()), reinterpret_cast<const unsigned char*>(packet.data() + packet.size()), output);
+
     std::copy(message_data_.begin(), message_data_.end(), current);
 }
 
@@ -1314,8 +1315,8 @@ APRS_TRACK_INLINE position_ddm dd_to_ddm(double lat, double lon)
     std::tie(ddm.lon_d, ddm.lon_m) = dd_to_ddm(lon);
     ddm.lat_d = std::abs(ddm.lat_d);
     ddm.lon_d = std::abs(ddm.lon_d);
-    ddm.lat = lat > 0 ? 'N' : 'S';
-    ddm.lon = lon > 0 ? 'E' : 'W';
+    ddm.lat = lat >= 0 ? 'N' : 'S';
+    ddm.lon = lon >= 0 ? 'E' : 'W';
     return ddm;
 }
 
