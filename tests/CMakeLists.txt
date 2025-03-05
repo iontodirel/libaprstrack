@@ -83,33 +83,35 @@ enable_testing()
 
 set(INPUT_TEST_FILE ${CMAKE_SOURCE_DIR}/../assets/packets.json)
 
-add_executable(aprsroute_tests "tests.cpp" "../libaprstrack.hpp")
-target_link_libraries(aprsroute_tests GTest::gtest_main gtest gtest_main nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
+add_executable(aprstrack_tests "tests.cpp" "../libaprstrack.hpp")
+target_link_libraries(aprstrack_tests GTest::gtest_main gtest gtest_main nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
 
 add_definitions(-DINPUT_TEST_FILE="${INPUT_TEST_FILE}")
 
-set_property(TARGET aprsroute_tests PROPERTY CXX_STANDARD 20)
+set_property(TARGET aprstrack_tests PROPERTY CXX_STANDARD 20)
 
 if(MSVC)
-    target_compile_options(aprsroute_tests PRIVATE /W4 /WX)
+    target_compile_options(aprstrack_tests PRIVATE /W4 /WX)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(aprsroute_tests PRIVATE -Wall -Wextra -pedantic -Werror)
+    target_compile_options(aprstrack_tests PRIVATE -Wall -Wextra -pedantic -Werror)
 endif()
 
-add_executable (aprsroute_use_in_tu "use_in_tu.h" "use_in_tu.cpp" "compile_in_tu.cpp")
-set_property(TARGET aprsroute_use_in_tu PROPERTY CXX_STANDARD 20)
+add_executable (aprstrack_use_in_tu "use_in_tu.h" "use_in_tu.cpp" "compile_in_tu.cpp")
+set_property(TARGET aprstrack_use_in_tu PROPERTY CXX_STANDARD 20)
 
-add_executable (aprsroute_route "routing.cpp")
-set_property(TARGET aprsroute_route PROPERTY CXX_STANDARD 20)
+add_executable (aprstrack_route "routing.cpp")
+set_property(TARGET aprstrack_route PROPERTY CXX_STANDARD 20)
 
 add_executable (generate_test_json "generate_test_json.cpp")
 target_link_libraries(generate_test_json nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
 set_property(TARGET generate_test_json PROPERTY CXX_STANDARD 20)
 
-add_executable(aprsroute_basic_periodic_test "basic_periodic_test.cpp" "../libaprstrack.hpp")
-target_link_libraries(aprsroute_basic_periodic_test GTest::gtest_main gtest gtest_main nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
-set_property(TARGET aprsroute_basic_periodic_test PROPERTY CXX_STANDARD 20)
+add_executable(aprstrack_basic_periodic_test "basic_periodic_test.cpp" "../libaprstrack.hpp")
+target_link_libraries(aprstrack_basic_periodic_test GTest::gtest_main gtest gtest_main nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
+set_property(TARGET aprstrack_basic_periodic_test PROPERTY CXX_STANDARD 20)
 
 include(GoogleTest)
 
-gtest_discover_tests(aprsroute_tests)
+gtest_discover_tests(aprstrack_tests)
+gtest_discover_tests(aprstrack_basic_periodic_test)
+

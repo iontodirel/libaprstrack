@@ -208,6 +208,22 @@ Use the tests as examples of how to use the library. The tests also provide a co
 
 The ***assets*** directory contains route information generated from OSM and Valhalla, and is used to simulate and test tracking.
 
+### Testing workflow
+
+Out of the box the tests can be run successfully on Windows, Linux, and OSX. The tests can be ran from Visual Studio or VSCode, or from the command line.
+
+The tests targets are: *aprstrack_tests* and *aprstrack_basic_periodic_test*.
+
+The assets folder contains the test data used by the tests. The tests assets can be regenerated using the `parse_packets.pl` script and the `generate_test_json` executable.
+
+Supply `assets/mic_e_packets.txt` and `assets/position_packets.txt` to the Perl `scripts/parse_packets.pl` script. The Perl scrip hosts the FAP APRS parsing library, which is used to parse the packets.
+
+Modify the $INPUT_FILE and $OUTPUT_FILE in the Perl script, to supply the files, each individual invocation will generate the `assets/mic_e_packets.json` and then `assets/position_packets.json` files, which contain the early test data.
+
+The `generate_test_json` executable will be invoked next to generate the `assets/packets.json` file, which contains the final processed packets.
+
+The `assets/mic_e_packets.txt` and `assets/position_packets.txt` where captured from APRS-IS.
+
 ## Development
 
 The test project can be opened in Visual Studio or VSCode. And it will work out of the box if the dependencies are installed.

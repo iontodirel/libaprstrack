@@ -69,8 +69,8 @@ struct packet_data
     double speed = 0.0;
     std::string course_str;
     std::string speed_str;
-    mic_e_status mic_e_status = mic_e_status::unknown;
-    packet_type packet_type;
+    enum mic_e_status mic_e_status = mic_e_status::unknown;
+    enum packet_type packet_type;
     std::string comment;
     bool has_course_speed = false;
     bool has_altitude = false;

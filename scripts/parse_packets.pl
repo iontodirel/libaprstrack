@@ -11,8 +11,8 @@ use HTTP::Request;
 use Try::Tiny;
 
 # Constants
-my $INPUT_FILE = 'aprsis_seattle_1/other.txt';
-my $OUTPUT_FILE = 'output2.json';
+my $INPUT_FILE = '../assets/mic_e_packets.txt';
+my $OUTPUT_FILE = '../assets/mic_e_packets.json';
 my $API_TIMEOUT = 10; # seconds
 my $USER_AGENT = 'APRSParserScript/1.0';
 
