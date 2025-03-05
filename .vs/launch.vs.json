@@ -8,8 +8,8 @@
       "projectTarget": "generate_test_json.exe",
       "name": "generate_test_json.exe",
       "args": [
-        "${workspaceRoot}\\assets\\output.json",
-        "${workspaceRoot}\\assets\\output2.json",
+        "${workspaceRoot}\\assets\\mic_e_packets.json",
+        "${workspaceRoot}\\assets\\position_packets.json",
         "${workspaceRoot}\\assets\\packets.json"
       ]
     },
@@ -21,8 +21,8 @@
       "comment": "Learn how to configure WSL debugging. For more info, see http://aka.ms/vslinuxdebug",
       "debuggerConfiguration": "gdb",
       "args": [
-        "${debugInfo.remoteWorkspaceRoot}/assets/output.json",
-        "${debugInfo.remoteWorkspaceRoot}/assets/output2.json",
+        "${debugInfo.remoteWorkspaceRoot}/assets/mic_e_packets.json",
+        "${debugInfo.remoteWorkspaceRoot}/assets/position_packets.json",
         "${debugInfo.remoteWorkspaceRoot}/assets/packets.json"
       ],
       "env": {}
