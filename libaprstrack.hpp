@@ -1322,6 +1322,27 @@ APRS_TRACK_INLINE position_ddm dd_to_ddm(double lat, double lon)
 
 APRS_TRACK_INLINE std::string format_number_to_string(double number, int width, int precision)
 {
+    // Converts a double to a formatted string representation with specific width and precision
+    //
+    // Parameters:
+    //
+    //   number    - the floating-point value to format
+    //   width     - minimum width for the resulting string (padding with leading zeros if > 0)
+    //   precision - decimal precision (number of digits after decimal point)
+    //               if precision is 0, formats as integer without decimal point
+    //               the number is rounded to the specified precision
+    //
+    // Examples:
+    //
+    //   format_number_to_string(37.7749, 4)    ->  37.7749
+    //   format_number_to_string(37.7749, 1)    ->  37.8
+    //   format_number_to_string(37.7749, 0)    ->  37
+    //   format_number_to_string(37.7749, 5, 2) ->  037.77
+    //   format_number_to_string(0.7749, 5, 2)  ->  000.77
+    //   format_number_to_string(5.5, 8, 4)     ->  0005.5000
+    //   format_number_to_string(0.5, 8, 4)     ->  0000.5000
+    //   format_number_to_string(-5.5, 8, 4)    -> -005.5000
+
     std::string pretty_number_str;
 
     if (precision == 0)
