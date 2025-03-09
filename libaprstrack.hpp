@@ -1007,7 +1007,7 @@ std::string encode_compressed_altitude(double altitude_feet);
 std::string encode_mic_e_packet_no_message(const tracker& t, const data& d);
 std::string encode_mic_e_packet(const tracker& t, const data& d);
 std::string encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity);
-std::string encode_mic_e_alt(double alt_feet);
+std::string encode_mic_e_alt_feet(double alt_feet);
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
@@ -1166,7 +1166,7 @@ APRS_TRACK_INLINE std::string encode_mic_e_packet_no_message(const tracker& t, c
 
     if (d.alt_feet.has_value())
     {
-        packet.append(encode_mic_e_alt(d.alt_feet.value()));
+        packet.append(encode_mic_e_alt_feet(d.alt_feet.value()));
     }
 
     return packet;
@@ -2284,7 +2284,8 @@ char encode_mic_e_lon_hundred_minutes(int lon_h);
 std::string encode_mic_e_lon(double lon);
 std::string encode_mic_e_course_speed(double course_degrees, double speed_knots);
 std::string encode_mic_e_course_speed_alternate(double course_degrees, double speed_knots);
-std::string encode_mic_e_alt(double alt_feet);
+std::string encode_mic_e_alt(double alt_meters);
+std::string encode_mic_e_alt_feet(double alt_feet);
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
@@ -2324,7 +2325,7 @@ APRS_TRACK_INLINE std::string encode_mic_e_packet_no_message(std::string_view fr
 
     packet.append(encode_mic_e_packet_no_message(from, path, lat, lon, status, course_degrees, speed_knots, symbol_table, symbol_code, ambiguity));
 
-    packet.append(encode_mic_e_alt(alt_feet));
+    packet.append(encode_mic_e_alt_feet(alt_feet));
 
     return packet;
 }
@@ -2841,12 +2842,27 @@ APRS_TRACK_INLINE std::string encode_mic_e_course_speed_alternate(double course_
     return course_speed;
 }
 
-APRS_TRACK_INLINE std::string encode_mic_e_alt(double alt_feet)
+APRS_TRACK_INLINE std::string encode_mic_e_alt(double alt_meters)
 {
+    // Encoded altitude in mic-e format
+    //
+    //   xxx}
+    //
+    // Example:
+    //
+    //   altitude = 59.06 feet = 18 meters
+    //   relative altitude = 18 + 10000 = 10018
+    //                       ~~
+    //   base-91 encoding: 10018 = 1*91² + 19*91 + 8
+    //                             ~       ~~      ~
+    //   ASCII characters: 1+33=34 '"', 19+33=52 '4', 8 + 33=41 ')'
+    //                     ~            ~~            ~
+    //   result: "4)}
+
     std::string alt_str(4, '\0');
 
-    int alt_meters = static_cast<int>(std::round(alt_feet * 0.3048));
-    int relative_alt = alt_meters + 10000;
+    int alt_meters_int = static_cast<int>(std::round(alt_meters));
+    int relative_alt = alt_meters_int + 10000;
 
     int v0 = relative_alt / (91 * 91);
     int r = relative_alt % (91 * 91);
@@ -2859,6 +2875,12 @@ APRS_TRACK_INLINE std::string encode_mic_e_alt(double alt_feet)
     alt_str[3] = '}';
 
     return alt_str;
+}
+
+APRS_TRACK_INLINE std::string encode_mic_e_alt_feet(double alt_feet)
+{
+    double alt_meters = alt_feet * 0.3048;
+    return encode_mic_e_alt(alt_meters);
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
@@ -2906,7 +2928,7 @@ APRS_TRACK_INLINE std::string encode_altitude(double alt_feet)
 {
     //
     //  Data Format:
-    // 
+    //
     //    /A=aaaaaa
     //    ----------
     //     3   6

@@ -691,6 +691,89 @@ std::vector<packet_data> process_packets(const std::vector<packet_data>& packets
 
             actual_packet_string = packet_string;
         }
+        else if (packet.packet_type == packet_type::position_compressed)
+        {
+            size_t compression_type_index = 0;
+
+            if (packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
+            {
+                packet_string = encode_position_packet_compressed_no_timestamp_no_message(
+                    packet.from,
+                    packet.to,
+                    packet.path,
+                    packet.messaging_str == "true",
+                    packet.lat,
+                    packet.lon,
+                    packet.symbol_table[0],
+                    packet.symbol_code[0],
+                    packet.course,
+                    kmh_to_knots(packet.speed),
+                    1);
+            }
+            else if (!packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
+            {
+                packet_string = encode_position_packet_compressed_no_timestamp_no_message(
+                    packet.from,
+                    packet.to,
+                    packet.path,
+                    packet.messaging_str == "true",
+                    packet.lat,
+                    packet.lon,
+                    packet.symbol_table[0],
+                    packet.symbol_code[0],
+                    meters_to_feet(packet.alt),
+                    1);
+            }
+            else if (!packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
+            {
+                packet_string = encode_position_packet_compressed_no_timestamp_no_message(
+                    packet.from,
+                    packet.to,
+                    packet.path,
+                    packet.messaging_str == "true",
+                    packet.lat,
+                    packet.lon,
+                    packet.symbol_table[0],
+                    packet.symbol_code[0],
+                    packet.course,
+                    kmh_to_knots(packet.speed),
+                    1,
+                    meters_to_feet(packet.alt));
+            }
+            else if (packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
+            {
+                packet_string = encode_position_packet_compressed_no_timestamp_no_message(
+                    packet.from,
+                    packet.to,
+                    packet.path,
+                    packet.messaging_str == "true",
+                    packet.lat,
+                    packet.lon,
+                    packet.symbol_table[0],
+                    packet.symbol_code[0],
+                    1);
+            }
+
+            actual_packet_string = packet_string;
+
+            compression_type_index = packet_string.size() - 1;
+
+            if (!packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
+            {
+                compression_type_index -= 9;
+            }
+
+            char compression_type = packet_string[compression_type_index];
+
+            assert(compression_type == '\x1');
+
+            packet_string[compression_type_index] = expected_packet_string[compression_type_index];
+        }
+        else
+        {
+            skipped_count++;
+            continue;
+        }
 
         bool result = expected_packet_string.starts_with(packet_string);
 
