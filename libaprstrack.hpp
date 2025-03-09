@@ -396,8 +396,8 @@ private:
     enum algorithm algorithm_ = algorithm::none;
     std::vector<unsigned char> message_data_;
     size_t message_data_length_ = 0;
-    char symbol_code_;
-    char symbol_table_;
+    char symbol_code_ = '>';
+    char symbol_table_ = '/';
     unsigned int interval_seconds_ = 30;
     unsigned int last_update_seconds = 0;
     std::chrono::time_point<std::chrono::high_resolution_clock> last_time;
@@ -1327,7 +1327,8 @@ APRS_TRACK_INLINE std::string format_number_to_string(double number, int width, 
     if (precision == 0)
     {
         double i;
-        std::modf(number, &i);
+        double f = std::modf(number, &i);
+        (void)f;
 
         char buffer[32];
 

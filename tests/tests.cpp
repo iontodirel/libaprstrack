@@ -1606,6 +1606,13 @@ TEST(position, encode_position_data_compressed_no_timestamp)
         std::string data = encode_position_data_compressed_no_timestamp('!', 50.006266308942, 20.168111391714, '/', 'u', 120, 45.90, 0b01001000);
         EXPECT_TRUE(data == "!/54agSVoou?SH");
     }
+
+    {
+        // 2E0WXF-3>APDW17,WIDE2-1,qAO,2E0WXF-2:!b4KfKNN3c#
+        // NOTE: why is the symbol table 'b' instead of 1 when decoded by FAP?
+        std::string data = encode_position_data_compressed_no_timestamp('!', 51.4834062258811, 0.0089466195533987, '1', '#', 0b01001000);
+        EXPECT_TRUE(data == "!14KfKNN3c#H");
+    }
 }
 
 TEST(tracker, various_anonymous_structs)
@@ -1951,6 +1958,7 @@ TEST(tracker, auto_tests)
         {
             if (!packet.alt_str.empty())
             {
+                // Mic-E with altitude
                 actual_packet_string = encode_mic_e_packet_no_message(
                     packet.from,
                     packet.path,
@@ -1966,6 +1974,7 @@ TEST(tracker, auto_tests)
             }
             else
             {
+                // Mic-E without altitude
                 actual_packet_string = encode_mic_e_packet_no_message(
                     packet.from,
                     packet.path,
@@ -1983,6 +1992,7 @@ TEST(tracker, auto_tests)
         {
             if (packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
             {
+                // Position without altitude, course, or speed
                 actual_packet_string = encode_position_packet_no_timestamp_no_message(
                     packet.from,
                     packet.to,
@@ -1996,6 +2006,7 @@ TEST(tracker, auto_tests)
             }
             else if (packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
             {
+                // Position without altitude, but with course or speed
                 actual_packet_string = encode_position_packet_no_timestamp_no_message(
                     packet.from,
                     packet.to,
@@ -2011,6 +2022,7 @@ TEST(tracker, auto_tests)
             }
             else if (!packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
             {
+                // Position with altitude, but without course or speed
                 actual_packet_string = encode_position_packet_no_timestamp_no_message(
                     packet.from,
                     packet.to,
@@ -2025,6 +2037,7 @@ TEST(tracker, auto_tests)
             }
             else if (!packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
             {
+                // Position with altitude, course, and speed
                 actual_packet_string = encode_position_packet_no_timestamp_no_message(
                     packet.from,
                     packet.to,

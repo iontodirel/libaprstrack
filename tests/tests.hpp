@@ -74,7 +74,7 @@ struct packet_data
     std::string course_str;
     std::string speed_str;
     enum mic_e_status mic_e_status = mic_e_status::unknown;
-    enum packet_type packet_type;
+    enum packet_type packet_type = packet_type::mic_e;
     std::string comment;
     bool has_course_speed = false;
     bool has_altitude = false;

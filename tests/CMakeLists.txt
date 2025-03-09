@@ -110,8 +110,14 @@ add_executable(aprstrack_basic_periodic_test "basic_periodic_test.cpp" "../libap
 target_link_libraries(aprstrack_basic_periodic_test GTest::gtest_main gtest gtest_main nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
 set_property(TARGET aprstrack_basic_periodic_test PROPERTY CXX_STANDARD 20)
 
+add_custom_target(run_generate_test_json ALL
+   COMMAND generate_test_json ${CMAKE_SOURCE_DIR}/../assets/mic_e_packets.json ${CMAKE_SOURCE_DIR}/../assets/position_packets.json ${CMAKE_SOURCE_DIR}/../assets/packets.json
+   DEPENDS generate_test_json
+   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+   COMMENT "Running generate_test_json with specified input files"
+)
+
 include(GoogleTest)
 
 gtest_discover_tests(aprstrack_tests)
 gtest_discover_tests(aprstrack_basic_periodic_test)
-
