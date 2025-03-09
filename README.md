@@ -216,13 +216,17 @@ The tests targets are: *aprstrack_tests* and *aprstrack_basic_periodic_test*.
 
 The assets folder contains the test data used by the tests. The tests assets can be regenerated using the `scripts/parse_packets.pl` script and the `generate_test_json` executable.
 
-Supply `assets/mic_e_packets.txt` and `assets/position_packets.txt` to the Perl `scripts/parse_packets.pl` script. The Perl scrip hosts the FAP APRS parsing library, which is used to parse the packets.
-
-Modify the $INPUT_FILE and $OUTPUT_FILE in the Perl script, to supply the files, each individual invocation will generate the `assets/mic_e_packets.json` and then `assets/position_packets.json` files, which contain the early test data.
+Supply `assets/mic_e_packets.txt` and `assets/position_packets.txt` to the Perl `scripts/parse_packets.pl` script. The Perl script hosts the FAP APRS parsing library, which is used to parse the packets.
 
 The `generate_test_json` executable will be invoked next to generate the `assets/packets.json` file, which contains the final processed packets.
 
+A CMake target `run_generate_test_json` is provided to run both the Perl script and generate the test data all-in-one with one single invocation.
+
 The `assets/mic_e_packets.txt` and `assets/position_packets.txt` where captured from APRS-IS.
+
+### Static Analysis
+
+MSVC and Clang-Tidy static analysis has been run on the code, and no issues were found.
 
 ## Development
 
@@ -237,7 +241,6 @@ On Linux systems, install the dependencies listed in `install_dependencies.sh`, 
 This library uses C++ 20, C++ 20 language features, and a small part of the C++ Standard Library. It has no other dependencies.
 
 The library is cross platform, and can run on Windows, Linux, and OSX. The library is supported and tested with MSVC, GCC and Clang toolsets.
-
 
 ### Embedded platforms
 

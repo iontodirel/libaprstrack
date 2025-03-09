@@ -9,15 +9,26 @@ use MIME::Base64;
 use LWP::UserAgent;
 use HTTP::Request;
 use Try::Tiny;
+use Getopt::Long;
 
-# Constants
-my $INPUT_FILE = '../assets/mic_e_packets.txt';
-my $OUTPUT_FILE = '../assets/mic_e_packets.json';
+my @input_files;
+my @output_files;
 my $API_TIMEOUT = 10; # seconds
 my $USER_AGENT = 'APRSParserScript/1.0';
 
-process_packets_from_file($INPUT_FILE, $OUTPUT_FILE);
-print "Processing complete! JSON saved to $OUTPUT_FILE\n";
+GetOptions(
+    'input=s{1,}' => \@input_files,
+    'output=s{1,}' => \@output_files,
+) or die "Error in command line arguments\n";
+
+if (scalar(@input_files) != scalar(@output_files)) {
+    die "The number of input files must match the number of output files\n";
+}
+
+for my $i (0..$#input_files) {
+    process_packets_from_file($input_files[$i], $output_files[$i]);
+    print "Processing complete! JSON saved to $output_files[$i]\n";
+}
 
 sub process_packets_from_file {
     my ($input_file, $output_file) = @_;
