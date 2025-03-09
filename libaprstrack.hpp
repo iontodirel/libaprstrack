@@ -984,7 +984,7 @@ std::string encode_position_packet_with_timestamp_dhm(const tracker& t, const da
 std::string encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
 std::string encode_course_speed(double course_degrees, double speed_knots);
 std::string encode_altitude(double altitude_feet);
-char packet_type_2(bool m);
+char packet_type_with_timestamp(bool m);
 
 std::string encode_position_packet_with_utc_timestamp_hms_no_message(const tracker& t, const data& d);
 std::string encode_position_packet_with_utc_timestamp_hms(const tracker& t, const data& d);
@@ -1045,7 +1045,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_timestamp_dhm_no_messa
 {
     std::string packet;
 
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(t.from(), t.to(), t.path(), packet_type_2(t.messaging()), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+    packet.append(encode_position_packet_with_timestamp_dhm_no_message(t.from(), t.to(), t.path(), packet_type_with_timestamp(t.messaging()), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
@@ -1218,17 +1218,17 @@ APRS_TRACK_NAMESPACE_BEGIN
 
 APRS_TRACK_DETAIL_NAMESPACE_BEGIN
 
-char packet_type_1(bool m);
-char packet_type_2(bool m);
+char packet_type_without_timestamp(bool m);
+char packet_type_with_timestamp(bool m);
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE char packet_type_1(bool m)
+APRS_TRACK_INLINE char packet_type_without_timestamp(bool m)
 {
     return m ? '=' : '!';
 }
 
-APRS_TRACK_INLINE char packet_type_2(bool m)
+APRS_TRACK_INLINE char packet_type_with_timestamp(bool m)
 {
    return m ? '@' : '/';
 }
@@ -1531,6 +1531,14 @@ std::string encode_header(std::string_view from, std::string_view to, std::strin
 
 APRS_TRACK_INLINE std::string encode_header(std::string_view from, std::string_view to, std::string_view path)
 {
+    // Encode the header of a packet:
+    //
+    // Example:
+    //
+    //   N0CALL>APRS,TCPIP*,qAC,N0CALL:
+    //   ~~~~~~ ~~~~ ~~~~~~~~~~~~~~~~~
+    //   from  >to  ,path             :
+
     std::string packet;
 
     packet.append(from);
@@ -1607,7 +1615,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_no_timestamp_no_message(std
 
     packet.append(encode_header(from, to, path));
 
-    packet.append(encode_position_data_no_timestamp(packet_type_1(messaging), lat, lon, symbol_table, symbol_code, ambiguity));
+    packet.append(encode_position_data_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, ambiguity));
 
     return packet;
 }
@@ -1705,7 +1713,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_timestamp_dhm_no_messa
 
     packet.append(encode_header(from, to, path));
 
-    packet.append(encode_position_data_with_timestamp_dhm(packet_type_2(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
+    packet.append(encode_position_data_with_timestamp_dhm(packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
 
     return packet;
 }
@@ -1714,7 +1722,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_timestamp_dhm_no_messa
 {
     std::string packet;
 
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(from, to, path, packet_type_2(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
+    packet.append(encode_position_packet_with_timestamp_dhm_no_message(from, to, path, packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
 
     packet.append(encode_course_speed(track_degrees, speed_knots));
 
@@ -1725,7 +1733,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_timestamp_dhm_no_messa
 {
     std::string packet;
 
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(from, to, path, packet_type_2(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
+    packet.append(encode_position_packet_with_timestamp_dhm_no_message(from, to, path, packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
 
     packet.append(encode_altitude(alt_feet));
 
@@ -1736,7 +1744,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_timestamp_dhm_no_messa
 {
     std::string packet;
 
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(from, to, path, packet_type_2(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
+    packet.append(encode_position_packet_with_timestamp_dhm_no_message(from, to, path, packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
 
     packet.append(encode_course_speed(track_degrees, speed_knots));
 
@@ -1805,7 +1813,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_hms_no_m
 
     packet.append(encode_header(from, to, path));
 
-    packet.append(encode_position_data_with_utc_timestamp_hms(packet_type_2(messaging), hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity));
+    packet.append(encode_position_data_with_utc_timestamp_hms(packet_type_with_timestamp(messaging), hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity));
     
     return packet;
 }
@@ -1905,7 +1913,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_dhm_no_m
 
     packet.append(encode_header(from, to, path));
 
-    packet.append(encode_position_data_with_utc_timestamp_dhm(packet_type_2(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
+    packet.append(encode_position_data_with_utc_timestamp_dhm(packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
     
     return packet;
 }
@@ -2099,7 +2107,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_
 
     packet.append(encode_header(from, to, path));
 
-    packet.append(encode_position_data_compressed_no_timestamp(packet_type_1(messaging), lat, lon, symbol_table, symbol_code, compression_type));
+    packet.append(encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, compression_type));
 
     return packet;
 }
@@ -2110,7 +2118,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_
 
     packet.append(encode_header(from, to, path));
     
-    packet.append(encode_position_data_compressed_no_timestamp(packet_type_1(messaging), lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type));
+    packet.append(encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type));
 
     return packet;
 }
@@ -2121,7 +2129,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_
 
     packet.append(encode_header(from, to, path));
 
-    packet.append(encode_position_data_compressed_no_timestamp(packet_type_1(messaging), lat, lon, symbol_table, symbol_code, alt_feet, compression_type));
+    packet.append(encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, alt_feet, compression_type));
 
     return packet;
 }
@@ -2132,7 +2140,7 @@ APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_
 
     packet.append(encode_header(from, to, path));
 
-    packet.append(encode_position_data_compressed_no_timestamp(packet_type_1(messaging), lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type));
+    packet.append(encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type));
 
     packet.append(encode_altitude(alt_feet));
 
