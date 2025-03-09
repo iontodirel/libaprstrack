@@ -43,6 +43,10 @@
 #include <fstream>
 #include <cctype>
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
 using namespace aprs::track;
 using namespace aprs::track::detail;
 
@@ -96,6 +100,18 @@ struct expected_packet
 inline double kmh_to_knots(double kmh)
 {
     return kmh * 0.539957;
+}
+
+inline void nop()
+{
+#if defined(_MSC_VER)
+    __nop();
+#elif defined(__GNUC__) || defined(__clang__)
+    __asm__ __volatile__("nop");
+#else
+    // Fallback for other compilers
+    std::this_thread::yield();
+#endif
 }
 
 inline std::string base64_encode(const std::string& input)

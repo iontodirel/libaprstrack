@@ -5,7 +5,7 @@
 using namespace aprs::track;
 using namespace aprs::track::detail;
 
-int main()
+void func()
 {
     tracker t;
     t.from("N0CALL");
@@ -50,8 +50,4 @@ int main()
     packet = encode_position_packet_with_utc_timestamp_dhm_no_message(t, data_internal);
 
     assert(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W>335/008");
-
-    func();
-
-    return 0;
 }

@@ -214,7 +214,7 @@ Out of the box the tests can be run successfully on Windows, Linux, and OSX. The
 
 The tests targets are: *aprstrack_tests* and *aprstrack_basic_periodic_test*.
 
-The assets folder contains the test data used by the tests. The tests assets can be regenerated using the `parse_packets.pl` script and the `generate_test_json` executable.
+The assets folder contains the test data used by the tests. The tests assets can be regenerated using the `scripts/parse_packets.pl` script and the `generate_test_json` executable.
 
 Supply `assets/mic_e_packets.txt` and `assets/position_packets.txt` to the Perl `scripts/parse_packets.pl` script. The Perl scrip hosts the FAP APRS parsing library, which is used to parse the packets.
 

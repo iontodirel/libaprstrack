@@ -96,11 +96,11 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(aprstrack_tests PRIVATE -Wall -Wextra -pedantic -Werror)
 endif()
 
-add_executable (aprstrack_use_in_tu "use_in_tu.h" "use_in_tu.cpp" "compile_in_tu.cpp")
+add_executable (aprstrack_use_in_tu "use_in_tu.h" "use_in_tu.cpp" "use_in_other_tu.cpp" "compile_in_tu.cpp")
 set_property(TARGET aprstrack_use_in_tu PROPERTY CXX_STANDARD 20)
 
-add_executable (aprstrack_route "routing.cpp")
-set_property(TARGET aprstrack_route PROPERTY CXX_STANDARD 20)
+add_executable (aprstrack_route_test "routing_test.cpp")
+set_property(TARGET aprstrack_route_test PROPERTY CXX_STANDARD 20)
 
 add_executable (generate_test_json "generate_test_json.cpp")
 target_link_libraries(generate_test_json nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
