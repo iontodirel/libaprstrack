@@ -1953,8 +1953,13 @@ APRS_TRACK_INLINE std::string encode_position_packet_with_utc_timestamp_dhm_no_m
 //                                                                  //
 // **************************************************************** //
 
+std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code);
+std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type);
 std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type);
+std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type);
+std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type);
 std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type);
+std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type);
 std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, double alt_feet);
 std::string encode_compressed_course_speed(double course_degrees, double speed_knots);
 std::string encode_compressed_altitude(double altitude_feet);
@@ -1962,18 +1967,78 @@ int compression_type_to_int(compression_type type);
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type)
+APRS_TRACK_INLINE std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code)
 {
-    // 
+    //
     //  Data Format:
-    // 
+    //
     //     !   Sym     Comp Lat    Comp Lon     Sym Code   Compressed Speed/Range/Alt  CompType  Comment
     //     =
     //    --------------------------------------------------------------------------------------------------
     //     1    1          4           4            1                   2                  1       0-40
     //
     //  Examples:
-    //  
+    //
+    //    =/5L!!<*e7>7P[
+    //
+
+    std::string data;
+
+    data.append(1, type);
+
+    data.append(1, symbol_table);
+
+    data.append(encode_compressed_lat(lat));
+    data.append(encode_compressed_lon(lon));
+
+    data.append(1, symbol_code);
+
+    return data;
+}
+
+APRS_TRACK_INLINE std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type)
+{
+    //
+    //  Data Format:
+    //
+    //     !   Sym     Comp Lat    Comp Lon     Sym Code   Compressed Speed/Range/Alt  CompType  Comment
+    //     =
+    //    --------------------------------------------------------------------------------------------------
+    //     1    1          4           4            1                   2                  1       0-40
+    //
+    //  Examples:
+    //
+    //    =/5L!!<*e7>7P[
+    //
+
+    std::string data;
+
+    data.append(1, type);
+
+    data.append(1, symbol_table);
+
+    data.append(encode_compressed_lat(lat));
+    data.append(encode_compressed_lon(lon));
+
+    data.append(1, symbol_code);
+
+    data.append(1, static_cast<char>(compression_type));
+
+    return data;
+}
+
+APRS_TRACK_INLINE std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type)
+{
+    //
+    //  Data Format:
+    //
+    //     !   Sym     Comp Lat    Comp Lon     Sym Code   Compressed Speed/Range/Alt  CompType  Comment
+    //     =
+    //    --------------------------------------------------------------------------------------------------
+    //     1    1          4           4            1                   2                  1       0-40
+    //
+    //  Examples:
+    //
     //    =/5L!!<*e7>7P[
     //
 
@@ -1995,6 +2060,50 @@ APRS_TRACK_INLINE std::string encode_position_data_compressed_no_timestamp(char 
     return data;
 }
 
+APRS_TRACK_INLINE std::string encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type)
+{
+    //
+    //  Data Format:
+    //
+    //     !   Sym     Comp Lat    Comp Lon     Sym Code   Compressed Speed/Range/Alt  CompType  Comment
+    //     =
+    //    --------------------------------------------------------------------------------------------------
+    //     1    1          4           4            1                   2                  1       0-40
+    //
+    //  Examples:
+    //
+    //    =/5L!!<*e7>7P[
+    //
+
+    std::string data;
+
+    data.append(1, type);
+
+    data.append(1, symbol_table);
+
+    data.append(encode_compressed_lat(lat));
+    data.append(encode_compressed_lon(lon));
+
+    data.append(1, symbol_code);
+
+    data.append(encode_compressed_altitude(alt_feet));
+
+    data.append(1, static_cast<char>(compression_type));
+
+    return data;
+}
+
+APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type)
+{
+    std::string packet;
+
+    packet.append(encode_header(from, to, path));
+
+    packet.append(encode_position_data_compressed_no_timestamp(packet_type_1(messaging), lat, lon, symbol_table, symbol_code, compression_type));
+
+    return packet;
+}
+
 APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type)
 {
     std::string packet;
@@ -2002,6 +2111,17 @@ APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_
     packet.append(encode_header(from, to, path));
     
     packet.append(encode_position_data_compressed_no_timestamp(packet_type_1(messaging), lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type));
+
+    return packet;
+}
+
+APRS_TRACK_INLINE std::string encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type)
+{
+    std::string packet;
+
+    packet.append(encode_header(from, to, path));
+
+    packet.append(encode_position_data_compressed_no_timestamp(packet_type_1(messaging), lat, lon, symbol_table, symbol_code, alt_feet, compression_type));
 
     return packet;
 }

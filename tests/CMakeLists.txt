@@ -29,7 +29,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.28)
 
 project ("aprstrack_tests")
 
@@ -47,25 +47,14 @@ endif()
 
 include(FetchContent)
 
-FetchContent_Declare(
-	googletest
-	URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
-)
+FetchContent_Declare(googletest URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip)
 FetchContent_MakeAvailable(googletest)
 
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
-FetchContent_GetProperties(json)
-if(NOT json_POPULATED)
-  FetchContent_Populate(json)
-  add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+FetchContent_MakeAvailable(json)
 
 FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git GIT_TAG master)
-FetchContent_GetProperties(fmt)
-if(NOT fmt_POPULATED)
-  FetchContent_Populate(fmt)
-  add_subdirectory(${fmt_SOURCE_DIR} ${fmt_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+FetchContent_MakeAvailable(fmt)
 
 set(BOOST_INCLUDE_LIBRARIES asio beast)
 set(BOOST_ENABLE_CMAKE ON)
