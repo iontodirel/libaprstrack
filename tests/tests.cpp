@@ -73,10 +73,10 @@ TEST(data_ext, encode_speed_course)
 
 TEST(packet_type, packet_type_1_2)
 {
-    EXPECT_TRUE(packet_type_1(true) == '=');
-    EXPECT_TRUE(packet_type_1(false) == '!');
-    EXPECT_TRUE(packet_type_2(true) == '@');
-    EXPECT_TRUE(packet_type_2(false) == '/');
+    EXPECT_TRUE(packet_type_without_timestamp(true) == '=');
+    EXPECT_TRUE(packet_type_without_timestamp(false) == '!');
+    EXPECT_TRUE(packet_type_with_timestamp(true) == '@');
+    EXPECT_TRUE(packet_type_with_timestamp(false) == '/');
 }
 
 TEST(packet, encode_header)
@@ -1105,35 +1105,35 @@ TEST(mic_e, encode_mic_e_course_speed)
     }
 }
 
-TEST(mic_e, encode_mic_e_alt)
+TEST(mic_e, encode_mic_e_alt_feet)
 {
     {
-        std::string alt = encode_mic_e_alt(59.06);
+        std::string alt = encode_mic_e_alt_feet(59.06);
         EXPECT_TRUE(alt == "\"4)}");
     }
 
     {
-        std::string alt = encode_mic_e_alt(200);
+        std::string alt = encode_mic_e_alt_feet(200);
         EXPECT_TRUE(alt == "\"4T}");
     }
 
     {
-        std::string alt = encode_mic_e_alt(308.4);
+        std::string alt = encode_mic_e_alt_feet(308.4);
         EXPECT_TRUE(alt == "\"4u}");
     }
 
     {
-        std::string alt = encode_mic_e_alt(400.3);
+        std::string alt = encode_mic_e_alt_feet(400.3);
         EXPECT_TRUE(alt == "\"56}");
     }
 
     {
-        std::string alt = encode_mic_e_alt(672.6);
+        std::string alt = encode_mic_e_alt_feet(672.6);
         EXPECT_TRUE(alt == "\"6.}");
     }
 
     {
-        std::string alt = encode_mic_e_alt(2136.8);
+        std::string alt = encode_mic_e_alt_feet(2136.8);
         EXPECT_TRUE(alt == "\";%}");
     }
 }

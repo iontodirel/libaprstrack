@@ -35,6 +35,14 @@
 // This library is reusing code from libaprs: https://github.com/iontodirel/libaprs
 // Copyright (C) 2023 Ion Todirel
 
+// References:
+//
+//   - APRS Specification: https://www.aprs.org/doc/APRS101.PDF (APRS 1.0)
+//   - UTF-8 Specification: https://www.aprs.org/aprs12/utf-8.txt
+//   - Mic-E examples: https://www.aprs.org/aprs12/mic-e-examples.txt
+//   - Mic-E types: https://www.aprs.org/aprs12/mic-e-types.txt
+//   - Understanding APRS Packets: https://raw.githubusercontent.com/wb2osz/aprsspec/main/Understanding-APRS-Packets.pdf
+
 #pragma once
 
 #include <string>
@@ -1209,10 +1217,12 @@ APRS_TRACK_NAMESPACE_END
 //                                                                  //
 // **************************************************************** //
 
-#include <string> // for std::string and std::string_view.
+#include <string> // for std::string.
+#include <string_view> // for std::string_view.
 #include <tuple> // for std::tuple and std::tie.
 #include <cmath> // for mathematical functions like std::abs, std::modf, and std::round.
 #include <cstdio> // for std::snprintf.
+#include <cassert>
 
 APRS_TRACK_NAMESPACE_BEGIN
 
@@ -1223,14 +1233,14 @@ char packet_type_with_timestamp(bool m);
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE char packet_type_without_timestamp(bool m)
+APRS_TRACK_INLINE char packet_type_without_timestamp(bool messaging)
 {
-    return m ? '=' : '!';
+    return messaging ? '=' : '!';
 }
 
-APRS_TRACK_INLINE char packet_type_with_timestamp(bool m)
+APRS_TRACK_INLINE char packet_type_with_timestamp(bool messaging)
 {
-   return m ? '@' : '/';
+   return messaging ? '@' : '/';
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY

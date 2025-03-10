@@ -31,12 +31,6 @@
 
 #pragma once
 
-#include <nlohmann/json.hpp>
-
-#include <boost/beast/core/detail/base64.hpp>
-
-#include "../libaprstrack.hpp"
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -45,6 +39,16 @@
 
 #ifdef _MSC_VER
 #include <intrin.h>
+#endif
+
+#include "../libaprstrack.hpp"
+
+#include <nlohmann/json.hpp>
+
+#include <boost/beast/core/detail/base64.hpp>
+
+#ifndef LIBAPRSTRACK_PRINT_FAILED_PACKETS
+// Intentionally left empty
 #endif
 
 using namespace aprs::track;
