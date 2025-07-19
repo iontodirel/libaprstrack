@@ -769,6 +769,8 @@ std::vector<packet_data> process_packets(const std::vector<packet_data>& packets
 
             char compression_type = packet_string[compression_type_index];
 
+            (void)compression_type; // Suppress unused variable warning
+
             assert(compression_type == '\x1');
 
             packet_string[compression_type_index] = expected_packet_string[compression_type_index];

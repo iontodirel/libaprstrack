@@ -56,6 +56,9 @@ FetchContent_MakeAvailable(json)
 FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git GIT_TAG master)
 FetchContent_MakeAvailable(fmt)
 
+FetchContent_Declare(etl GIT_REPOSITORY https://github.com/ETLCPP/etl GIT_TAG 20.40.0)
+FetchContent_MakeAvailable(etl)
+
 set(BOOST_INCLUDE_LIBRARIES asio beast)
 set(BOOST_ENABLE_CMAKE ON)
 set(BOOST_USE_STATIC_LIBS ON)
@@ -99,6 +102,10 @@ add_executable(aprstrack_basic_periodic_test "basic_periodic_test.cpp" "../libap
 target_link_libraries(aprstrack_basic_periodic_test GTest::gtest_main gtest gtest_main nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
 set_property(TARGET aprstrack_basic_periodic_test PROPERTY CXX_STANDARD 20)
 
+add_executable(aprstrack_with_etl_string_test "with_etl_string.cpp" "../libaprstrack.hpp")
+set_property(TARGET aprstrack_with_etl_string_test PROPERTY CXX_STANDARD 20)
+target_link_libraries(aprstrack_with_etl_string_test PRIVATE etl::etl GTest::gtest_main gtest gtest_main)
+
 add_custom_target(run_generate_test_json
    COMMAND perl ${CMAKE_SOURCE_DIR}/../scripts/parse_packets.pl --input ${CMAKE_SOURCE_DIR}/../assets/mic_e_packets.txt ${CMAKE_SOURCE_DIR}/../assets/position_packets.txt --output ${CMAKE_SOURCE_DIR}/../assets/mic_e_packets.json ${CMAKE_SOURCE_DIR}/../assets/position_packets.json
    COMMAND generate_test_json ${CMAKE_SOURCE_DIR}/../assets/mic_e_packets.json ${CMAKE_SOURCE_DIR}/../assets/position_packets.json ${CMAKE_SOURCE_DIR}/../assets/packets.json
@@ -111,3 +118,4 @@ include(GoogleTest)
 
 gtest_discover_tests(aprstrack_tests)
 gtest_discover_tests(aprstrack_basic_periodic_test)
+gtest_discover_tests(aprstrack_with_etl_string_test)
