@@ -116,17 +116,20 @@ enum class mic_e_status; // forward declaration
 APRS_TRACK_DETAIL_NAMESPACE_BEGIN
 
 template<typename T>
-concept has_speed = requires(T t) {
+concept has_speed = requires(T t)
+{
     { t.speed } -> std::convertible_to<double>;
 };
 
 template<typename T>
-concept has_track = requires(T t) {
+concept has_track = requires(T t)
+{
     { t.track } -> std::convertible_to<double>;
 };
 
 template <typename T>
-concept has_day_hour_minute_seconds = requires(T t) {
+concept has_day_hour_minute_seconds = requires(T t)
+{
     { t.second } -> std::convertible_to<int>;
     { t.minute } -> std::convertible_to<int>;
     { t.day } -> std::convertible_to<int>;
@@ -134,7 +137,8 @@ concept has_day_hour_minute_seconds = requires(T t) {
 };
 
 template<typename T>
-concept has_altitude = requires(T t) {
+concept has_altitude = requires(T t)
+{
     { t.alt } -> std::convertible_to<double>;
 };
 
