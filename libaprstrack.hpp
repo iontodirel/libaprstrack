@@ -526,7 +526,7 @@ APRS_TRACK_INLINE char tracker::symbol_table() const
 
 APRS_TRACK_INLINE void tracker::from(std::string_view f)
 {
-    from_ = f;
+    from_ = f.data();
 }
 
 APRS_TRACK_INLINE const string_t& tracker::from() const
@@ -536,7 +536,7 @@ APRS_TRACK_INLINE const string_t& tracker::from() const
 
 APRS_TRACK_INLINE void tracker::to(std::string_view t)
 {
-    to_ = t;
+    to_ = t.data();
 }
 
 APRS_TRACK_INLINE const string_t& tracker::to() const
@@ -546,7 +546,7 @@ APRS_TRACK_INLINE const string_t& tracker::to() const
 
 APRS_TRACK_INLINE void tracker::path(std::string_view p)
 {
-    path_ = p;
+    path_ = p.data();
 }
 
 APRS_TRACK_INLINE const string_t& tracker::path() const
@@ -1036,7 +1036,7 @@ APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_no_message(const 
 {
     string_t packet;
 
-    packet.append(encode_position_packet_no_timestamp_no_message(t.from(), t.to(), t.path(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+    packet.append(encode_position_packet_no_timestamp_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
@@ -1066,7 +1066,7 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_no_message(
 {
     string_t packet;
 
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(t.from(), t.to(), t.path(), packet_type_with_timestamp(t.messaging()), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+    packet.append(encode_position_packet_with_timestamp_dhm_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), packet_type_with_timestamp(t.messaging()), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
@@ -1096,7 +1096,7 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_no_mess
 {
     string_t packet;
 
-    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message(t.from(), t.to(), t.path(), t.messaging(), d.hour, d.minute, d.second, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.hour, d.minute, d.second, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
@@ -1126,7 +1126,7 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_no_mess
 {
     string_t packet;
 
-    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message(t.from(), t.to(), t.path(), t.messaging(), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
@@ -1158,7 +1158,7 @@ APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_no_mes
 
     char compression_type = 0b00111000 + 33; // current, RMC, compressed
 
-    packet.append(encode_position_packet_compressed_no_timestamp_no_message(t.from(), t.to(), t.path(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), compression_type));
+    packet.append(encode_position_packet_compressed_no_timestamp_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), compression_type));
 
     if (d.alt_feet.has_value())
     {
@@ -1183,7 +1183,7 @@ APRS_TRACK_INLINE string_t encode_mic_e_packet_no_message(const tracker& t, cons
 {
     string_t packet;
 
-    packet.append(encode_mic_e_packet_no_message(t.from(), t.path(), d.lat, d.lon, t.mic_e_status(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), t.symbol_table(), t.symbol_code(), t.ambiguity()));
+    packet.append(encode_mic_e_packet_no_message(t.from().c_str(), t.path().c_str(), d.lat, d.lon, t.mic_e_status(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), t.symbol_table(), t.symbol_code(), t.ambiguity()));
 
     if (d.alt_feet.has_value())
     {
@@ -1415,7 +1415,7 @@ APRS_TRACK_INLINE string_t format_n_digits_string(int number, int width)
 {
     if (width <= 0)
     {
-        return std::to_string(number);
+        return string_t(std::to_string(number).c_str());
     }
 
     char buffer[32];
@@ -1470,13 +1470,13 @@ APRS_TRACK_INLINE string_t encode_compressed_lon(double lon)
 
     long num = static_cast<long>(std::round(190463 * (180 + lon)));
 
-    result = static_cast<char>((num % 91) + 33);
+    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
     num /= 91;
-    result = static_cast<char>((num % 91) + 33) + result;
+    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
     num /= 91;
-    result = static_cast<char>((num % 91) + 33) + result;
+    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
     num /= 91;
-    result = static_cast<char>((num % 91) + 33) + result;
+    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
 
     return result;
 }
@@ -1487,13 +1487,13 @@ APRS_TRACK_INLINE string_t encode_compressed_lat(double lat)
 
     long num = static_cast<long>(std::round(380926 * (90 - lat)));
 
-    result = static_cast<char>((num % 91) + 33);
+    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
     num /= 91;
-    result = static_cast<char>((num % 91) + 33) + result;
+    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
     num /= 91;
-    result = static_cast<char>((num % 91) + 33) + result;
+    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
     num /= 91;
-    result = static_cast<char>((num % 91) + 33) + result;
+    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
 
     return result;
 }
@@ -1585,14 +1585,14 @@ APRS_TRACK_INLINE string_t encode_header(std::string_view from, std::string_view
 
     string_t packet;
 
-    packet.append(from);
+    packet.append(from.data());
     packet.append(1, '>');
-    packet.append(to);
+    packet.append(to.data());
 
     if (path.empty() == false)
     {
         packet.append(1, ',');
-        packet.append(path);
+        packet.append(path.data());
     }
 
     packet.append(1, ':');
@@ -2365,12 +2365,13 @@ APRS_TRACK_INLINE string_t encode_mic_e_data(char type, double lat, double lon, 
 }
 
 APRS_TRACK_INLINE std::string encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity)
+APRS_TRACK_INLINE string_t encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity)
 {
     string_t packet;
 
     string_t lat_str = encode_mic_e_lat(lat, lon, status, ambiguity);
 
-    packet.append(encode_header(from, lat_str, path));
+    packet.append(encode_header(from, lat_str.data(), path));
 
     packet.append(encode_mic_e_data('`', lat, lon, course_degrees, speed_knots, symbol_table, symbol_code));
 
@@ -2415,13 +2416,13 @@ APRS_TRACK_INLINE void add_mic_e_position_ambiguity(string_t& destination_addres
 APRS_TRACK_INLINE void insert_mic_e_type(string_t& data, std::string_view type)
 {
     assert(data.size() >= 9);
-    data.insert(9, type);
+    data.insert(9, type.data());
 }
 
 APRS_TRACK_INLINE void append_mic_e_manufacturer(string_t& packet_or_data, std::string_view manufacturer_version)
 {
     assert(manufacturer_version.size() >= 1);
-    packet_or_data.insert(packet_or_data.size(), manufacturer_version);
+    packet_or_data.append(manufacturer_version.data(), manufacturer_version.size());
 }
 
 APRS_TRACK_INLINE void encode_mic_e_status(int a, int b, int c, bool custom, string_t& destination_address)
@@ -2817,7 +2818,6 @@ APRS_TRACK_INLINE string_t encode_mic_e_lon(double lon)
     double lon_m = (lon_abs - lon_d) * 60.0;
     double lon_m_f = 0.0;
     double lon_m_i = std::modf(lon_m, &lon_m_f) * 100.0;
-    //lon_m_i = std::round(lon_m_i);
     lon_m_i = round_number(lon_m_i);
 
     lon_str.append(1, encode_mic_e_lon_degrees(lon_d));
