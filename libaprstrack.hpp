@@ -2835,8 +2835,8 @@ APRS_TRACK_INLINE string_t encode_mic_e_course_speed(double course_degrees, doub
 {
     string_t course_speed;
 
-    int course = static_cast<int>(std::round(course_degrees));
-    int speed = static_cast<int>(std::round(speed_knots));
+    int course = static_cast<int>(round_number(course_degrees));
+    int speed = static_cast<int>(round_number(speed_knots));
 
     int sp = (speed / 10) + 'l'; // or + 28
     int se = (course % 100) + 28;

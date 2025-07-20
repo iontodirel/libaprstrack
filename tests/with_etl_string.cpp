@@ -4,7 +4,7 @@
 
 namespace aprs::track
 {
-    // Define custom types for APRS tracking
+    // Define custom type for APRS tracking
     using string_t = etl::string<100>;  // Example of a custom string type with a maximum length of 100 characters
 }
 
