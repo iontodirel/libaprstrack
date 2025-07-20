@@ -31,7 +31,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../libaprstrack.hpp"
+#include "../aprstrack.hpp"
 
 using namespace aprs::track;
 using namespace aprs::track::detail;

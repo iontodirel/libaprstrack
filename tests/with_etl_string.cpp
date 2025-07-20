@@ -9,7 +9,7 @@ namespace aprs::track
 }
 
 #define APRS_TRACK_DEFINE_CUSTOM_TYPES
-#include "../libaprstrack.hpp"
+#include "../aprstrack.hpp"
 
 using namespace aprs::track;
 using namespace aprs::track::detail;

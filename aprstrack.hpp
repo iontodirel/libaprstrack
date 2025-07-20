@@ -5,7 +5,7 @@
 // Copyright (c) 2025 Ion Todirel                                   //
 // **************************************************************** //
 //
-// libaprstrack.hpp
+// aprstrack.hpp
 // 
 // MIT License
 // 
@@ -1437,6 +1437,7 @@ APRS_TRACK_INLINE string_t format_n_digits_string(int number, int width)
 {
     if (width <= 0)
     {
+        //return std::to_string(number);
         return string_t(std::to_string(number).c_str());
     }
 
@@ -2386,7 +2387,9 @@ APRS_TRACK_INLINE string_t encode_mic_e_data(char type, double lat, double lon, 
     return data;
 }
 
-APRS_TRACK_INLINE std::string encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity)
+// support type... first character
+// 
+
 APRS_TRACK_INLINE string_t encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity)
 {
     string_t packet;

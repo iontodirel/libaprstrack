@@ -75,7 +75,7 @@ enable_testing()
 
 set(INPUT_TEST_FILE ${CMAKE_SOURCE_DIR}/../assets/packets.json)
 
-add_executable(aprstrack_tests "tests.cpp" "../libaprstrack.hpp")
+add_executable(aprstrack_tests "tests.cpp" "../aprstrack.hpp")
 target_link_libraries(aprstrack_tests GTest::gtest_main gtest gtest_main nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
 
 add_definitions(-DINPUT_TEST_FILE="${INPUT_TEST_FILE}")
@@ -98,11 +98,11 @@ add_executable (generate_test_json "generate_test_json.cpp")
 target_link_libraries(generate_test_json nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
 set_property(TARGET generate_test_json PROPERTY CXX_STANDARD 20)
 
-add_executable(aprstrack_basic_periodic_test "basic_periodic_test.cpp" "../libaprstrack.hpp")
+add_executable(aprstrack_basic_periodic_test "basic_periodic_test.cpp" "../aprstrack.hpp")
 target_link_libraries(aprstrack_basic_periodic_test GTest::gtest_main gtest gtest_main nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
 set_property(TARGET aprstrack_basic_periodic_test PROPERTY CXX_STANDARD 20)
 
-add_executable(aprstrack_with_etl_string_test "with_etl_string.cpp" "../libaprstrack.hpp")
+add_executable(aprstrack_with_etl_string_test "with_etl_string.cpp" "../aprstrack.hpp")
 set_property(TARGET aprstrack_with_etl_string_test PROPERTY CXX_STANDARD 20)
 target_link_libraries(aprstrack_with_etl_string_test PRIVATE etl::etl GTest::gtest_main gtest gtest_main)
 
