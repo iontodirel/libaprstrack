@@ -302,6 +302,24 @@ enum class compression_type
     current_rmc_digipeater          // 1 11 111
 };
 
+enum class device_id
+{
+    original,
+    unknown,
+    th_d7a,
+    tm_d700,
+    tm_d710,
+    th_d72a,
+    th_d74a,
+    with_messaging,
+    no_messaging,
+    vx_8,
+    ftm_350,
+    vx_8g,
+    ft_1d,
+    ftm_400dr,
+};
+
 enum class algorithm
 {
     smart_beaconing,
