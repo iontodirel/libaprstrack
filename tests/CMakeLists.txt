@@ -45,6 +45,14 @@ if(UNIX)
     add_compile_definitions(IS_LINUX_MAC)
 endif()
 
+find_package(OpenSSL REQUIRED)
+
+if(OPENSSL_VERSION VERSION_LESS "1.1")
+    add_definitions(-DOPENSSL_API_1_0)
+else()
+    add_definitions(-DOPENSSL_API_1_1)
+endif()
+
 include(FetchContent)
 
 FetchContent_Declare(googletest URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip)
@@ -71,8 +79,28 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(boost)
 
+set(CIVETWEB_ENABLE_SSL OFF CACHE BOOL "Disable CivetWeb SSL" FORCE)
+set(CIVETWEB_BUILD_TESTING OFF CACHE BOOL "Disable CivetWeb building tests" FORCE)
+set(CIVETWEB_ENABLE_WEBSOCKET ON CACHE BOOL "Enable CivetWeb websocket support" FORCE)
+set(CIVETWEB_SKIP_INSTALL ON CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+  civetweb
+  GIT_REPOSITORY https://github.com/civetweb/civetweb.git
+  GIT_TAG v1.15
+)
+FetchContent_Populate(civetweb)
 enable_testing()
 
+add_library(civetweb STATIC
+    ${civetweb_SOURCE_DIR}/src/civetweb.c
+    ${civetweb_SOURCE_DIR}/src/CivetServer.cpp
+)
+
+target_link_libraries(civetweb PRIVATE ${OPENSSL_LIBRARIES})
+target_include_directories(civetweb PUBLIC ${civetweb_SOURCE_DIR}/include ${civetweb_SOURCE_DIR})
+target_compile_definitions(civetweb PRIVATE USE_WEBSOCKET)
 set(INPUT_TEST_FILE ${CMAKE_SOURCE_DIR}/../assets/packets.json)
 
 add_executable(aprstrack_tests "tests.cpp" "../aprstrack.hpp")
@@ -92,6 +120,8 @@ add_executable (aprstrack_use_in_tu "use_in_tu.h" "use_in_tu.cpp" "use_in_other_
 set_property(TARGET aprstrack_use_in_tu PROPERTY CXX_STANDARD 20)
 
 add_executable (aprstrack_route_test "routing_test.cpp")
+target_include_directories(aprstrack_route_test PRIVATE ${civetweb_SOURCE_DIR}/include ${civetweb_SOURCE_DIR})
+target_link_libraries(aprstrack_route_test nlohmann_json::nlohmann_json fmt::fmt Boost::asio civetweb)
 set_property(TARGET aprstrack_route_test PROPERTY CXX_STANDARD 20)
 
 add_executable (generate_test_json "generate_test_json.cpp")

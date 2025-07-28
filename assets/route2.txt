@@ -1,5 +1,13 @@
 Route from Seattle to Los Angeles
 
+Python:
+
+    # Route from Seattle to Los Angeles
+    locations = [
+        (47.6287, -122.3462),
+        (33.7654, -118.1757) 
+    ]  # Set route points
+
 Valhalla Request:
 
 curl -X POST "http://192.168.1.190:8002/route" -H "Content-Type: application/json" -d '{

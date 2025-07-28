@@ -89,6 +89,9 @@
 #ifdef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 // Intentionally left empty
 #endif
+#ifndef APRS_TRACK_SMART_BEACONING_DEBUG
+#define APRS_TRACK_SMART_BEACONING_DEBUG(...)
+#endif
 
 APRS_TRACK_NAMESPACE_BEGIN
 
@@ -118,12 +121,14 @@ APRS_TRACK_DETAIL_NAMESPACE_BEGIN
 template<typename T>
 concept has_speed = requires(T t)
 {
+    // expected in m/s
     { t.speed } -> std::convertible_to<double>;
 };
 
 template<typename T>
 concept has_track = requires(T t)
 {
+    // expected in degrees
     { t.track } -> std::convertible_to<double>;
 };
 
@@ -139,6 +144,7 @@ concept has_day_hour_minute_seconds = requires(T t)
 template<typename T>
 concept has_altitude = requires(T t)
 {
+    // expected in meters
     { t.alt } -> std::convertible_to<double>;
 };
 
@@ -168,10 +174,11 @@ string_t encode_position_packet_compressed_no_timestamp(const tracker& t, const 
 string_t encode_mic_e_packet_no_message(const tracker& t, const data& d);
 string_t encode_mic_e_packet(const tracker& t, const data& d);
 
-bool smart_beaconing_test(int speed, int course, int low_speed, int high_speed, int slow_interval_seconds, int fast_interval_seconds, int min_turn_degrees, int turn_interval_seconds, int turn_slope, int last_update_seconds);
+bool smart_beaconing_test(int speed, int prev_course, int course, int low_speed, int high_speed, int slow_interval_seconds, int fast_interval_seconds, int min_turn_degrees, int turn_interval_seconds, int turn_slope, int last_update_seconds);
 
 double meters_to_feet(double meters);
-double meters_s_to_knots(double meters_s);
+double mps_to_knots(double mps);
+double knots_to_mps(double knots);
 
 APRS_TRACK_NAMESPACE_END
 
@@ -353,10 +360,10 @@ struct tracker
     void mic_e_status(enum mic_e_status s);
     enum mic_e_status mic_e_status() const;
 
-    void low_speed(int value);
-    int low_speed() const;
-    void high_speed(int value);
-    int high_speed() const;
+    void low_speed(double speed_mps);
+    double low_speed() const;
+    void high_speed(double speed_mps);
+    double high_speed() const;
     void slow_rate(int seconds);
     int slow_rate() const;
     void fast_rate(int seconds);
@@ -392,7 +399,7 @@ struct tracker
     template <class Rep, class Period>
     void interval(std::chrono::duration<Rep, Period> interval);
 
-    void interval_seconds(int interval);
+    void interval_seconds(int interval_seconds);
 
     template <Position T>
     void position(const T& p);
@@ -440,14 +447,15 @@ private:
     char symbol_table_ = '/';
     unsigned int interval_seconds_ = 30;
     unsigned int last_update_seconds = 0;
+    std::optional<double> previous_track_degrees_;
     std::chrono::time_point<std::chrono::high_resolution_clock> last_time;
-    int low_speed_ = 5;
-    int high_speed_ = 60;
-    int slow_rate_ = 60;
-    int fast_rate_ = 30;
-    int turn_time_ = 15;
-    int turn_angle_ = 15;
-    int turn_slope_ = 255;
+    double low_speed_knots_ = 4.0;  // 5 mph -> 4 knots
+    double high_speed_knots_ = 52.0; // 60 mph -> 52 knots
+    int slow_rate_ = 60; // 60 seconds (1 minute)
+    int fast_rate_ = 30; // 30 seconds
+    int turn_time_ = 15; // 15 seconds
+    int turn_angle_ = 15; // 15 degrees
+    int turn_slope_ = 255; // 255 (no slope)
     int ambiguity_ = 0;
     bool aprs_messaging_ = false;
     bool updated_ = false;
@@ -606,24 +614,32 @@ APRS_TRACK_INLINE enum mic_e_status tracker::mic_e_status() const
     return mic_e_status_;
 }
 
-APRS_TRACK_INLINE void tracker::low_speed(int value)
+APRS_TRACK_INLINE void tracker::low_speed(double speed_mps)
 {
-    low_speed_ = value;
+APRS_TRACK_DETAIL_NAMESPACE_USE
+
+    low_speed_knots_ = mps_to_knots(speed_mps);
 }
 
-APRS_TRACK_INLINE int tracker::low_speed() const
+APRS_TRACK_INLINE double tracker::low_speed() const
 {
-    return low_speed_;
+APRS_TRACK_DETAIL_NAMESPACE_USE
+
+    return knots_to_mps(low_speed_knots_);
 }
 
-APRS_TRACK_INLINE void tracker::high_speed(int value)
+APRS_TRACK_INLINE void tracker::high_speed(double speed_mps)
 {
-    high_speed_ = value;
+APRS_TRACK_DETAIL_NAMESPACE_USE
+
+    high_speed_knots_ = mps_to_knots(speed_mps);
 }
 
-APRS_TRACK_INLINE int tracker::high_speed() const
+APRS_TRACK_INLINE double tracker::high_speed() const
 {
-    return high_speed_;
+APRS_TRACK_DETAIL_NAMESPACE_USE
+
+    return knots_to_mps(high_speed_knots_);
 }
 
 APRS_TRACK_INLINE void tracker::slow_rate(int seconds)
@@ -751,7 +767,7 @@ APRS_TRACK_DETAIL_NAMESPACE_USE
 
     if constexpr (has_speed<T>)
     {
-        data_.speed_knots = meters_s_to_knots(p.speed);
+        data_.speed_knots = mps_to_knots(p.speed);
     }
 
     if constexpr (has_track<T>)
@@ -775,9 +791,9 @@ APRS_TRACK_DETAIL_NAMESPACE_USE
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE void tracker::interval_seconds(int interval)
+APRS_TRACK_INLINE void tracker::interval_seconds(int interval_seconds)
 {
-    interval_seconds_ = interval;
+    interval_seconds_ = interval_seconds;
 }
 
 APRS_TRACK_INLINE void tracker::position(double lat, double lon)
@@ -792,30 +808,30 @@ APRS_TRACK_DETAIL_NAMESPACE_USE
 
     data_.lat = lat;
     data_.lon = lon;
-    data_.speed_knots = meters_s_to_knots(speed_mps);
+    data_.speed_knots = mps_to_knots(speed_mps);
     data_.track_degrees = track_degrees;
 }
 
-APRS_TRACK_INLINE void tracker::position(double lat, double lon, double speed_mps, double track_degrees, double alt)
+APRS_TRACK_INLINE void tracker::position(double lat, double lon, double speed_mps, double track_degrees, double alt_meters)
 {
 APRS_TRACK_DETAIL_NAMESPACE_USE
 
     data_.lat = lat;
     data_.lon = lon;
-    data_.speed_knots = meters_s_to_knots(speed_mps);
+    data_.speed_knots = mps_to_knots(speed_mps);
     data_.track_degrees = track_degrees;
-    data_.alt_feet = alt;
+    data_.alt_feet = meters_to_feet(alt_meters);
 }
 
-APRS_TRACK_INLINE void tracker::position(double lat, double lon, double speed_mps, double track_degrees, double alt, int day, int hour, int minute, int second)
+APRS_TRACK_INLINE void tracker::position(double lat, double lon, double speed_mps, double track_degrees, double alt_meters, int day, int hour, int minute, int second)
 {
 APRS_TRACK_DETAIL_NAMESPACE_USE
 
     data_.lat = lat;
     data_.lon = lon;
-    data_.speed_knots = meters_s_to_knots(speed_mps);
+    data_.speed_knots = mps_to_knots(speed_mps);
     data_.track_degrees = track_degrees;
-    data_.alt_feet = alt;
+    data_.alt_feet = meters_to_feet(alt_meters);
     data_.day = day;
     data_.hour = hour;
     data_.minute = minute;
@@ -847,7 +863,7 @@ APRS_TRACK_INLINE void tracker::speed(double speed_mps)
 {
 APRS_TRACK_DETAIL_NAMESPACE_USE
 
-    data_.speed_knots = meters_s_to_knots(speed_mps);
+    data_.speed_knots = mps_to_knots(speed_mps);
 }
 
 APRS_TRACK_INLINE void tracker::alt(double alt_meters)
@@ -874,6 +890,7 @@ APRS_TRACK_INLINE void tracker::update()
         if (smart_beaconing_test())
         {
             last_time = std::chrono::high_resolution_clock::now();
+            previous_track_degrees_ = data_.track_degrees;
             updated_ = true;
             return;
         }
@@ -991,10 +1008,13 @@ APRS_TRACK_INLINE_NO_DISABLE void tracker::packet(packet_type p, OutputRange&& o
 
 APRS_TRACK_INLINE bool tracker::smart_beaconing_test()
 {
-    int speed = static_cast<int>(data_.speed_knots.value_or(0));
-    int course = static_cast<int>(data_.track_degrees.value_or(0));
+    int speed_knots = static_cast<int>(data_.speed_knots.value_or(0.0));
+    int course_degrees = static_cast<int>(data_.track_degrees.value_or(0));
+    int prev_course_degrees = static_cast<int>(previous_track_degrees_.value_or(0));
+    int low_speed_knots_int = static_cast<int>(std::round(low_speed_knots_));
+    int high_speed_knots_int = static_cast<int>(std::round(high_speed_knots_));
 
-    bool result = APRS_TRACK_DETAIL_NAMESPACE_REFERENCE smart_beaconing_test(speed, course, low_speed_, high_speed_, slow_rate_,
+    bool result = APRS_TRACK_DETAIL_NAMESPACE_REFERENCE smart_beaconing_test(speed_knots, prev_course_degrees, course_degrees, low_speed_knots_int, high_speed_knots_int, slow_rate_,
         fast_rate_, turn_time_, turn_angle_, turn_slope_, last_update_seconds);
 
     return result;
@@ -3061,11 +3081,11 @@ APRS_TRACK_NAMESPACE_BEGIN
 
 APRS_TRACK_DETAIL_NAMESPACE_BEGIN
 
-bool smart_beaconing_test(int speed, int course, int low_speed, int high_speed, int slow_rate, int fast_rate, int turn_time, int turn_angle, int turn_slope, int last_update);
+bool smart_beaconing_test(int speed, int prev_course, int course, int low_speed, int high_speed, int slow_rate, int fast_rate, int turn_time, int turn_angle, int turn_slope, int last_update);
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE bool smart_beaconing_test(int speed, int course, int low_speed, int high_speed, int slow_rate, int fast_rate, int turn_time, int turn_angle, int turn_slope, int last_update)
+APRS_TRACK_INLINE bool smart_beaconing_test(int speed, int prev_course, int course, int low_speed, int high_speed, int slow_rate, int fast_rate, int turn_time, int turn_angle, int turn_slope, int last_update)
 {
     //
     // Smart Beaconing Algorithm (TM)
@@ -3097,6 +3117,11 @@ APRS_TRACK_INLINE bool smart_beaconing_test(int speed, int course, int low_speed
 
     int interval = 0;
 
+    int course_delta = std::abs(prev_course - course);
+    if (course_delta > 180)
+    {
+        course_delta = 360 - course_delta; // Handle angle wraparound
+    }
     if (speed < low_speed)
     {
         interval = slow_rate;
@@ -3114,18 +3139,17 @@ APRS_TRACK_INLINE bool smart_beaconing_test(int speed, int course, int low_speed
 
         int turn_threshold = turn_angle + (turn_slope / speed);
 
-        if (course > turn_threshold)
+        if (course_delta > turn_threshold)
         {
             interval = turn_time;
         }
     }
 
-    if (last_update >= interval)
-    {
-        return true;
-    }
+    bool result = (last_update >= interval);
 
-    return false;
+    APRS_TRACK_SMART_BEACONING_DEBUG(result, speed, prev_course, course, low_speed, high_speed, slow_rate, fast_rate, turn_time, turn_angle, turn_slope, last_update, interval);
+
+    return result;
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
@@ -3137,7 +3161,9 @@ APRS_TRACK_INLINE bool smart_beaconing_test(int speed, int course, int low_speed
 // **************************************************************** //
 
 double meters_to_feet(double meters);
-double meters_s_to_knots(double meters_s);
+double mps_to_knots(double mps);
+double knots_to_mps(double knots);
+double mph_to_mps(double mph);
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
@@ -3146,9 +3172,19 @@ APRS_TRACK_INLINE double meters_to_feet(double meters)
     return meters * 3.28084;
 }
 
-APRS_TRACK_INLINE double meters_s_to_knots(double meters_s)
+APRS_TRACK_INLINE double mps_to_knots(double mps)
 {
-    return meters_s * 1.9438444924406;
+    return mps * 1.9438444924406;
+}
+
+APRS_TRACK_INLINE double knots_to_mps(double knots)
+{
+    return knots / 1.9438444924406;
+}
+
+APRS_TRACK_INLINE double mph_to_mps(double mph)
+{
+    return mph * 0.44704;
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY

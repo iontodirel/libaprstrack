@@ -312,7 +312,7 @@ TEST(format, format_n_digits_string)
 TEST(conversion, unit_conversions)
 {
     EXPECT_NEAR(meters_to_feet(1), 3.28084, 0.00001);
-    EXPECT_NEAR(meters_s_to_knots(1), 1.94384, 0.00001);
+    EXPECT_NEAR(mps_to_knots(1), 1.94384, 0.00001);
 }
 
 TEST(time, encode_timestamp_dhm)

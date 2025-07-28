@@ -1,5 +1,13 @@
 Route from Seattle to Lake Chelan
 
+Python:
+
+    # Route from Seattle to Lake Chelan
+    locations = [
+        (47.6287, -122.3462),
+        (47.8426, -120.0167) 
+    ]  # Set route points
+
 Valhalla Request:
 
 curl -X POST "http://192.168.1.190:8002/route" -H "Content-Type: application/json" -d '{

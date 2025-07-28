@@ -1,5 +1,13 @@
 Route from Seattle to Clyde Hill
 
+Python:
+
+    # Route from Seattle to Clyde Hill
+    locations = [
+        (47.6080, -122.3130),
+        (47.6320, -122.2091) 
+    ]  # Set route points
+
 Valhalla Request:
 
 curl -X POST "http://192.168.1.190:8002/route" -H "Content-Type: application/json" -d '{
