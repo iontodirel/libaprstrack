@@ -446,8 +446,9 @@ private:
     std::array<char, 10> to_{};
     std::array<char, 88> path_{};
     enum algorithm algorithm_ = algorithm::none;
-    std::vector<unsigned char> message_data_;
+    std::array<unsigned char, 256> message_data_{};
     size_t message_data_length_ = 0;
+    size_t message_data_size_ = 0;
     char symbol_code_ = '>';
     char symbol_table_ = '/';
     unsigned int interval_seconds_ = 30;
@@ -709,10 +710,10 @@ template <typename CharType, typename Traits>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::message(const std::basic_string_view<CharType, Traits>& m)
 {
     message_data_length_ = m.size();
-
     const unsigned char* data = reinterpret_cast<const unsigned char*>(m.data());
-    size_t size = m.size() * sizeof(CharType);
-    message_data_.assign(data, data + size);
+    size_t size = std::min(m.size() * sizeof(CharType), message_data_.size());
+    std::copy_n(data, size, message_data_.begin());
+    message_data_size_ = size;
 }
 
 template <typename CharType>
@@ -737,13 +738,14 @@ template <std::input_iterator InputIterator>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::message(InputIterator begin, InputIterator end)
 {
     message_data_length_ = std::distance(begin, end);
-    message_data_.assign(begin, end);
+    message_data_size_ = std::min(static_cast<size_t>(message_data_length_), message_data_.size());
+    std::copy_n(begin, message_data_size_, message_data_.begin());
 }
 
 template <std::output_iterator<unsigned char> OutputIterator>
 APRS_TRACK_INLINE_NO_DISABLE OutputIterator tracker::message(OutputIterator output) const
 {
-    output = std::copy(message_data_.begin(), message_data_.end(), output);
+    output = std::copy_n(message_data_.begin(), message_data_size_, output);
     return output;
 }
 
@@ -1007,7 +1009,7 @@ APRS_TRACK_INLINE_NO_DISABLE OutputIterator tracker::packet(packet_type p, Outpu
 
     output = std::copy(reinterpret_cast<const unsigned char*>(packet.data()), reinterpret_cast<const unsigned char*>(packet.data() + packet.size()), output);
 
-    output = std::copy(message_data_.begin(), message_data_.end(), output);
+    output = std::copy_n(message_data_.begin(), message_data_size_, output);
 
     return output;
 }
