@@ -98,6 +98,7 @@ APRS_TRACK_NAMESPACE_BEGIN
 #ifndef APRS_TRACK_DEFINE_CUSTOM_TYPES
 
 using string_t = std::basic_string<char>;
+using u8string_t = std::basic_string<char8_t>;
 
 #endif // APRS_TRACK_DEFINE_CUSTOM_TYPES
 
@@ -161,18 +162,21 @@ struct data
     int second = 0;
 };
 
-string_t encode_position_packet_no_timestamp_no_message(const tracker& t, const data& d);
-string_t encode_position_packet_no_timestamp(const tracker& t, const data& d);
-string_t encode_position_packet_with_timestamp_dhm_no_message(const tracker& t, const data& d);
-string_t encode_position_packet_with_timestamp_dhm(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_hms_no_message(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_hms(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_dhm_no_message(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_dhm(const tracker& t, const data& d);
-string_t encode_position_packet_compressed_no_timestamp_no_message(const tracker& t, const data& d);
-string_t encode_position_packet_compressed_no_timestamp(const tracker& t, const data& d);
-string_t encode_mic_e_packet_no_message(const tracker& t, const data& d);
-string_t encode_mic_e_packet(const tracker& t, const data& d);
+// add string version with message!
+// add github workflow
+
+string_t encode_position_packet_no_timestamp_no_message_to(const tracker& t, const data& d);
+string_t encode_position_packet_no_timestamp_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_timestamp_dhm_no_message_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_timestamp_dhm_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_utc_timestamp_hms_no_message_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_utc_timestamp_hms_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_utc_timestamp_dhm_no_message_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_utc_timestamp_dhm_to(const tracker& t, const data& d);
+string_t encode_position_packet_compressed_no_timestamp_no_message_to(const tracker& t, const data& d);
+string_t encode_position_packet_compressed_no_timestamp_to(const tracker& t, const data& d);
+string_t encode_mic_e_packet_no_message_to(const tracker& t, const data& d);
+string_t encode_mic_e_packet_to(const tracker& t, const data& d);
 
 bool smart_beaconing_test(int speed, int prev_course, int course, int low_speed, int high_speed, int slow_interval_seconds, int fast_interval_seconds, int min_turn_degrees, int turn_interval_seconds, int turn_slope, int last_update_seconds);
 
@@ -391,10 +395,10 @@ struct tracker
     void message(InputIterator begin, InputIterator end);
 
     template <std::output_iterator<unsigned char> OutputIterator>
-    void message(OutputIterator output);
+    OutputIterator message(OutputIterator output) const;
 
     string_t message() const;
-    std::u8string u8message() const;
+    u8string_t u8message() const;
 
     template <class Rep, class Period>
     void interval(std::chrono::duration<Rep, Period> interval);
@@ -424,10 +428,10 @@ struct tracker
 
     string_t packet_string(packet_type p) const;
 
-    std::u8string u8packet_string(packet_type p) const;
+    u8string_t u8packet_string(packet_type p) const;
 
     template <std::output_iterator<unsigned char> OutputIterator>
-    void packet(packet_type p, OutputIterator output) const;
+    OutputIterator packet(packet_type p, OutputIterator output) const;
 
     template <std::ranges::output_range<unsigned char> OutputRange>
     void packet(packet_type p, OutputRange&& output_range) const;
@@ -462,9 +466,9 @@ private:
     enum mic_e_status mic_e_status_ = mic_e_status::in_service;
 };
 
-string_t to_string(mic_e_status status);
+std::string to_string(mic_e_status status);
 
-string_t to_string(packet_type type);
+std::string to_string(packet_type type);
 
 APRS_TRACK_NAMESPACE_END
 
@@ -480,7 +484,7 @@ APRS_TRACK_NAMESPACE_BEGIN
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE string_t to_string(mic_e_status status)
+APRS_TRACK_INLINE std::string to_string(mic_e_status status)
 {
     switch (status)
     {
@@ -505,7 +509,7 @@ APRS_TRACK_INLINE string_t to_string(mic_e_status status)
     return "unknown";
 }
 
-APRS_TRACK_INLINE string_t to_string(packet_type type)
+APRS_TRACK_INLINE std::string to_string(packet_type type)
 {
     switch (type)
     {
@@ -730,9 +734,10 @@ APRS_TRACK_INLINE_NO_DISABLE void tracker::message(InputIterator begin, InputIte
 }
 
 template <std::output_iterator<unsigned char> OutputIterator>
-APRS_TRACK_INLINE_NO_DISABLE void tracker::message(OutputIterator output)
+APRS_TRACK_INLINE_NO_DISABLE OutputIterator tracker::message(OutputIterator output) const
 {
-    std::copy(message_data_.begin(), message_data_.end(), output);
+    output = std::copy(message_data_.begin(), message_data_.end(), output);
+    return output;
 }
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
@@ -743,10 +748,10 @@ APRS_TRACK_INLINE string_t tracker::message() const
     return string_t(data, message_data_length_);
 }
 
-APRS_TRACK_INLINE std::u8string tracker::u8message() const
+APRS_TRACK_INLINE u8string_t tracker::u8message() const
 {
     const char8_t* data = reinterpret_cast<const char8_t*>(message_data_.data());
-    return std::u8string(data, message_data_length_);
+    return u8string_t(data, message_data_length_);
 }
 
 #endif
@@ -922,22 +927,22 @@ APRS_TRACK_DETAIL_NAMESPACE_USE
     switch (p)
     {
         case aprs::track::packet_type::mic_e:
-            packet = encode_mic_e_packet_no_message(*this, data_);
+            packet = encode_mic_e_packet_no_message_to(*this, data_);
             break;
         case aprs::track::packet_type::position:
-            packet = encode_position_packet_no_timestamp_no_message(*this, data_);
+            packet = encode_position_packet_no_timestamp_no_message_to(*this, data_);
             break;
         case aprs::track::packet_type::position_compressed:
-            packet = encode_position_packet_compressed_no_timestamp_no_message(*this, data_);
+            packet = encode_position_packet_compressed_no_timestamp_no_message_to(*this, data_);
             break;
         case aprs::track::packet_type::position_with_timestamp:
-            packet = encode_position_packet_with_timestamp_dhm_no_message(*this, data_);
+            packet = encode_position_packet_with_timestamp_dhm_no_message_to(*this, data_);
             break;
         case aprs::track::packet_type::position_with_timestamp_utc:
-            packet = encode_position_packet_with_utc_timestamp_dhm_no_message(*this, data_);
+            packet = encode_position_packet_with_utc_timestamp_dhm_no_message_to(*this, data_);
             break;
         case aprs::track::packet_type::position_with_timestamp_utc_hms:
-            packet = encode_position_packet_with_utc_timestamp_hms_no_message(*this, data_);
+            packet = encode_position_packet_with_utc_timestamp_hms_no_message_to(*this, data_);
             break;
         default:
             break;
@@ -955,22 +960,22 @@ APRS_TRACK_DETAIL_NAMESPACE_USE
     switch (p)
     {
         case aprs::track::packet_type::mic_e:
-            packet = encode_mic_e_packet(*this, data_);
+            packet = encode_mic_e_packet_to(*this, data_);
             break;
         case aprs::track::packet_type::position:
-            packet = encode_position_packet_no_timestamp(*this, data_);
+            packet = encode_position_packet_no_timestamp_to(*this, data_);
             break;
         case aprs::track::packet_type::position_compressed:
-            packet = encode_position_packet_compressed_no_timestamp(*this, data_);
+            packet = encode_position_packet_compressed_no_timestamp_to(*this, data_);
             break;
         case aprs::track::packet_type::position_with_timestamp:
-            packet = encode_position_packet_with_timestamp_dhm(*this, data_);
+            packet = encode_position_packet_with_timestamp_dhm_to(*this, data_);
             break;
         case aprs::track::packet_type::position_with_timestamp_utc:
-            packet = encode_position_packet_with_utc_timestamp_dhm(*this, data_);
+            packet = encode_position_packet_with_utc_timestamp_dhm_to(*this, data_);
             break;
         case aprs::track::packet_type::position_with_timestamp_utc_hms:
-            packet = encode_position_packet_with_utc_timestamp_hms(*this, data_);
+            packet = encode_position_packet_with_utc_timestamp_hms_to(*this, data_);
             break;
         default:
             break;
@@ -979,23 +984,25 @@ APRS_TRACK_DETAIL_NAMESPACE_USE
     return packet;
 }
 
-APRS_TRACK_INLINE std::u8string tracker::u8packet_string(packet_type p) const
+APRS_TRACK_INLINE u8string_t tracker::u8packet_string(packet_type p) const
 {
     string_t packet = packet_string(p);
-    std::u8string u8packet(packet.begin(), packet.end());
+    u8string_t u8packet(packet.begin(), packet.end());
     return u8packet;
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 template <std::output_iterator<unsigned char> OutputIterator>
-APRS_TRACK_INLINE_NO_DISABLE void tracker::packet(packet_type p, OutputIterator output) const
+APRS_TRACK_INLINE_NO_DISABLE OutputIterator tracker::packet(packet_type p, OutputIterator output) const
 {
     string_t packet = packet_string_no_message(p);
 
-    OutputIterator current = std::copy(reinterpret_cast<const unsigned char*>(packet.data()), reinterpret_cast<const unsigned char*>(packet.data() + packet.size()), output);
+    output = std::copy(reinterpret_cast<const unsigned char*>(packet.data()), reinterpret_cast<const unsigned char*>(packet.data() + packet.size()), output);
 
-    std::copy(message_data_.begin(), message_data_.end(), current);
+    output = std::copy(message_data_.begin(), message_data_.end(), output);
+
+    return output;
 }
 
 template <std::ranges::output_range<unsigned char> OutputRange>
@@ -1036,212 +1043,199 @@ APRS_TRACK_NAMESPACE_BEGIN
 
 APRS_TRACK_DETAIL_NAMESPACE_BEGIN
 
-string_t encode_position_packet_no_timestamp_no_message(const tracker& t, const data& d);
-string_t encode_position_packet_no_timestamp(const tracker& t, const data& d);
-string_t encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_course_speed(double course_degrees, double speed_knots);
-string_t encode_altitude(double altitude_feet);
-
-string_t encode_position_packet_with_timestamp_dhm_no_message(const tracker& t, const data& d);
-string_t encode_position_packet_with_timestamp_dhm(const tracker& t, const data& d);
-string_t encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_course_speed(double course_degrees, double speed_knots);
-string_t encode_altitude(double altitude_feet);
+string_t encode_position_packet_no_timestamp_no_message_to(const tracker& t, const data& d);
+string_t encode_position_packet_no_timestamp_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_timestamp_dhm_no_message_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_timestamp_dhm_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_utc_timestamp_hms_no_message_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_utc_timestamp_hms_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_utc_timestamp_dhm_no_message_to(const tracker& t, const data& d);
+string_t encode_position_packet_with_utc_timestamp_dhm_to(const tracker& t, const data& d);
+string_t encode_position_packet_compressed_no_timestamp_no_message_to(const tracker& t, const data& d);
+string_t encode_position_packet_compressed_no_timestamp_to(const tracker& t, const data& d);
+string_t encode_mic_e_packet_no_message_to(const tracker& t, const data& d);
+string_t encode_mic_e_packet_to(const tracker& t, const data& d);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_course_speed(double course_degrees, double speed_knots, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_altitude(double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_mic_e_alt_feet(double alt_feet, OutputIt out);
 char packet_type_with_timestamp(bool m);
-
-string_t encode_position_packet_with_utc_timestamp_hms_no_message(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_hms(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_course_speed(double course_degrees, double speed_knots);
-string_t encode_altitude(double altitude_feet);
-
-string_t encode_position_packet_with_utc_timestamp_dhm_no_message(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_dhm(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_course_speed(double course_degrees, double speed_knots);
-string_t encode_altitude(double altitude_feet);
-
-string_t encode_position_packet_compressed_no_timestamp_no_message(const tracker& t, const data& d);
-string_t encode_position_packet_compressed_no_timestamp(const tracker& t, const data& d);
-string_t encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type);
-string_t encode_compressed_course_speed(double course_degrees, double speed_knots);
-string_t encode_compressed_altitude(double altitude_feet);
-
-string_t encode_mic_e_packet_no_message(const tracker& t, const data& d);
-string_t encode_mic_e_packet(const tracker& t, const data& d);
-string_t encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_mic_e_alt_feet(double alt_feet);
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_no_message(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_no_message_to(const tracker& t, const data& d)
 {
     string_t packet;
 
-    packet.append(encode_position_packet_no_timestamp_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+    encode_position_packet_no_timestamp_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
-        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
+        encode_course_speed(d.track_degrees.value(), d.speed_knots.value(), std::back_inserter(packet));
     }
 
     if (d.alt_feet.has_value())
     {
-        packet.append(encode_altitude(d.alt_feet.value()));
+        encode_altitude(d.alt_feet.value(), std::back_inserter(packet));
     }
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_to(const tracker& t, const data& d)
 {
     string_t packet;
 
-    packet.append(encode_position_packet_no_timestamp_no_message(t, d));
+    packet.append(encode_position_packet_no_timestamp_no_message_to(t, d));
 
-    packet.append(t.message());
+    t.message(std::back_inserter(packet));
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_no_message(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_no_message_to(const tracker& t, const data& d)
 {
     string_t packet;
 
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), packet_type_with_timestamp(t.messaging()), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+    encode_position_packet_with_timestamp_dhm_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), packet_type_with_timestamp(t.messaging()), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
-        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
+        encode_course_speed(d.track_degrees.value(), d.speed_knots.value(), std::back_inserter(packet));
     }
 
     if (d.alt_feet.has_value())
     {
-        packet.append(encode_altitude(d.alt_feet.value()));
+        encode_altitude(d.alt_feet.value(), std::back_inserter(packet));
     }
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_to(const tracker& t, const data& d)
 {
     string_t packet;
 
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(t, d));
+    packet.append(encode_position_packet_with_timestamp_dhm_no_message_to(t, d));
 
-    packet.append(t.message());
+    t.message(std::back_inserter(packet));
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_no_message(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_no_message_to(const tracker& t, const data& d)
 {
     string_t packet;
 
-    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.hour, d.minute, d.second, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+    encode_position_packet_with_utc_timestamp_hms_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.hour, d.minute, d.second, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
-        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
+        encode_course_speed(d.track_degrees.value(), d.speed_knots.value(), std::back_inserter(packet));
     }
 
     if (d.alt_feet.has_value())
     {
-        packet.append(encode_altitude(d.alt_feet.value()));
+        encode_altitude(d.alt_feet.value(), std::back_inserter(packet));
     }
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_to(const tracker& t, const data& d)
 {
     string_t packet;
 
-    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message(t, d));
+    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message_to(t, d));
 
-    packet.append(t.message());
+    t.message(std::back_inserter(packet));
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_no_message(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_no_message_to(const tracker& t, const data& d)
 {
     string_t packet;
 
-    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity()));
+    encode_position_packet_with_utc_timestamp_dhm_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
-        packet.append(encode_course_speed(d.track_degrees.value(), d.speed_knots.value()));
+        encode_course_speed(d.track_degrees.value(), d.speed_knots.value(), std::back_inserter(packet));
     }
 
     if (d.alt_feet.has_value())
     {
-        packet.append(encode_altitude(d.alt_feet.value()));
+        encode_altitude(d.alt_feet.value(), std::back_inserter(packet));
     }
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_to(const tracker& t, const data& d)
 {
     string_t packet;
 
-    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message(t, d));
+    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message_to(t, d));
 
-    packet.append(t.message());
+    t.message(std::back_inserter(packet));
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_no_message(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_no_message_to(const tracker& t, const data& d)
 {
     string_t packet;
 
     char compression_type = 0b00111000 + 33; // current, RMC, compressed
 
-    packet.append(encode_position_packet_compressed_no_timestamp_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), compression_type));
+    encode_position_packet_compressed_no_timestamp_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), compression_type, std::back_inserter(packet));
 
     if (d.alt_feet.has_value())
     {
-        packet.append(encode_altitude(d.alt_feet.value()));
+        encode_altitude(d.alt_feet.value(), std::back_inserter(packet));
     }
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_to(const tracker& t, const data& d)
 {
     string_t packet;
 
-    packet.append(encode_position_packet_compressed_no_timestamp_no_message(t, d));
+    packet.append(encode_position_packet_compressed_no_timestamp_no_message_to(t, d));
 
-    packet.append(t.message());
+    t.message(std::back_inserter(packet));
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_packet_no_message(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_mic_e_packet_no_message_to(const tracker& t, const data& d)
 {
     string_t packet;
 
-    packet.append(encode_mic_e_packet_no_message(t.from().c_str(), t.path().c_str(), d.lat, d.lon, t.mic_e_status(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), t.symbol_table(), t.symbol_code(), t.ambiguity()));
+    encode_mic_e_packet_no_message(t.from().c_str(), t.path().c_str(), d.lat, d.lon, t.mic_e_status(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
     if (d.alt_feet.has_value())
     {
-        packet.append(encode_mic_e_alt_feet(d.alt_feet.value()));
+        encode_mic_e_alt_feet(d.alt_feet.value(), std::back_inserter(packet));
     }
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_packet(const tracker& t, const data& d)
+APRS_TRACK_INLINE string_t encode_mic_e_packet_to(const tracker& t, const data& d)
 {
     string_t packet;
 
-    packet.append(encode_mic_e_packet_no_message(t, d));
+    packet.append(encode_mic_e_packet_no_message_to(t, d));
 
-    packet.append(t.message());
+    t.message(std::back_inserter(packet));
 
     return packet;
 }
@@ -1272,12 +1266,13 @@ APRS_TRACK_NAMESPACE_END
 //                                                                  //
 // **************************************************************** //
 
-#include <string> // for std::string.
 #include <string_view> // for std::string_view.
 #include <tuple> // for std::tuple and std::tie.
 #include <cmath> // for mathematical functions like std::abs, std::modf, and std::round.
 #include <cstdio> // for std::snprintf.
-#include <cassert>
+#include <array> // for std::array.
+#include <algorithm> // for std::copy_n and std::copy.
+#include <iterator> // for iterator concepts.
 
 APRS_TRACK_NAMESPACE_BEGIN
 
@@ -1318,23 +1313,139 @@ struct position_ddm
 
 struct position_ddm_string
 {
-    string_t lat;
-    string_t lon;
+    std::array<char, 8> lat;
+    std::array<char, 9> lon;
 };
 
+template<std::output_iterator<char> OutputIt> OutputIt format_number_to_string(double number, int width, int precision, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt format_number_to_string(double number, int precision, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt format_n_digits_string(int number, int width, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt format_two_digits_string(int number, OutputIt out);
+template<std::bidirectional_iterator BidirIt> void add_position_ambiguity(BidirIt begin, BidirIt end, int ambiguity);
 std::tuple<int, int, double> dd_to_dms(double dd);
 std::tuple<int, double> dd_to_ddm(double dd);
 position_ddm dd_to_ddm(double lat, double lon);
-string_t format_number_to_string(double number, int width, int precision);
-string_t format_number_to_string(double number, int precision);
-string_t format_n_digits_string(int number, int digits);
-string_t format_two_digits_string(int number);
 position_ddm_string to_ddm_short_string(const position_ddm& p, int ambiguity);
-position_ddm_string to_ddm_short_string(const position_ddm& p);
-void add_position_ambiguity(string_t& position, int ambiguity);
-string_t encode_compressed_lon(double lon);
-string_t encode_compressed_lat(double lat);
-string_t encode_compressed_lat_lon(double lat, double lon);
+std::array<char, 4> encode_compressed_lon(double lon);
+std::array<char, 4> encode_compressed_lat(double lat);
+std::array<char, 8> encode_compressed_lat_lon(double lat, double lon);
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt format_number_to_string(double number, int width, int precision, OutputIt out)
+{
+    // Converts a double to a formatted string representation with specific width and precision
+    //
+    // Parameters:
+    //
+    //   number    - the floating-point value to format
+    //   width     - minimum width for the resulting string (padding with leading zeros if > 0)
+    //   precision - decimal precision (number of digits after decimal point)
+    //               if precision is 0, formats as integer without decimal point
+    //               the number is rounded to the specified precision
+    //
+    // Examples:
+    //
+    //   format_number_to_string(37.7749, 4)    ->  37.7749
+    //   format_number_to_string(37.7749, 1)    ->  37.8
+    //   format_number_to_string(37.7749, 0)    ->  37
+    //   format_number_to_string(37.7749, 5, 2) ->  037.77
+    //   format_number_to_string(0.7749, 5, 2)  ->  000.77
+    //   format_number_to_string(5.5, 8, 4)     ->  0005.5000
+    //   format_number_to_string(0.5, 8, 4)     ->  0000.5000
+    //   format_number_to_string(-5.5, 8, 4)    -> -005.5000
+
+    char buffer[32];
+    int len;
+
+    if (precision == 0)
+    {
+        double i;
+        double f = std::modf(number, &i);
+        (void)f;
+
+        if (width > 0)
+        {
+            len = std::snprintf(buffer, sizeof(buffer), "%0*d", width, static_cast<int>(i));
+        }
+        else
+        {
+            len = std::snprintf(buffer, sizeof(buffer), "%d", static_cast<int>(i));
+        }
+    }
+    else
+    {
+        if (width > 0)
+        {
+            len = std::snprintf(buffer, sizeof(buffer), "%0*.*f", width + 1, precision, number);
+        }
+        else
+        {
+            len = std::snprintf(buffer, sizeof(buffer), "%.*f", precision, number);
+        }
+    }
+
+    size_t count = static_cast<size_t>(std::min(len, 31));
+    return std::copy_n(buffer, count, out);
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt format_number_to_string(double number, int precision, OutputIt out)
+{
+    return format_number_to_string(number, 0, precision, out);
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt format_n_digits_string(int number, int width, OutputIt out)
+{
+    char buffer[32];
+    int len;
+
+    if (width <= 0)
+    {
+        len = std::snprintf(buffer, sizeof(buffer), "%d", number);
+    }
+    else
+    {
+        len = std::snprintf(buffer, sizeof(buffer), "%0*d", width, number);
+    }
+
+    size_t count = static_cast<size_t>(std::min(len, 31));
+    return std::copy_n(buffer, count, out);
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt format_two_digits_string(int number, OutputIt out)
+{
+    return format_n_digits_string(number, 2, out);
+}
+
+template<std::bidirectional_iterator BidirIt>
+APRS_TRACK_INLINE_NO_DISABLE void add_position_ambiguity(BidirIt begin, BidirIt end, int ambiguity)
+{
+    if (!(ambiguity > 0))
+    {
+        return;
+    }
+
+    if (end - begin < 2)
+    {
+        return;
+    }
+
+    auto it = end - 2;
+
+    int count = 0;
+
+    while (it != begin && count < ambiguity)
+    {
+        if (*it != '.')
+        {
+            *it = ' ';
+            count++;
+        }
+        --it;
+    }
+}
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
@@ -1343,12 +1454,12 @@ APRS_TRACK_INLINE std::tuple<int, int, double> dd_to_dms(double dd)
     // Example algorithm:
     //
     // Input DD = 37.7749
-    // 
+    //
     // D = integer part of 37.7749 = 37
     // DM = fractional part of 37.7749 * 60 = 0.7749 * 60 = 46.494
     // M = integer part of 46.494 = 46
     // S = fractional part of 46.494 * 60 = 0.494 * 60 = 29.64
-    // 
+    //
     // Output DMS = 37° 46' 29.64"
 
     double d, dm, m, s;
@@ -1385,168 +1496,84 @@ APRS_TRACK_INLINE position_ddm dd_to_ddm(double lat, double lon)
     return ddm;
 }
 
-APRS_TRACK_INLINE string_t format_number_to_string(double number, int width, int precision)
-{
-    // Converts a double to a formatted string representation with specific width and precision
-    //
-    // Parameters:
-    //
-    //   number    - the floating-point value to format
-    //   width     - minimum width for the resulting string (padding with leading zeros if > 0)
-    //   precision - decimal precision (number of digits after decimal point)
-    //               if precision is 0, formats as integer without decimal point
-    //               the number is rounded to the specified precision
-    //
-    // Examples:
-    //
-    //   format_number_to_string(37.7749, 4)    ->  37.7749
-    //   format_number_to_string(37.7749, 1)    ->  37.8
-    //   format_number_to_string(37.7749, 0)    ->  37
-    //   format_number_to_string(37.7749, 5, 2) ->  037.77
-    //   format_number_to_string(0.7749, 5, 2)  ->  000.77
-    //   format_number_to_string(5.5, 8, 4)     ->  0005.5000
-    //   format_number_to_string(0.5, 8, 4)     ->  0000.5000
-    //   format_number_to_string(-5.5, 8, 4)    -> -005.5000
-
-    string_t pretty_number_str;
-
-    if (precision == 0)
-    {
-        double i;
-        double f = std::modf(number, &i);
-        (void)f;
-
-        char buffer[32];
-
-        if (width > 0)
-        {
-            std::snprintf(buffer, sizeof(buffer), "%0*d", width, static_cast<int>(i));
-        }
-        else
-        {
-            std::snprintf(buffer, sizeof(buffer), "%d", static_cast<int>(i));
-        }
-
-        pretty_number_str = buffer;
-    }
-    else
-    {
-        char buffer[32];
-
-        if (width > 0)
-        {
-            std::snprintf(buffer, sizeof(buffer), "%0*.*f", width + 1, precision, number);
-        }
-        else
-        {
-            std::snprintf(buffer, sizeof(buffer), "%.*f", precision, number);
-        }
-
-        pretty_number_str = buffer;
-    }
-
-    return pretty_number_str;
-}
-
-APRS_TRACK_INLINE string_t format_number_to_string(double number, int precision)
-{
-    return format_number_to_string(number, 0, precision);
-}
-
-APRS_TRACK_INLINE string_t format_n_digits_string(int number, int width)
-{
-    if (width <= 0)
-    {
-        //return std::to_string(number);
-        return string_t(std::to_string(number).c_str());
-    }
-
-    char buffer[32];
-    std::snprintf(buffer, sizeof(buffer), "%0*d", width, number);
-    return string_t(buffer);
-}
-
-APRS_TRACK_INLINE string_t format_two_digits_string(int number)
-{
-    return format_n_digits_string(number, 2);
-}
-
 APRS_TRACK_INLINE position_ddm_string to_ddm_short_string(const position_ddm& p, int ambiguity)
 {
+    // Converts a position in DDM format to a short string representation
+    //
+    // Lat: DDMM.MMd
+    // Lon: DDDMM.MMd
+
     position_ddm_string s;
-    s.lat = format_number_to_string(p.lat_d, 2, 0);
-    s.lat.append(format_number_to_string(p.lat_m, 4, 2));
-    s.lat.append(1, p.lat);
-    add_position_ambiguity(s.lat, ambiguity);
-    s.lon = format_number_to_string(p.lon_d, 3, 0);
-    s.lon.append(format_number_to_string(p.lon_m, 4, 2));
-    s.lon.append(1, p.lon);
-    return s;
+
+    auto lat_it = s.lat.begin();
+    lat_it = format_number_to_string(p.lat_d, 2, 0, lat_it);   // DD
+    lat_it = format_number_to_string(p.lat_m, 4, 2, lat_it);   // MM.MM
+    *lat_it++ = p.lat;                                         // d
+
+    // Position ambiguity only can be applied to latitude as per APRS spec.
+    add_position_ambiguity(s.lat.begin(), lat_it, ambiguity); // DDMM.M d (if the ambiguity is 1)
+
+    auto lon_it = s.lon.begin();
+    lon_it = format_number_to_string(p.lon_d, 3, 0, lon_it);   // DDD
+    lon_it = format_number_to_string(p.lon_m, 4, 2, lon_it);   // MM.MM
+    *lon_it++ = p.lon;                                         // d
+
+    return s;                                                  // DDDMM.MMd DDDMM.MMd
 }
 
-APRS_TRACK_INLINE position_ddm_string to_ddm_short_string(const position_ddm& p)
+APRS_TRACK_INLINE std::array<char, 4> encode_compressed_lon(double lon)
 {
-    return to_ddm_short_string(p, 0);
-}
-
-APRS_TRACK_INLINE void add_position_ambiguity(string_t& position, int ambiguity)
-{
-    if (!(ambiguity > 0))
-    {
-        return;
-    }
-
-    for (size_t i = position.size() - 2, count = 0; i > 0 && count < static_cast<size_t>(ambiguity); i--)
-    {
-        if (position[i] == '.')
-        {
-            continue;
-        }
-        position[i] = ' ';
-        count++;
-    }
-}
-
-APRS_TRACK_INLINE string_t encode_compressed_lon(double lon)
-{
-    string_t result;
+    std::array<char, 4> result;
 
     long num = static_cast<long>(std::round(190463 * (180 + lon)));
 
-    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
+    result[3] = static_cast<char>((num % 91) + 33);
     num /= 91;
-    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
+    result[2] = static_cast<char>((num % 91) + 33);
     num /= 91;
-    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
+    result[1] = static_cast<char>((num % 91) + 33);
     num /= 91;
-    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
+    result[0] = static_cast<char>((num % 91) + 33);
 
     return result;
 }
 
-APRS_TRACK_INLINE string_t encode_compressed_lat(double lat)
+APRS_TRACK_INLINE std::array<char, 4> encode_compressed_lat(double lat)
 {
-    string_t result;
+    std::array<char, 4> result;
 
     long num = static_cast<long>(std::round(380926 * (90 - lat)));
 
-    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
+    result[3] = static_cast<char>((num % 91) + 33);
     num /= 91;
-    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
+    result[2] = static_cast<char>((num % 91) + 33);
     num /= 91;
-    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
+    result[1] = static_cast<char>((num % 91) + 33);
     num /= 91;
-    result.insert(result.begin(), static_cast<char>((num % 91) + 33));
+    result[0] = static_cast<char>((num % 91) + 33);
 
     return result;
 }
 
-APRS_TRACK_INLINE string_t encode_compressed_lat_lon(double lat, double lon)
+APRS_TRACK_INLINE std::array<char, 8> encode_compressed_lat_lon(double lat, double lon)
 {
-    string_t result;
+    // Example:
+    //
+    // Lat: 36.354730315074
+    // Lon: -119.3034815161
+    //
+    // Compressed lat and lon:
+    //
+    //   <+_*0@"k
 
-    result.append(encode_compressed_lat(lat));
-    result.append(encode_compressed_lon(lon));
+    std::array<char, 8> result;
+
+    std::array<char, 4> lat_arr = encode_compressed_lat(lat);
+    std::array<char, 4> lon_arr = encode_compressed_lon(lon);
+
+    std::copy(lat_arr.begin(), lat_arr.end(), result.begin());
+
+    std::copy(lon_arr.begin(), lon_arr.end(), result.begin() + 4);
 
     return result;
 }
@@ -1559,49 +1586,49 @@ APRS_TRACK_INLINE string_t encode_compressed_lat_lon(double lat, double lon)
 //                                                                  //
 // **************************************************************** //
 
-string_t encode_timestamp_dhm(int day, int hour, int min);
-string_t encode_utc_timestamp_dhm(int day, int hour, int min);
-string_t encode_utc_timestamp_hms(int hour, int min, int sec);
+std::array<char, 7> encode_timestamp_dhm(int day, int hour, int min);
+std::array<char, 7> encode_utc_timestamp_dhm(int day, int hour, int min);
+std::array<char, 7> encode_utc_timestamp_hms(int hour, int min, int sec);
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE string_t encode_timestamp_dhm(int day, int hour, int min)
+APRS_TRACK_INLINE std::array<char, 7> encode_timestamp_dhm(int day, int hour, int min)
 {
-    string_t dhm;
+    std::array<char, 7> dhm;
 
-    dhm.append(format_two_digits_string(day));
-    dhm.append(format_two_digits_string(hour));
-    dhm.append(format_two_digits_string(min));
+    format_n_digits_string(day, 2, dhm.begin());      // DD
+    format_n_digits_string(hour, 2, dhm.begin() + 2); // HH
+    format_n_digits_string(min, 2, dhm.begin() + 4);  // MM
 
-    dhm.append("/");
+    dhm[6] = '/';                                     // /
 
-    return dhm;
+    return dhm;                                       // DDHHMM/
 }
 
-APRS_TRACK_INLINE string_t encode_utc_timestamp_dhm(int day, int hour, int min)
+APRS_TRACK_INLINE std::array<char, 7> encode_utc_timestamp_dhm(int day, int hour, int min)
 {
-    string_t dhm;
+    std::array<char, 7> dhm;
 
-    dhm.append(format_two_digits_string(day));
-    dhm.append(format_two_digits_string(hour));
-    dhm.append(format_two_digits_string(min));
+    format_n_digits_string(day, 2, dhm.begin());      // DD
+    format_n_digits_string(hour, 2, dhm.begin() + 2); // HH
+    format_n_digits_string(min, 2, dhm.begin() + 4);  // MM
 
-    dhm.append("z");
+    dhm[6] = 'z';                                     // z
 
-    return dhm;
+    return dhm;                                       // DDHHMMz
 }
 
-APRS_TRACK_INLINE string_t encode_utc_timestamp_hms(int hour, int min, int sec)
+APRS_TRACK_INLINE std::array<char, 7> encode_utc_timestamp_hms(int hour, int min, int sec)
 {
-    string_t dhm;
+    std::array<char, 7> hms;
 
-    dhm.append(format_two_digits_string(hour));
-    dhm.append(format_two_digits_string(min));
-    dhm.append(format_two_digits_string(sec));
+    format_n_digits_string(hour, 2, hms.begin());      // HH
+    format_n_digits_string(min, 2, hms.begin() + 2);   // MM
+    format_n_digits_string(sec, 2, hms.begin() + 4);   // SS
 
-    dhm.append("h");
+    hms[6] = 'h';                                      // h
 
-    return dhm;
+    return hms;                                        // HHMMSSh
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
@@ -1612,11 +1639,10 @@ APRS_TRACK_INLINE string_t encode_utc_timestamp_hms(int hour, int min, int sec)
 //                                                                  //
 // **************************************************************** //
 
-string_t encode_header(std::string_view from, std::string_view to, std::string_view path);
+template<std::output_iterator<char> OutputIt> OutputIt encode_header(std::string_view from, std::string_view to, std::string_view path, OutputIt out);
 
-#ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
-
-APRS_TRACK_INLINE string_t encode_header(std::string_view from, std::string_view to, std::string_view path)
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE OutputIt encode_header(std::string_view from, std::string_view to, std::string_view path, OutputIt out)
 {
     // Encode the header of a packet:
     //
@@ -1626,24 +1652,22 @@ APRS_TRACK_INLINE string_t encode_header(std::string_view from, std::string_view
     //   ~~~~~~ ~~~~ ~~~~~~~~~~~~~~~~~
     //   from  >to  ,path             :
 
-    string_t packet;
+    out = std::copy(from.begin(), from.end(), out);     // from
 
-    packet.append(from.data());
-    packet.append(1, '>');
-    packet.append(to.data());
+    *out++ = '>';                                       // '>'
 
-    if (path.empty() == false)
+    out = std::copy(to.begin(), to.end(), out);         // to
+
+    if (!path.empty())
     {
-        packet.append(1, ',');
-        packet.append(path.data());
+        *out++ = ',';                                   // ','
+        out = std::copy(path.begin(), path.end(), out); // path
     }
 
-    packet.append(1, ':');
+    *out++ = ':';                                       // ':'
 
-    return packet;
+    return out;                                         // from > to , path :
 }
-
-#endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 // **************************************************************** //
 //                                                                  //
@@ -1651,21 +1675,76 @@ APRS_TRACK_INLINE string_t encode_header(std::string_view from, std::string_view
 //                                                                  //
 // **************************************************************** //
 
-string_t encode_position_data_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees);
-string_t encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet);
-string_t encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet);
-string_t encode_course_speed(double course_degrees, double speed_knots);
-string_t encode_altitude(double altitude_feet);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_data_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_header(std::string_view from, std::string_view to, std::string_view path, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_course_speed(double course_degrees, double speed_knots, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_altitude(double alt_feet, OutputIt out);
+std::array<char, 20> encode_position_data_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
+position_ddm_string to_ddm_short_string(const position_ddm& p, int ambiguity);
+position_ddm dd_to_ddm(double lat, double lon);
+position_ddm_string to_ddm_short_string(const position_ddm& p, int ambiguity);
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out)
+{
+    out = encode_header(from, to, path, out);
+
+    out = encode_position_data_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, OutputIt out)
+{
+    out = encode_position_packet_no_timestamp_no_message(from, to, path, messaging, lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    out = encode_course_speed(track_degrees, speed_knots, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out)
+{
+    out = encode_position_packet_no_timestamp_no_message(from, to, path, messaging, lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    out = encode_altitude(alt_feet, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet, OutputIt out)
+{
+    out = encode_position_packet_no_timestamp_no_message(from, to, path, messaging, lat, lon, symbol_table, symbol_code, ambiguity, speed_knots, track_degrees, out);
+
+    out = encode_altitude(alt_feet, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_data_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out) // outside the fw decl ifdef
+{
+    std::array<char, 20> data = encode_position_data_no_timestamp(type, lat, lon, symbol_table, symbol_code, ambiguity);
+
+    out = std::copy(data.begin(), data.end(), out);
+
+    return out;
+}
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE string_t encode_position_data_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
+APRS_TRACK_INLINE std::array<char, 20> encode_position_data_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
 {
-    // 
+    //
     //  Data Format:
-    // 
+    //
     //     !   Lat  Sym  Lon  Sym Code   Comment
     //     =
     //    ------------------------------------------
@@ -1678,66 +1757,22 @@ APRS_TRACK_INLINE string_t encode_position_data_no_timestamp(char type, double l
     //    !49  .  N/072  .  W-
     //
 
-    string_t data;
+    std::array<char, 20> data;
 
-    data.append(1, type);
+    data[0] = type;                                       // type
 
     position_ddm ddm = dd_to_ddm(lat, lon);
     position_ddm_string ddm_str = to_ddm_short_string(ddm, ambiguity);
 
-    data.append(ddm_str.lat);
+    std::copy_n(ddm_str.lat.data(), 8, data.data() + 1);  // Lat: DDMM.MMd
 
-    data.append(1, symbol_table);
+    data[9] = symbol_table;                               // Symbol table (Sym)
 
-    data.append(ddm_str.lon);
+    std::copy_n(ddm_str.lon.data(), 9, data.data() + 10); // Lon: DDDMM.MMd
 
-    data.append(1, symbol_code);
+    data[19] = symbol_code;                               // symbol code (Sym Code)
 
-    return data;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
-{
-    string_t packet;
-
-    packet.append(encode_header(from, to, path));
-
-    packet.append(encode_position_data_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, ambiguity));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees)
-{
-    string_t packet;
-
-    packet.append(encode_position_packet_no_timestamp_no_message(from, to, path, messaging, lat, lon, symbol_table, symbol_code, ambiguity));
-
-    packet.append(encode_course_speed(track_degrees, speed_knots));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet)
-{
-    string_t packet;
-
-    packet.append(encode_position_packet_no_timestamp_no_message(from, to, path, messaging, lat, lon, symbol_table, symbol_code, ambiguity));
-
-    packet.append(encode_altitude(alt_feet));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet)
-{
-    string_t packet;
-
-    packet.append(encode_position_packet_no_timestamp_no_message(from, to, path, messaging, lat, lon, symbol_table, symbol_code, ambiguity, speed_knots, track_degrees));
-
-    packet.append(encode_altitude(alt_feet));
-
-    return packet;
+    return data;                                          // type DDMM.MMd Sym DDDMM.MMd Sym Code
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
@@ -1748,17 +1783,72 @@ APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_no_message(std::s
 //                                                                  //
 // **************************************************************** //
 
-string_t encode_position_data_with_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees);
-string_t encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet);
-string_t encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet);
-string_t encode_course_speed(double course_degrees, double speed_knots);
-string_t encode_altitude(double altitude_feet);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_data_with_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt);
+template<std::output_iterator<char> OutputIt> OutputIt encode_header(std::string_view from, std::string_view to, std::string_view path, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_course_speed(double course_degrees, double speed_knots, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_altitude(double alt_feet, OutputIt out);
+std::array<char, 27> encode_position_data_with_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
+std::array<char, 7> encode_timestamp_dhm(int day, int hour, int min);
+position_ddm dd_to_ddm(double lat, double lon);
+position_ddm_string to_ddm_short_string(const position_ddm& p, int ambiguity);
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out)
+{
+    out = encode_header(from, to, path, out);
+
+    out = encode_position_data_with_timestamp_dhm(packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, OutputIt out)
+{
+    out = encode_position_packet_with_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    out = encode_course_speed(track_degrees, speed_knots, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out)
+{
+    out = encode_position_packet_with_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    out = encode_altitude(alt_feet, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet, OutputIt out)
+{
+    out = encode_position_packet_with_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity, speed_knots, track_degrees, out);
+
+    out = encode_altitude(alt_feet, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_data_with_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out)
+{
+    std::array<char, 27> data = encode_position_data_with_timestamp_dhm(type, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity);
+
+    out = std::copy(data.begin(), data.end(), out);
+
+    return out;
+}
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE string_t encode_position_data_with_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
+APRS_TRACK_INLINE std::array<char, 27> encode_position_data_with_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
 {
     // 
     //  Data Format:
@@ -1774,70 +1864,26 @@ APRS_TRACK_INLINE string_t encode_position_data_with_timestamp_dhm(char type, in
     //    @092345/4903.50N/07201.75W>Test1234
     //
 
-    string_t data;
+    std::array<char, 27> data;
 
-    data.append(1, type);
+    data[0] = type;                                                       // type
 
-    data.append(encode_timestamp_dhm(day, hour, min));
+    std::array<char, 7> timestamp = encode_timestamp_dhm(day, hour, min);
+
+    std::copy_n(timestamp.data(), timestamp.size(), data.begin() + 1);    // Time: DDHHMM/
 
     position_ddm ddm = dd_to_ddm(lat, lon);
     position_ddm_string ddm_str = to_ddm_short_string(ddm, ambiguity);
 
-    data.append(ddm_str.lat);
+    std::copy_n(ddm_str.lat.data(), 8, data.data() + 8);                  // Lat: DDMM.MMd
 
-    data.append(1, symbol_table);
+    data[16] = symbol_table;                                              // Symbol table (Sym)
 
-    data.append(ddm_str.lon);
+    std::copy_n(ddm_str.lon.data(), 9, data.data() + 17);                 // Lon: DDDMM.MMd
 
-    data.append(1, symbol_code);
+    data[26] = symbol_code;                                               // symbol code (Sym Code)
 
-    return data;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
-{
-    string_t packet;
-
-    packet.append(encode_header(from, to, path));
-
-    packet.append(encode_position_data_with_timestamp_dhm(packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees)
-{
-    string_t packet;
-
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(from, to, path, packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
-
-    packet.append(encode_course_speed(track_degrees, speed_knots));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet)
-{
-    string_t packet;
-
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(from, to, path, packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
-
-    packet.append(encode_altitude(alt_feet));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet)
-{
-    string_t packet;
-
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message(from, to, path, packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
-
-    packet.append(encode_course_speed(track_degrees, speed_knots));
-
-    packet.append(encode_altitude(alt_feet));
-
-    return packet;
+    return data;                                                          // type DDHHMM/ DDMM.MMd Sym DDDMM.MMd Sym Code
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
@@ -1848,17 +1894,72 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_no_message(
 //                                                                  //
 // **************************************************************** //
 
-string_t encode_position_data_with_utc_timestamp_hms(char type, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees);
-string_t encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet);
-string_t encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet);
-string_t encode_course_speed(double course_degrees, double speed_knots);
-string_t encode_altitude(double altitude_feet);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_data_with_utc_timestamp_hms(char type, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_header(std::string_view from, std::string_view to, std::string_view path, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_course_speed(double course_degrees, double speed_knots, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_altitude(double alt_feet, OutputIt out);
+std::array<char, 27> encode_position_data_with_utc_timestamp_hms(char type, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
+std::array<char, 7> encode_utc_timestamp_hms(int hour, int min, int sec);
+position_ddm dd_to_ddm(double lat, double lon);
+position_ddm_string to_ddm_short_string(const position_ddm& p, int ambiguity);
+
+template <std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_data_with_utc_timestamp_hms(char type, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out)
+{
+    std::array<char, 27>  data = encode_position_data_with_utc_timestamp_hms(type, hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity);
+
+    out = std::copy(data.begin(), data.end(), out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out)
+{
+    out = encode_header(from, to, path, out);
+
+    out = encode_position_data_with_utc_timestamp_hms(packet_type_with_timestamp(messaging), hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, OutputIt out)
+{
+    out = encode_position_packet_with_utc_timestamp_hms_no_message(from, to, path, messaging, hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    out = encode_course_speed(track_degrees, speed_knots, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out)
+{
+    out = encode_position_packet_with_utc_timestamp_hms_no_message(from, to, path, messaging, hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    out = encode_altitude(alt_feet, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet, OutputIt out)
+{
+    out = encode_position_packet_with_utc_timestamp_hms_no_message(from, to, path, messaging, hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity, speed_knots, track_degrees, out);
+
+    out = encode_altitude(alt_feet, out);
+
+    return out;
+}
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE string_t encode_position_data_with_utc_timestamp_hms(char type, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
+APRS_TRACK_INLINE std::array<char, 27> encode_position_data_with_utc_timestamp_hms(char type, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
 {
     // 
     //  Data Format:
@@ -1874,70 +1975,26 @@ APRS_TRACK_INLINE string_t encode_position_data_with_utc_timestamp_hms(char type
     //    @092345/4903.50N/07201.75W>Test1234
     //    @234517h4903.50N/07201.75W>Test1234
 
-    string_t data;
+    std::array<char, 27> data;
 
-    data.append(1, type);
+    data[0] = type;                                                           // type
 
-    data.append(encode_utc_timestamp_hms(hour, min, sec));
+    std::array<char, 7> timestamp = encode_utc_timestamp_hms(hour, min, sec);
+
+    std::copy_n(timestamp.data(), timestamp.size(), data.begin() + 1);        // Time: HHMMSSh
 
     position_ddm ddm = dd_to_ddm(lat, lon);
     position_ddm_string ddm_str = to_ddm_short_string(ddm, ambiguity);
 
-    data.append(ddm_str.lat);
+    std::copy_n(ddm_str.lat.data(), ddm_str.lat.size(), data.begin() + 8);    // Lat: DDMM.MMd
 
-    data.append(1, symbol_table);
+    data[16] = symbol_table;                                                  // Symbol table (Sym)
 
-    data.append(ddm_str.lon);
+    std::copy_n(ddm_str.lon.data(), ddm_str.lon.size(), data.begin() + 17);   // Lon: DDDMM.MMd
 
-    data.append(1, symbol_code);
+    data[26] = symbol_code;                                                   // symbol code (Sym Code)
 
-    return data;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
-{
-    string_t packet;
-
-    packet.append(encode_header(from, to, path));
-
-    packet.append(encode_position_data_with_utc_timestamp_hms(packet_type_with_timestamp(messaging), hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity));
-    
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees)
-{
-    string_t packet;
-    
-    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message(from, to, path, messaging, hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity));
-    
-    packet.append(encode_course_speed(track_degrees, speed_knots));
-    
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet)
-{
-    string_t packet;
-
-    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message(from, to, path, messaging, hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity));
-    
-    packet.append(encode_altitude(alt_feet));
-    
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet)
-{
-    string_t packet;
-   
-    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message(from, to, path, messaging, hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity));
-    
-    packet.append(encode_course_speed(track_degrees, speed_knots));
-    
-    packet.append(encode_altitude(alt_feet));
-    
-    return packet;
+    return data;                                                              // type HHMMSSh DDMM.MMd Sym DDDMM.MMd Sym Code
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
@@ -1948,17 +2005,72 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_no_mess
 //                                                                  //
 // **************************************************************** //
 
-string_t encode_position_data_with_utc_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees);
-string_t encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet);
-string_t encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet);
-string_t encode_course_speed(double course_degrees, double speed_knots);
-string_t encode_altitude(double altitude_feet);
+template <std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template <std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, OutputIt out);
+template <std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out);
+template <std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet, OutputIt out);
+template <std::output_iterator<char> OutputIt> OutputIt encode_position_data_with_utc_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_header(std::string_view from, std::string_view to, std::string_view path, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_course_speed(double course_degrees, double speed_knots, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_altitude(double alt_feet, OutputIt out);
+std::array<char, 27> encode_position_data_with_utc_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity);
+std::array<char, 7> encode_utc_timestamp_dhm(int day, int hour, int min);
+position_ddm dd_to_ddm(double lat, double lon);
+position_ddm_string to_ddm_short_string(const position_ddm& p, int ambiguity);
+
+template <std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_data_with_utc_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out)
+{
+    std::array<char, 27> data = encode_position_data_with_utc_timestamp_dhm(type, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity);
+
+    out = std::copy(data.begin(), data.end(), out);
+
+    return out;
+}
+
+template <std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out)
+{
+    out = encode_header(from, to, path, out);
+
+    out = encode_position_data_with_utc_timestamp_dhm(packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    return out;
+}
+
+template <std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, OutputIt out)
+{
+    out = encode_position_packet_with_utc_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    out = encode_course_speed(track_degrees, speed_knots, out);
+
+    return out;
+}
+
+template <std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out)
+{
+    out = encode_position_packet_with_utc_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity, out);
+
+    out = encode_altitude(alt_feet, out);
+
+    return out;
+}
+
+template <std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet, OutputIt out)
+{
+    out = encode_position_packet_with_utc_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity, speed_knots, track_degrees, out);
+
+    out = encode_altitude(alt_feet, out);
+
+    return out;
+}
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE string_t encode_position_data_with_utc_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
+APRS_TRACK_INLINE std::array<char, 27> encode_position_data_with_utc_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
 {
     // 
     //  Data Format:
@@ -1974,70 +2086,26 @@ APRS_TRACK_INLINE string_t encode_position_data_with_utc_timestamp_dhm(char type
     //    @092345/4903.50N/07201.75W>Test1234
     //
 
-    string_t data;
+    std::array<char, 27> data;
 
-    data.append(1, type);
+    data[0] = type;                                                       // type
 
-    data.append(encode_utc_timestamp_dhm(day, hour, min));
+    std::array<char, 7> timestamp = encode_utc_timestamp_dhm(day, hour, min);
+
+    std::copy_n(timestamp.data(), timestamp.size(), data.begin() + 1);    // Time: DDHHMMz
 
     position_ddm ddm = dd_to_ddm(lat, lon);
     position_ddm_string ddm_str = to_ddm_short_string(ddm, ambiguity);
 
-    data.append(ddm_str.lat);
+    std::copy_n(ddm_str.lat.data(), 8, data.data() + 8);                  // Lat: DDMM.MMd
 
-    data.append(1, symbol_table);
+    data[16] = symbol_table;                                              // Symbol table (Sym)
 
-    data.append(ddm_str.lon);
+    std::copy_n(ddm_str.lon.data(), 9, data.data() + 17);                 // Lon: DDDMM.MMd
 
-    data.append(1, symbol_code);
+    data[26] = symbol_code;                                               // symbol code (Sym Code)
 
-    return data;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity)
-{
-    string_t packet;
-
-    packet.append(encode_header(from, to, path));
-
-    packet.append(encode_position_data_with_utc_timestamp_dhm(packet_type_with_timestamp(messaging), day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
-    
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees)
-{
-    string_t packet;
-  
-    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
-    
-    packet.append(encode_course_speed(track_degrees, speed_knots));
-    
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet)
-{
-    string_t packet;
-
-    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
-
-    packet.append(encode_altitude(alt_feet));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet)
-{
-    string_t packet;
-
-    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity));
-    
-    packet.append(encode_course_speed(track_degrees, speed_knots));
-    
-    packet.append(encode_altitude(alt_feet));
-    
-    return packet;
+    return data;                                                          // type DDHHMMz DDMM.MMd Sym DDDMM.MMd Sym Code
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
@@ -2048,21 +2116,101 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_no_mess
 //                                                                  //
 // **************************************************************** //
 
-string_t encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code);
-string_t encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type);
-string_t encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type);
-string_t encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type);
-string_t encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type);
-string_t encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type);
-string_t encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type);
-string_t encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, double alt_feet);
-string_t encode_compressed_course_speed(double course_degrees, double speed_knots);
-string_t encode_compressed_altitude(double altitude_feet);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_header(std::string_view from, std::string_view to, std::string_view path, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_altitude(double alt_feet, OutputIt out);
+std::array<char, 11> encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code);
+std::array<char, 12> encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type);
+std::array<char, 14> encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type);
+std::array<char, 14> encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type);
+std::array<char, 2> encode_compressed_course_speed(double course_degrees, double speed_knots);
+std::array<char, 2> encode_compressed_altitude(double altitude_feet);
 int compression_type_to_int(compression_type type);
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type, OutputIt out)
+{
+    out = encode_header(from, to, path, out);
+
+    out = encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, compression_type, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, OutputIt out)
+{
+    out = encode_header(from, to, path, out);
+
+    out = encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type, OutputIt out)
+{
+    out = encode_header(from, to, path, out);
+
+    out = encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, alt_feet, compression_type, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, double alt_feet, OutputIt out)
+{
+    out = encode_header(from, to, path, out);
+
+    out = encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type, out);
+
+    out = encode_altitude(alt_feet, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, OutputIt out)
+{
+    auto data = encode_position_data_compressed_no_timestamp(type, lat, lon, symbol_table, symbol_code);
+
+    return std::copy(data.begin(), data.end(), out);
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type, OutputIt out)
+{
+    auto data = encode_position_data_compressed_no_timestamp(type, lat, lon, symbol_table, symbol_code, compression_type);
+
+    return std::copy(data.begin(), data.end(), out);
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, OutputIt out)
+{
+    auto data = encode_position_data_compressed_no_timestamp(type, lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type);
+
+    return std::copy(data.begin(), data.end(), out);
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type, OutputIt out)
+{
+    auto data = encode_position_data_compressed_no_timestamp(type, lat, lon, symbol_table, symbol_code, alt_feet, compression_type);
+
+    return std::copy(data.begin(), data.end(), out);
+}
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE string_t encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code)
+APRS_TRACK_INLINE std::array<char, 11> encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code)
 {
     //
     //  Data Format:
@@ -2077,21 +2225,23 @@ APRS_TRACK_INLINE string_t encode_position_data_compressed_no_timestamp(char typ
     //    =/5L!!<*e7>7P[
     //
 
-    string_t data;
+    std::array<char, 11> data;
 
-    data.append(1, type);
+    data[0] = type;                                               // type
+    data[1] = symbol_table;                                       // symbol table (Sym)
 
-    data.append(1, symbol_table);
+    std::array<char, 4> lat_arr = encode_compressed_lat(lat);
+    std::array<char, 4> lon_arr = encode_compressed_lon(lon);
 
-    data.append(encode_compressed_lat(lat));
-    data.append(encode_compressed_lon(lon));
+    std::copy_n(lat_arr.data(), lat_arr.size(), data.data() + 2); // compressed latitude (Comp Lat)
+    std::copy_n(lon_arr.data(), lon_arr.size(), data.data() + 6); // compressed longitude (Comp Lon)
 
-    data.append(1, symbol_code);
+    data[10] = symbol_code;                                       // symbol code (Sym Code)
 
-    return data;
+    return data;                                                  // type Sym Comp Lat Comp Lon Sym Code
 }
 
-APRS_TRACK_INLINE string_t encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type)
+APRS_TRACK_INLINE std::array<char, 12> encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type)
 {
     //
     //  Data Format:
@@ -2106,23 +2256,26 @@ APRS_TRACK_INLINE string_t encode_position_data_compressed_no_timestamp(char typ
     //    =/5L!!<*e7>7P[
     //
 
-    string_t data;
+    std::array<char, 12> data;
 
-    data.append(1, type);
+    data[0] = type;                                               // type
 
-    data.append(1, symbol_table);
+    data[1] = symbol_table;                                       // symbol table (Sym)
 
-    data.append(encode_compressed_lat(lat));
-    data.append(encode_compressed_lon(lon));
+    std::array<char, 4> lat_arr = encode_compressed_lat(lat);
+    std::array<char, 4> lon_arr = encode_compressed_lon(lon);
 
-    data.append(1, symbol_code);
+    std::copy_n(lat_arr.data(), lat_arr.size(), data.data() + 2); // compressed latitude (Comp Lat)
+    std::copy_n(lon_arr.data(), lon_arr.size(), data.data() + 6); // compressed longitude (Comp Lon)
 
-    data.append(1, static_cast<char>(compression_type));
+    data[10] = symbol_code;                                       // symbol code (Sym Code)
 
-    return data;
+    data[11] = static_cast<char>(compression_type);               // compression type (CompType)
+
+    return data;                                                  // type Sym Comp Lat Comp Lon Sym Code CompType
 }
 
-APRS_TRACK_INLINE string_t encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type)
+APRS_TRACK_INLINE std::array<char, 14> encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type)
 {
     //
     //  Data Format:
@@ -2137,25 +2290,30 @@ APRS_TRACK_INLINE string_t encode_position_data_compressed_no_timestamp(char typ
     //    =/5L!!<*e7>7P[
     //
 
-    string_t data;
+    std::array<char, 14> data;
 
-    data.append(1, type);
+    data[0] = type;                                               // type
 
-    data.append(1, symbol_table);
+    data[1] = symbol_table;                                       // symbol table (Sym)
 
-    data.append(encode_compressed_lat(lat));
-    data.append(encode_compressed_lon(lon));
+    std::array<char, 4> lat_arr = encode_compressed_lat(lat);
+    std::array<char, 4> lon_arr = encode_compressed_lon(lon);
 
-    data.append(1, symbol_code);
+    std::copy_n(lat_arr.data(), lat_arr.size(), data.data() + 2); // compressed latitude (Comp Lat)
+    std::copy_n(lon_arr.data(), lon_arr.size(), data.data() + 6); // compressed longitude (Comp Lon)
 
-    data.append(encode_compressed_course_speed(course_degrees, speed_knots));
+    data[10] = symbol_code;                                       // symbol code (Sym Code)
 
-    data.append(1, static_cast<char>(compression_type));
+    std::array<char, 2> course_speed_arr = encode_compressed_course_speed(course_degrees, speed_knots);
 
-    return data;
+    std::copy_n(course_speed_arr.data(), course_speed_arr.size(), data.data() + 11); // compressed course/speed (Comp Speed)
+
+    data[13] = static_cast<char>(compression_type);               // compression type (CompType)
+
+    return data;                                                  // type Sym Comp Lat Comp Lon Sym Code Comp Speed CompType
 }
 
-APRS_TRACK_INLINE string_t encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type)
+APRS_TRACK_INLINE std::array<char, 14> encode_position_data_compressed_no_timestamp(char type, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type)
 {
     //
     //  Data Format:
@@ -2170,76 +2328,36 @@ APRS_TRACK_INLINE string_t encode_position_data_compressed_no_timestamp(char typ
     //    =/5L!!<*e7>7P[
     //
 
-    string_t data;
 
-    data.append(1, type);
+    std::array<char, 14> data;
 
-    data.append(1, symbol_table);
+    data[0] = type;                                                // type
 
-    data.append(encode_compressed_lat(lat));
-    data.append(encode_compressed_lon(lon));
+    data[1] = symbol_table;                                        // symbol table (Sym)
 
-    data.append(1, symbol_code);
+    std::array<char, 4> lat_arr = encode_compressed_lat(lat);
+    std::array<char, 4> lon_arr = encode_compressed_lon(lon);
 
-    data.append(encode_compressed_altitude(alt_feet));
+    std::copy_n(lat_arr.data(), lat_arr.size(), data.data() + 2);  // compressed latitude (Comp Lat)
+    std::copy_n(lon_arr.data(), lon_arr.size(), data.data() + 6);  // compressed longitude (Comp Lon)
 
-    data.append(1, static_cast<char>(compression_type));
+    data[10] = symbol_code;                                        // symbol code (Sym Code)
 
-    return data;
+    std::array<char, 2> alt_arr = encode_compressed_altitude(alt_feet);
+
+    std::copy_n(alt_arr.data(), alt_arr.size(), data.data() + 11); // compressed altitude (Comp Alt)
+
+    data[13] = static_cast<char>(compression_type);                // compression type (CompType)
+
+    return data;                                                   // type Sym Comp Lat Comp Lon Sym Code Comp Alt CompType
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, unsigned char compression_type)
+APRS_TRACK_INLINE std::array<char, 2> encode_compressed_course_speed(double course_degrees, double speed_knots)
 {
-    string_t packet;
-
-    packet.append(encode_header(from, to, path));
-
-    packet.append(encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, compression_type));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type)
-{
-    string_t packet;
-
-    packet.append(encode_header(from, to, path));
-    
-    packet.append(encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double alt_feet, unsigned char compression_type)
-{
-    string_t packet;
-
-    packet.append(encode_header(from, to, path));
-
-    packet.append(encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, alt_feet, compression_type));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, double course_degrees, double speed_knots, unsigned char compression_type, double alt_feet)
-{
-    string_t packet;
-
-    packet.append(encode_header(from, to, path));
-
-    packet.append(encode_position_data_compressed_no_timestamp(packet_type_without_timestamp(messaging), lat, lon, symbol_table, symbol_code, course_degrees, speed_knots, compression_type));
-
-    packet.append(encode_altitude(alt_feet));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_compressed_course_speed(double course_degrees, double speed_knots)
-{
-    string_t course_speed(2, '\0');
+    std::array<char, 2> course_speed;
 
     // course degrees is expressed in degrees 0 to 359, clockwise from due north
-    // if the value exceeds 359, it is wrapped around to 0
+    // if the value exceeds 359, data_it is wrapped around to 0
     while (course_degrees >= 360.0)
     {
         course_degrees -= 360.0;
@@ -2254,19 +2372,19 @@ APRS_TRACK_INLINE string_t encode_compressed_course_speed(double course_degrees,
     return course_speed;
 }
 
-APRS_TRACK_INLINE string_t encode_compressed_altitude(double altitude_feet)
+APRS_TRACK_INLINE std::array<char, 2> encode_compressed_altitude(double altitude_feet)
 {
+    std::array<char, 2> alt;
+
     int cs = static_cast<int>(std::round(std::log(altitude_feet) / std::log(1.002)));
 
     int c = cs / 91;
     int s = cs % 91;
 
-    string_t out(2, '\0');
+    alt[0] = static_cast<char>(c + 33);
+    alt[1] = static_cast<char>(s + 33);
 
-    out[0] = static_cast<char>(c + 33);
-    out[1] = static_cast<char>(s + 33);
-
-    return out;
+    return alt;
 }
 
 APRS_TRACK_INLINE int compression_type_to_int(compression_type type)
@@ -2360,81 +2478,137 @@ APRS_TRACK_INLINE int compression_type_to_int(compression_type type)
 //                                                                  //
 // **************************************************************** //
 
-string_t encode_mic_e_data(char type, double lat, double lon, double course_degrees, double speed_knots, char symbol_table, char symbol_code);
-string_t encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity);
-string_t encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity, double alt_feet);
-void add_mic_e_position_ambiguity(string_t& destination_address, int ambiguity);
-void encode_mic_e_status(int a, int b, int c, bool custom, string_t& destination_address);
-void encode_mic_e_lat_direction(char direction, string_t& destination_address);
-void encode_mic_lon_offset(bool offset, string_t& destination_address);
-void encode_mic_lon_direction(char direction, string_t& destination_address);
+template<std::output_iterator<char> OutputIt> OutputIt encode_mic_e_data(char type, double lat, double lon, double course_degrees, double speed_knots, char symbol_table, char symbol_code, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_mic_e_course_speed(double course_degrees, double speed_knots, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_mic_e_course_speed_alternate(double course_degrees, double speed_knots, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_mic_e_alt_feet(double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_mic_e_alt(double alt_meters, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt append_mic_e_manufacturer(std::string_view manufacturer_version, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_header(std::string_view from, std::string_view to, std::string_view path, OutputIt out);
+std::array<char, 9> encode_mic_e_data(char type, double lat, double lon, double course_degrees, double speed_knots, char symbol_table, char symbol_code);
+void add_mic_e_position_ambiguity(std::array<char, 6>& destination_address, int ambiguity);
+void encode_mic_e_status(int a, int b, int c, bool custom, std::array<char, 6>& destination_address);
+void encode_mic_e_lat_direction(char direction, std::array<char, 6>& destination_address);
+void encode_mic_lon_offset(bool offset, std::array<char, 6>& destination_address);
+void encode_mic_lon_direction(char direction, std::array<char, 6>& destination_address);
 std::tuple<int, int, int, bool> encode_mic_e_status(mic_e_status status);
-void encode_mic_e_status(mic_e_status status, string_t& destination_address);
-string_t encode_mic_e_lat(double lat);
-string_t encode_mic_e_lat(double lat, mic_e_status status);
-string_t encode_mic_e_lat(double lat, double lon, mic_e_status status, int ambiguity);
+void encode_mic_e_status(mic_e_status status, std::array<char, 6>& destination_address);
+std::array<char, 6> encode_mic_e_lat(double lat);
+std::array<char, 6> encode_mic_e_lat(double lat, mic_e_status status);
+std::array<char, 6> encode_mic_e_lat(double lat, double lon, mic_e_status status, int ambiguity);
 char encode_mic_e_lon_degrees(int lon_d);
 char encode_mic_e_lon_minutes(int lon_m);
 char encode_mic_e_lon_hundred_minutes(int lon_h);
-string_t encode_mic_e_lon(double lon);
-string_t encode_mic_e_course_speed(double course_degrees, double speed_knots);
-string_t encode_mic_e_course_speed_alternate(double course_degrees, double speed_knots);
-string_t encode_mic_e_alt(double alt_meters);
-string_t encode_mic_e_alt_feet(double alt_feet);
+std::array<char, 3> encode_mic_e_lon(double lon);
+std::array<char, 3> encode_mic_e_course_speed(double course_degrees, double speed_knots);
+std::array<char, 3> encode_mic_e_course_speed_alternate(double course_degrees, double speed_knots);
+std::array<char, 4> encode_mic_e_alt(double alt_meters);
+std::array<char, 4> encode_mic_e_alt_feet(double alt_feet);
+double round_number_to_nearest_tenth(double number);
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_mic_e_data(char type, double lat, double lon, double course_degrees, double speed_knots, char symbol_table, char symbol_code, OutputIt out)
+{
+    std::array<char, 9> data = encode_mic_e_data(type, lat, lon, course_degrees, speed_knots, symbol_table, symbol_code);
+
+    out = std::copy(data.begin(), data.end(), out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity, OutputIt out)
+{
+    std::array<char, 6> lat_str = encode_mic_e_lat(lat, lon, status, ambiguity);
+
+    out = encode_header(from, { lat_str.data(), lat_str.size() }, path, out);
+
+    out = encode_mic_e_data('`', lat, lon, course_degrees, speed_knots, symbol_table, symbol_code, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out)
+{
+    out = encode_mic_e_packet_no_message(from, path, lat, lon, status, course_degrees, speed_knots, symbol_table, symbol_code, ambiguity, out);
+
+    out = encode_mic_e_alt_feet(alt_feet, out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_mic_e_course_speed(double course_degrees, double speed_knots, OutputIt out)
+{
+    std::array<char, 3> course_speed = encode_mic_e_course_speed(course_degrees, speed_knots);
+
+    out = std::copy(course_speed.begin(), course_speed.end(), out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_mic_e_course_speed_alternate(double course_degrees, double speed_knots, OutputIt out)
+{
+    std::array<char, 3> course_speed = encode_mic_e_course_speed_alternate(course_degrees, speed_knots);
+
+    out = std::copy(course_speed.begin(), course_speed.end(), out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_mic_e_alt_feet(double alt_feet, OutputIt out)
+{
+    std::array<char, 4> alt_arr = encode_mic_e_alt_feet(alt_feet);
+
+    out = std::copy(alt_arr.begin(), alt_arr.end(), out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_mic_e_alt(double alt_meters, OutputIt out)
+{
+    std::array<char, 4> alt_arr = encode_mic_e_alt(alt_meters);
+
+    out = std::copy(alt_arr.begin(), alt_arr.end(), out);
+
+    return out;
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt append_mic_e_manufacturer(std::string_view manufacturer_version, OutputIt out)
+{
+    return std::copy(manufacturer_version.begin(), manufacturer_version.end(), out);
+}
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE double round_number(double number)
-{
-    double factor = 10.0;
-    return std::round(number * factor) / factor;
-}
-
-APRS_TRACK_INLINE string_t encode_mic_e_data(char type, double lat, double lon, double course_degrees, double speed_knots, char symbol_table, char symbol_code)
+APRS_TRACK_INLINE std::array<char, 9> encode_mic_e_data(char type, double lat, double lon, double course_degrees, double speed_knots, char symbol_table, char symbol_code)
 {
     (void)lat;
 
-    string_t data;
+    std::array<char, 9> data;
 
-    data.append(1, type);
+    data[0] = type;
 
-    data.append(encode_mic_e_lon(lon));
-    data.append(encode_mic_e_course_speed(course_degrees, speed_knots));
+    std::array<char, 3> lon_arr = encode_mic_e_lon(lon);
+    std::array<char, 3> course_speed_arr = encode_mic_e_course_speed(course_degrees, speed_knots);
 
-    data.append(1, symbol_code);
-    data.append(1, symbol_table);
+    std::copy_n(lon_arr.data(), lon_arr.size(), data.data() + 1);
+    std::copy_n(course_speed_arr.data(), course_speed_arr.size(), data.data() + 4);
+
+    data[7] = symbol_code;
+    data[8] = symbol_table;
 
     return data;
 }
 
-// support type... first character
-// 
-
-APRS_TRACK_INLINE string_t encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity)
-{
-    string_t packet;
-
-    string_t lat_str = encode_mic_e_lat(lat, lon, status, ambiguity);
-
-    packet.append(encode_header(from, lat_str.data(), path));
-
-    packet.append(encode_mic_e_data('`', lat, lon, course_degrees, speed_knots, symbol_table, symbol_code));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t encode_mic_e_packet_no_message(std::string_view from, std::string_view path, double lat, double lon, mic_e_status status, double course_degrees, double speed_knots, char symbol_table, char symbol_code, int ambiguity, double alt_feet)
-{
-    string_t packet;
-
-    packet.append(encode_mic_e_packet_no_message(from, path, lat, lon, status, course_degrees, speed_knots, symbol_table, symbol_code, ambiguity));
-
-    packet.append(encode_mic_e_alt_feet(alt_feet));
-
-    return packet;
-}
-
-APRS_TRACK_INLINE void add_mic_e_position_ambiguity(string_t& destination_address, int ambiguity)
+APRS_TRACK_INLINE void add_mic_e_position_ambiguity(std::array<char, 6>& destination_address, int ambiguity)
 {
     if (!(ambiguity > 0))
     {
@@ -2458,26 +2632,14 @@ APRS_TRACK_INLINE void add_mic_e_position_ambiguity(string_t& destination_addres
     }
 }
 
-APRS_TRACK_INLINE void insert_mic_e_type(string_t& data, std::string_view type)
+APRS_TRACK_INLINE void encode_mic_e_status(int a, int b, int c, bool custom, std::array<char, 6>& destination_address)
 {
-    assert(data.size() >= 9);
-    data.insert(9, type.data());
-}
-
-APRS_TRACK_INLINE void append_mic_e_manufacturer(string_t& packet_or_data, std::string_view manufacturer_version)
-{
-    assert(manufacturer_version.size() >= 1);
-    packet_or_data.append(manufacturer_version.data(), manufacturer_version.size());
-}
-
-APRS_TRACK_INLINE void encode_mic_e_status(int a, int b, int c, bool custom, string_t& destination_address)
-{
-    int message_bits[3] = {a, b, c};
+    int message_bits[3] = { a, b, c };
 
     for (size_t i = 0; i < 3; i++)
     {
         // this handling is not necessary due to how the
-        // lat ambiguity is applied later, but it is useful in testing
+        // lat ambiguity is applied later, but data_it is useful in testing
         if (destination_address[i] == ' ')
         {
             if (message_bits[i] == 1 && custom)
@@ -2506,10 +2668,10 @@ APRS_TRACK_INLINE void encode_mic_e_status(int a, int b, int c, bool custom, str
     }
 }
 
-APRS_TRACK_INLINE void encode_mic_e_lat_direction(char direction, string_t& destination_address)
+APRS_TRACK_INLINE void encode_mic_e_lat_direction(char direction, std::array<char, 6>& destination_address)
 {
     // this handling is not necessary due to how the
-    // lat ambiguity is applied later, but it is useful in testing
+    // lat ambiguity is applied later, but data_it is useful in testing
     if (destination_address[3] == ' ')
     {
         if (direction == 'N')
@@ -2529,10 +2691,10 @@ APRS_TRACK_INLINE void encode_mic_e_lat_direction(char direction, string_t& dest
     }
 }
 
-APRS_TRACK_INLINE void encode_mic_lon_offset(bool offset, string_t& destination_address)
+APRS_TRACK_INLINE void encode_mic_lon_offset(bool offset, std::array<char, 6>& destination_address)
 {
     // this handling is not necessary due to how the
-    // lat ambiguity is applied later, but it is useful in testing
+    // lat ambiguity is applied later, but data_it is useful in testing
     if (destination_address[4] == ' ')
     {
         if (offset)
@@ -2552,10 +2714,10 @@ APRS_TRACK_INLINE void encode_mic_lon_offset(bool offset, string_t& destination_
     }
 }
 
-APRS_TRACK_INLINE void encode_mic_lon_direction(char direction, string_t& destination_address)
+APRS_TRACK_INLINE void encode_mic_lon_direction(char direction, std::array<char, 6>& destination_address)
 {
     // this handling is not necessary due to how the
-    // lat ambiguity is applied later, but it is useful in testing
+    // lat ambiguity is applied later, but data_it is useful in testing
     if (destination_address[5] == ' ')
     {
         if (direction == 'W')
@@ -2694,7 +2856,7 @@ APRS_TRACK_INLINE std::tuple<int, int, int, bool> encode_mic_e_status(mic_e_stat
     return std::make_tuple(a, b, c, custom);
 }
 
-APRS_TRACK_INLINE void encode_mic_e_status(mic_e_status status, string_t& destination_address)
+APRS_TRACK_INLINE void encode_mic_e_status(mic_e_status status, std::array<char, 6>& destination_address)
 {
     int a = 0;
     int b = 0;
@@ -2706,7 +2868,7 @@ APRS_TRACK_INLINE void encode_mic_e_status(mic_e_status status, string_t& destin
     encode_mic_e_status(a, b, c, custom, destination_address);
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_lat(double lat)
+APRS_TRACK_INLINE std::array<char, 6> encode_mic_e_lat(double lat)
 {
     // Converts decimal degrees coordinates to mic-e position format:
     //
@@ -2745,16 +2907,18 @@ APRS_TRACK_INLINE string_t encode_mic_e_lat(double lat)
     char buffer[7];
     std::snprintf(buffer, sizeof(buffer), "%02d%02d%02d", lat_d, static_cast<int>(lat_m_f), static_cast<int>(lat_m_i));
 
-    string_t lat_str(buffer);
+    std::array<char, 6> lat_str;
+
+    std::copy(buffer, buffer + 6, lat_str.begin());
 
     return lat_str;
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_lat(double lat, mic_e_status status)
+APRS_TRACK_INLINE std::array<char, 6> encode_mic_e_lat(double lat, mic_e_status status)
 {
     char direction = (lat >= 0.0) ? 'N' : 'S';
 
-    string_t lat_str = encode_mic_e_lat(lat);
+    std::array<char, 6> lat_str = encode_mic_e_lat(lat);
 
     encode_mic_e_status(status, lat_str);
     encode_mic_e_lat_direction(direction, lat_str);
@@ -2762,9 +2926,9 @@ APRS_TRACK_INLINE string_t encode_mic_e_lat(double lat, mic_e_status status)
     return lat_str;
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_lat(double lat, double lon, mic_e_status status, int ambiguity)
+APRS_TRACK_INLINE std::array<char, 6> encode_mic_e_lat(double lat, double lon, mic_e_status status, int ambiguity)
 {
-    string_t lat_str = encode_mic_e_lat(lat, status);
+    std::array<char, 6> lat_str = encode_mic_e_lat(lat, status);
 
     double lon_abs = std::fabs(lon);
     int lon_d = static_cast<int>(lon_abs);
@@ -2832,7 +2996,7 @@ APRS_TRACK_INLINE char encode_mic_e_lon_hundred_minutes(int lon_h)
     return static_cast<char>(result);
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_lon(double lon)
+APRS_TRACK_INLINE std::array<char, 3> encode_mic_e_lon(double lon)
 {
     // Similar implementation to latitude encoding, but with additional
     // table lookups for the longitude degrees, minutes, and hundredths
@@ -2854,7 +3018,7 @@ APRS_TRACK_INLINE string_t encode_mic_e_lon(double lon)
     //      * Decimal minutes: 0.638
     //    - Multiplies decimal by 100 to get hundredths: 0.638 × 100 = 63.8
 
-    string_t lon_str;
+    std::array<char, 3> lon_str;
 
     double lon_abs = std::fabs(lon);
 
@@ -2863,21 +3027,21 @@ APRS_TRACK_INLINE string_t encode_mic_e_lon(double lon)
     double lon_m = (lon_abs - lon_d) * 60.0;
     double lon_m_f = 0.0;
     double lon_m_i = std::modf(lon_m, &lon_m_f) * 100.0;
-    lon_m_i = round_number(lon_m_i);
+    lon_m_i = round_number_to_nearest_tenth(lon_m_i);
 
-    lon_str.append(1, encode_mic_e_lon_degrees(lon_d));
-    lon_str.append(1, encode_mic_e_lon_minutes(static_cast<int>(lon_m)));
-    lon_str.append(1, encode_mic_e_lon_hundred_minutes(static_cast<int>(lon_m_i)));
+    lon_str[0] = encode_mic_e_lon_degrees(lon_d);
+    lon_str[1] = encode_mic_e_lon_minutes(static_cast<int>(lon_m));
+    lon_str[2] = encode_mic_e_lon_hundred_minutes(static_cast<int>(lon_m_i));
 
     return lon_str;
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_course_speed(double course_degrees, double speed_knots)
+APRS_TRACK_INLINE std::array<char, 3> encode_mic_e_course_speed(double course_degrees, double speed_knots)
 {
-    string_t course_speed;
+    std::array<char, 3> course_speed;
 
-    int course = static_cast<int>(round_number(course_degrees));
-    int speed = static_cast<int>(round_number(speed_knots));
+    int course = static_cast<int>(round_number_to_nearest_tenth(course_degrees));
+    int speed = static_cast<int>(round_number_to_nearest_tenth(speed_knots));
 
     int sp = (speed / 10) + 'l'; // or + 28
     int se = (course % 100) + 28;
@@ -2908,16 +3072,16 @@ APRS_TRACK_INLINE string_t encode_mic_e_course_speed(double course_degrees, doub
         dc = dc + speed_units * 10;
     }
 
-    course_speed.append(1, static_cast<char>(sp));
-    course_speed.append(1, static_cast<char>(dc));
-    course_speed.append(1, static_cast<char>(se));
+    course_speed[0] = static_cast<char>(sp);
+    course_speed[1] = static_cast<char>(dc);
+    course_speed[2] = static_cast<char>(se);
 
     return course_speed;
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_course_speed_alternate(double course_degrees, double speed_knots)
+APRS_TRACK_INLINE std::array<char, 3> encode_mic_e_course_speed_alternate(double course_degrees, double speed_knots)
 {
-    string_t course_speed;
+    std::array<char, 3> course_speed;
 
     int course = static_cast<int>(std::round(course_degrees));
     int speed = static_cast<int>(std::round(speed_knots));
@@ -2951,14 +3115,14 @@ APRS_TRACK_INLINE string_t encode_mic_e_course_speed_alternate(double course_deg
         dc = dc + speed_units * 10;
     }
 
-    course_speed.append(1, static_cast<char>(sp));
-    course_speed.append(1, static_cast<char>(dc));
-    course_speed.append(1, static_cast<char>(se));
+    course_speed[0] = static_cast<char>(sp);
+    course_speed[1] = static_cast<char>(dc);
+    course_speed[2] = static_cast<char>(se);
 
     return course_speed;
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_alt(double alt_meters)
+APRS_TRACK_INLINE std::array<char, 4> encode_mic_e_alt(double alt_meters)
 {
     // Encoded altitude in mic-e format
     //
@@ -2975,7 +3139,7 @@ APRS_TRACK_INLINE string_t encode_mic_e_alt(double alt_meters)
     //                     ~            ~~            ~
     //   result: "4)}
 
-    string_t alt_str(4, '\0');
+    std::array<char, 4> alt_str;
 
     int alt_meters_int = static_cast<int>(std::round(alt_meters));
     int relative_alt = alt_meters_int + 10000;
@@ -2993,10 +3157,21 @@ APRS_TRACK_INLINE string_t encode_mic_e_alt(double alt_meters)
     return alt_str;
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_alt_feet(double alt_feet)
+APRS_TRACK_INLINE std::array<char, 4> encode_mic_e_alt_feet(double alt_feet)
 {
     double alt_meters = alt_feet * 0.3048;
     return encode_mic_e_alt(alt_meters);
+}
+
+APRS_TRACK_INLINE double round_number_to_nearest_tenth(double number)
+{
+    // Round number implementation for Mic-E
+    // In reality just using std::round would be sufficient
+    // But rounding to the nearest tenth make the encoding more
+    // compatible with existing Mic-E implementations like LibFAP
+
+    double factor = 10.0;
+    return std::round(number * factor) / factor;
 }
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
@@ -3007,19 +3182,35 @@ APRS_TRACK_INLINE string_t encode_mic_e_alt_feet(double alt_feet)
 //                                                                  //
 // **************************************************************** //
 
-string_t encode_course_speed(double course_degrees, double speed_knots);
-string_t encode_altitude(double alt_feet);
+template<std::output_iterator<char> OutputIt> OutputIt encode_altitude(double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_course_speed(double course_degrees, double speed_knots, OutputIt out);
+std::array<char, 7> encode_course_speed(double course_degrees, double speed_knots);
+std::array<char, 9> encode_altitude(double alt_feet);
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_altitude(double alt_feet, OutputIt out)
+{
+    std::array<char, 9> alt = encode_altitude(alt_feet);
+    return std::copy(alt.begin(), alt.end(), out);
+}
+
+template<std::output_iterator<char> OutputIt>
+APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_course_speed(double course_degrees, double speed_knots, OutputIt out)
+{
+    std::array<char, 7> course_speed = encode_course_speed(course_degrees, speed_knots);
+    return std::copy(course_speed.begin(), course_speed.end(), out);
+}
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE string_t encode_course_speed(double course_degrees, double speed_knots)
+APRS_TRACK_INLINE std::array<char, 7> encode_course_speed(double course_degrees, double speed_knots)
 {
     // 
     //  Data Format:
     // 
     //    Course / Speed
     //    --------------
-    //      3    1   3   
+    //      3    1   3
     //
     //  Example:
     //
@@ -3033,14 +3224,18 @@ APRS_TRACK_INLINE string_t encode_course_speed(double course_degrees, double spe
     int course_degrees_int = static_cast<int>(std::round(course_degrees));
     int speed_knots_int = static_cast<int>(std::round(speed_knots));
 
-    string_t course_speed;
-    course_speed.append(format_n_digits_string(course_degrees_int, 3));
-    course_speed.append("/");
-    course_speed.append(format_n_digits_string(speed_knots_int, 3));
+    std::array<char, 7> course_speed;
+
+    format_n_digits_string(course_degrees_int, 3, course_speed.begin());
+
+    course_speed[3] = '/';
+
+    format_n_digits_string(speed_knots_int, 3, course_speed.begin() + 4);
+
     return course_speed;
 }
 
-APRS_TRACK_INLINE string_t encode_altitude(double alt_feet)
+APRS_TRACK_INLINE std::array<char, 9> encode_altitude(double alt_feet)
 {
     //
     //  Data Format:
@@ -3059,9 +3254,10 @@ APRS_TRACK_INLINE string_t encode_altitude(double alt_feet)
 
     int alt_feet_int = static_cast<int>(std::round(alt_feet));
 
-    string_t altitude;
-    altitude.append("/A=");
-    altitude.append(format_n_digits_string(alt_feet_int, 6));
+    std::array<char, 9> altitude = { '/','A','=' };
+
+    format_n_digits_string(alt_feet_int, 6, altitude.begin() + 3);
+
     return altitude;
 }
 
@@ -3099,7 +3295,7 @@ APRS_TRACK_INLINE bool smart_beaconing_test(int speed, int prev_course, int cour
     //   high_speed - when the speed is higher than "high_speed", the tracker will update (transmit packet) at the fast_interval_seconds
     //   slow_rate - seconds, low speed transmission interval time
     //   fast_rate - seconds, high speed transmission interval time
-    //   turn_time - the minimum number of degrees the tracker must turn before it will transmit a packet
+    //   turn_time - the minimum number of degrees the tracker must turn before data_it will transmit a packet
     //   turn_angle - 
     //   turn_slope - the number of seconds since the last update
     //
@@ -3122,6 +3318,14 @@ APRS_TRACK_INLINE bool smart_beaconing_test(int speed, int prev_course, int cour
     {
         course_delta = 360 - course_delta; // Handle angle wraparound
     }
+    /*
+    // Calculate course delta with wraparound
+    double course_delta = std::abs(prev_course - course);
+    if (course_delta > 180) {
+        course_delta = 360 - course_delta; // Handle angle wraparound
+    }
+    */
+
     if (speed < low_speed)
     {
         interval = slow_rate;
