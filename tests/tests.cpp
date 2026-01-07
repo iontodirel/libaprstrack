@@ -1882,7 +1882,7 @@ TEST(tracker, various_anonymous_structs)
 
         t.position(data);
 
-        std::string packet = t.packet_string_no_message(packet_type::position_with_timestamp_utc);
+        std::string packet = t.packet_string_no_message_to(packet_type::position_with_timestamp_utc);
 
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W_335/008");
     }
@@ -1909,7 +1909,7 @@ TEST(tracker, various_anonymous_structs)
 
         t.position(data);
 
-        std::string packet = t.packet_string_no_message(packet_type::position_with_timestamp_utc);
+        std::string packet = t.packet_string_no_message_to(packet_type::position_with_timestamp_utc);
 
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W_");
     }
@@ -1936,7 +1936,7 @@ TEST(tracker, various_anonymous_structs)
 
         t.position(data);
 
-        std::string packet = t.packet_string_no_message(packet_type::position_with_timestamp_utc);
+        std::string packet = t.packet_string_no_message_to(packet_type::position_with_timestamp_utc);
 
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:/000000z3945.07N/07505.12W_");
     }
@@ -1959,7 +1959,7 @@ TEST(tracker, various_anonymous_structs)
 
         t.position(data);
 
-        std::string packet = t.packet_string_no_message(packet_type::position);
+        std::string packet = t.packet_string_no_message_to(packet_type::position);
 
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!3945.07N/07505.12W_");
     }
@@ -1985,7 +1985,7 @@ TEST(tracker, various_anonymous_structs)
 
         t.position(data);
 
-        std::string packet = t.packet_string_no_message(packet_type::mic_e);
+        std::string packet = t.packet_string_no_message_to(packet_type::mic_e);
 
         EXPECT_TRUE(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}");
     }
@@ -2010,7 +2010,7 @@ TEST(tracker, various_anonymous_structs)
 
         t.position(data);
 
-        std::string packet = t.packet_string_no_message(packet_type::mic_e);
+        std::string packet = t.packet_string_no_message_to(packet_type::mic_e);
 
         EXPECT_TRUE(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/");
     }
@@ -2033,7 +2033,7 @@ TEST(tracker, various_anonymous_structs)
 
         t.position(data);
 
-        std::string packet = t.packet_string_no_message(packet_type::mic_e);
+        std::string packet = t.packet_string_no_message_to(packet_type::mic_e);
 
         EXPECT_TRUE(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwl \x1c>/");
     }
@@ -2059,7 +2059,7 @@ TEST(tracker, various_anonymous_structs)
         t.position(data);
 
         // Y - compression type
-        std::string packet = t.packet_string(packet_type::position_compressed);
+        std::string packet = t.packet_string_to(packet_type::position_compressed);
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!/4qheP+c)[!#Y");
     }
 }
@@ -2092,7 +2092,7 @@ TEST(tracker, position)
 
     t.position(data);
 
-    std::string packet = t.packet_string_no_message(packet_type::mic_e);
+    std::string packet = t.packet_string_no_message_to(packet_type::mic_e);
 
     EXPECT_TRUE(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}");
 
@@ -2103,7 +2103,7 @@ TEST(tracker, position)
 
     t.position(data);
 
-    packet = t.packet_string_no_message(packet_type::mic_e);
+    packet = t.packet_string_no_message_to(packet_type::mic_e);
 
     EXPECT_TRUE(packet == "N0CALL>T9QPVP,WIDE1-1:`3T{lh}>/\"48}");
 }
@@ -2133,7 +2133,7 @@ TEST(tracker, message_and_packet_bytes)
     std::vector<unsigned char> message_bytes = { 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64 };
     t.message(message_bytes);
 
-    std::string packet = t.packet_string_no_message(packet_type::position);
+    std::string packet = t.packet_string_no_message_to(packet_type::position);
 
     EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!3945.07N/07505.12W_");
 
@@ -2177,7 +2177,7 @@ TEST(tracker, u8packet_string)
     {
         t.message(u8"Hello 世界");
 
-        std::u8string u8packet = t.u8packet_string(packet_type::mic_e);
+        std::u8string u8packet = t.packet_string_to<std::u8string>(packet_type::mic_e);
 
         EXPECT_TRUE(u8packet == u8"N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}Hello 世界");
     }
@@ -2186,7 +2186,7 @@ TEST(tracker, u8packet_string)
         std::vector<unsigned char> message_bytes = { 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64 };
         t.message(message_bytes);
 
-        std::u8string u8packet = t.u8packet_string(packet_type::mic_e);
+        std::u8string u8packet = t.packet_string_to<std::u8string>(packet_type::mic_e);
 
         EXPECT_TRUE(u8packet == u8"N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}Hello World");
 

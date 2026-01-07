@@ -88,7 +88,7 @@ TEST(tracker, basic_periodic)
 
         if (t.updated())
         {
-            std::string packet = t.packet_string_no_message(packet_type::mic_e);
+            std::string packet = t.packet_string_no_message_to(packet_type::mic_e);
 
             EXPECT_TRUE(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}");
 

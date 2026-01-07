@@ -95,17 +95,6 @@
 #define APRS_TRACK_SMART_BEACONING_DEBUG(...)
 #endif
 
-APRS_TRACK_NAMESPACE_BEGIN
-
-#ifndef APRS_TRACK_DEFINE_CUSTOM_TYPES
-
-using string_t = std::basic_string<char>;
-using u8string_t = std::basic_string<char8_t>;
-
-#endif // APRS_TRACK_DEFINE_CUSTOM_TYPES
-
-APRS_TRACK_NAMESPACE_END
-
 // **************************************************************** //
 //                                                                  //
 //                                                                  //
@@ -135,7 +124,7 @@ concept has_track = requires(T t)
     { t.track } -> std::convertible_to<double>;
 };
 
-template <typename T>
+template<typename T>
 concept has_day_hour_minute_seconds = requires(T t)
 {
     { t.second } -> std::convertible_to<int>;
@@ -164,20 +153,18 @@ struct data
     int second = 0;
 };
 
-// add string version with message!
-
-string_t encode_position_packet_no_timestamp_no_message_to(const tracker& t, const data& d);
-string_t encode_position_packet_no_timestamp_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_timestamp_dhm_no_message_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_timestamp_dhm_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_hms_no_message_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_hms_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_dhm_no_message_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_dhm_to(const tracker& t, const data& d);
-string_t encode_position_packet_compressed_no_timestamp_no_message_to(const tracker& t, const data& d);
-string_t encode_position_packet_compressed_no_timestamp_to(const tracker& t, const data& d);
-string_t encode_mic_e_packet_no_message_to(const tracker& t, const data& d);
-string_t encode_mic_e_packet_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_position_packet_no_timestamp_no_message_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_position_packet_no_timestamp_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_position_packet_with_timestamp_dhm_no_message_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_position_packet_with_timestamp_dhm_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_position_packet_with_utc_timestamp_hms_no_message_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_position_packet_with_utc_timestamp_hms_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_position_packet_with_utc_timestamp_dhm_no_message_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_position_packet_with_utc_timestamp_dhm_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_position_packet_compressed_no_timestamp_no_message_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_position_packet_compressed_no_timestamp_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_mic_e_packet_no_message_to(const tracker& t, const data& d);
+template<typename Container = std::string> Container encode_mic_e_packet_to(const tracker& t, const data& d);
 
 bool smart_beaconing_test(int speed, int prev_course, int course, int low_speed, int high_speed, int slow_interval_seconds, int fast_interval_seconds, int min_turn_degrees, int turn_interval_seconds, int turn_slope, int last_update_seconds);
 
@@ -199,7 +186,7 @@ APRS_TRACK_DETAIL_NAMESPACE_END
 
 APRS_TRACK_NAMESPACE_BEGIN
 
-template <typename T>
+template<typename T>
 concept Position = requires(T p)
 {
     { p.lat } -> std::convertible_to<double>;
@@ -380,33 +367,33 @@ struct tracker
     void turn_slope(int value);
     int turn_slope() const;
 
-    template <typename CharType, typename Traits>
+    template<typename CharType, typename Traits>
     void message(const std::basic_string_view<CharType, Traits>& m);
 
-    template <typename CharType>
+    template<typename CharType>
     void message(const CharType* m);
 
-    template <typename CharType>
+    template<typename CharType>
     void message(const CharType* m, size_t count);
 
-    template <std::ranges::input_range InputRange>
+    template<std::ranges::input_range InputRange>
     void message(InputRange&& input_range);
 
-    template <std::input_iterator InputIterator>
+    template<std::input_iterator InputIterator>
     void message(InputIterator begin, InputIterator end);
 
-    template <std::output_iterator<unsigned char> OutputIterator>
+    template<std::output_iterator<unsigned char> OutputIterator>
     OutputIterator message(OutputIterator output) const;
 
     std::string message() const;
     std::u8string u8message() const;
 
-    template <class Rep, class Period>
+    template<class Rep, class Period>
     void interval(std::chrono::duration<Rep, Period> interval);
 
     void interval_seconds(int interval_seconds);
 
-    template <Position T>
+    template<Position T>
     void position(const T& p);
 
     void position(double lat, double lon);
@@ -425,16 +412,16 @@ struct tracker
     void update();
     bool updated() const;
 
-    string_t packet_string_no_message(packet_type p) const;
+    template<typename Container = std::string>
+    Container packet_string_no_message_to(packet_type p) const;
 
-    string_t packet_string(packet_type p) const;
+    template<typename Container = std::string>
+    Container packet_string_to(packet_type p) const;
 
-    u8string_t u8packet_string(packet_type p) const;
-
-    template <std::output_iterator<unsigned char> OutputIterator>
+    template<std::output_iterator<unsigned char> OutputIterator>
     OutputIterator packet(packet_type p, OutputIterator output) const;
 
-    template <std::ranges::output_range<unsigned char> OutputRange>
+    template<std::ranges::output_range<unsigned char> OutputRange>
     void packet(packet_type p, OutputRange&& output_range) const;
 
     bool smart_beaconing_test();
@@ -706,7 +693,7 @@ APRS_TRACK_INLINE int tracker::turn_slope() const
 
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-template <typename CharType, typename Traits>
+template<typename CharType, typename Traits>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::message(const std::basic_string_view<CharType, Traits>& m)
 {
     message_data_length_ = m.size();
@@ -716,25 +703,25 @@ APRS_TRACK_INLINE_NO_DISABLE void tracker::message(const std::basic_string_view<
     message_data_size_ = size;
 }
 
-template <typename CharType>
+template<typename CharType>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::message(const CharType* m)
 {
     message(std::basic_string_view<CharType>(m));
 }
 
-template <typename CharType>
+template<typename CharType>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::message(const CharType* m, size_t count)
 {
     message(std::basic_string_view<CharType>(m, count));
 }
 
-template <std::ranges::input_range InputRange>
+template<std::ranges::input_range InputRange>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::message(InputRange&& input_range)
 {
     message(std::ranges::begin(input_range), std::ranges::end(input_range));
 }
 
-template <std::input_iterator InputIterator>
+template<std::input_iterator InputIterator>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::message(InputIterator begin, InputIterator end)
 {
     message_data_length_ = std::distance(begin, end);
@@ -742,7 +729,7 @@ APRS_TRACK_INLINE_NO_DISABLE void tracker::message(InputIterator begin, InputIte
     std::copy_n(begin, message_data_size_, message_data_.begin());
 }
 
-template <std::output_iterator<unsigned char> OutputIterator>
+template<std::output_iterator<unsigned char> OutputIterator>
 APRS_TRACK_INLINE_NO_DISABLE OutputIterator tracker::message(OutputIterator output) const
 {
     output = std::copy_n(message_data_.begin(), message_data_size_, output);
@@ -765,13 +752,13 @@ APRS_TRACK_INLINE std::u8string tracker::u8message() const
 
 #endif
 
-template <class Rep, class Period>
+template<class Rep, class Period>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::interval(std::chrono::duration<Rep, Period> interval)
 {
     interval_seconds_ = static_cast<int>(std::chrono::duration_cast<std::chrono::seconds>(interval).count());
 }
 
-template <Position T>
+template<Position T>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::position(const T& p)
 {
 APRS_TRACK_DETAIL_NAMESPACE_USE
@@ -927,85 +914,60 @@ APRS_TRACK_INLINE bool tracker::updated() const
     return updated_;
 }
 
-APRS_TRACK_INLINE string_t tracker::packet_string_no_message(packet_type p) const
-{
-APRS_TRACK_DETAIL_NAMESPACE_USE
-
-    string_t packet;
-
-    switch (p)
-    {
-        case aprs::track::packet_type::mic_e:
-            packet = encode_mic_e_packet_no_message_to(*this, data_);
-            break;
-        case aprs::track::packet_type::position:
-            packet = encode_position_packet_no_timestamp_no_message_to(*this, data_);
-            break;
-        case aprs::track::packet_type::position_compressed:
-            packet = encode_position_packet_compressed_no_timestamp_no_message_to(*this, data_);
-            break;
-        case aprs::track::packet_type::position_with_timestamp:
-            packet = encode_position_packet_with_timestamp_dhm_no_message_to(*this, data_);
-            break;
-        case aprs::track::packet_type::position_with_timestamp_utc:
-            packet = encode_position_packet_with_utc_timestamp_dhm_no_message_to(*this, data_);
-            break;
-        case aprs::track::packet_type::position_with_timestamp_utc_hms:
-            packet = encode_position_packet_with_utc_timestamp_hms_no_message_to(*this, data_);
-            break;
-        default:
-            break;
-    }
-
-    return packet;
-}
-
-APRS_TRACK_INLINE string_t tracker::packet_string(packet_type p) const
-{
-APRS_TRACK_DETAIL_NAMESPACE_USE
-
-    string_t packet;
-
-    switch (p)
-    {
-        case aprs::track::packet_type::mic_e:
-            packet = encode_mic_e_packet_to(*this, data_);
-            break;
-        case aprs::track::packet_type::position:
-            packet = encode_position_packet_no_timestamp_to(*this, data_);
-            break;
-        case aprs::track::packet_type::position_compressed:
-            packet = encode_position_packet_compressed_no_timestamp_to(*this, data_);
-            break;
-        case aprs::track::packet_type::position_with_timestamp:
-            packet = encode_position_packet_with_timestamp_dhm_to(*this, data_);
-            break;
-        case aprs::track::packet_type::position_with_timestamp_utc:
-            packet = encode_position_packet_with_utc_timestamp_dhm_to(*this, data_);
-            break;
-        case aprs::track::packet_type::position_with_timestamp_utc_hms:
-            packet = encode_position_packet_with_utc_timestamp_hms_to(*this, data_);
-            break;
-        default:
-            break;
-    }
-
-    return packet;
-}
-
-APRS_TRACK_INLINE u8string_t tracker::u8packet_string(packet_type p) const
-{
-    string_t packet = packet_string(p);
-    u8string_t u8packet(packet.begin(), packet.end());
-    return u8packet;
-}
-
 #endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-template <std::output_iterator<unsigned char> OutputIterator>
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container tracker::packet_string_no_message_to(packet_type p) const
+{
+APRS_TRACK_DETAIL_NAMESPACE_USE
+
+    switch (p)
+    {
+        case aprs::track::packet_type::mic_e:
+            return encode_mic_e_packet_no_message_to<Container>(*this, data_);
+        case aprs::track::packet_type::position:
+            return encode_position_packet_no_timestamp_no_message_to<Container>(*this, data_);
+        case aprs::track::packet_type::position_compressed:
+            return encode_position_packet_compressed_no_timestamp_no_message_to<Container>(*this, data_);
+        case aprs::track::packet_type::position_with_timestamp:
+            return encode_position_packet_with_timestamp_dhm_no_message_to<Container>(*this, data_);
+        case aprs::track::packet_type::position_with_timestamp_utc:
+            return encode_position_packet_with_utc_timestamp_dhm_no_message_to<Container>(*this, data_);
+        case aprs::track::packet_type::position_with_timestamp_utc_hms:
+            return encode_position_packet_with_utc_timestamp_hms_no_message_to<Container>(*this, data_);
+        default:
+            return Container{};
+    }
+}
+
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container tracker::packet_string_to(packet_type p) const
+{
+APRS_TRACK_DETAIL_NAMESPACE_USE
+
+    switch (p)
+    {
+        case aprs::track::packet_type::mic_e:
+            return encode_mic_e_packet_to<Container>(*this, data_);
+        case aprs::track::packet_type::position:
+            return encode_position_packet_no_timestamp_to<Container>(*this, data_);
+        case aprs::track::packet_type::position_compressed:
+            return encode_position_packet_compressed_no_timestamp_to<Container>(*this, data_);
+        case aprs::track::packet_type::position_with_timestamp:
+            return encode_position_packet_with_timestamp_dhm_to<Container>(*this, data_);
+        case aprs::track::packet_type::position_with_timestamp_utc:
+            return encode_position_packet_with_utc_timestamp_dhm_to<Container>(*this, data_);
+        case aprs::track::packet_type::position_with_timestamp_utc_hms:
+            return encode_position_packet_with_utc_timestamp_hms_to<Container>(*this, data_);
+        default:
+            return Container{};
+    }
+}
+
+template<std::output_iterator<unsigned char> OutputIterator>
 APRS_TRACK_INLINE_NO_DISABLE OutputIterator tracker::packet(packet_type p, OutputIterator output) const
 {
-    string_t packet = packet_string_no_message(p);
+    auto packet = packet_string_no_message_to(p);
 
     output = std::copy(reinterpret_cast<const unsigned char*>(packet.data()), reinterpret_cast<const unsigned char*>(packet.data() + packet.size()), output);
 
@@ -1014,7 +976,7 @@ APRS_TRACK_INLINE_NO_DISABLE OutputIterator tracker::packet(packet_type p, Outpu
     return output;
 }
 
-template <std::ranges::output_range<unsigned char> OutputRange>
+template<std::ranges::output_range<unsigned char> OutputRange>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::packet(packet_type p, OutputRange&& output_range) const
 {
     packet(p, std::ranges::begin(output_range));
@@ -1052,18 +1014,18 @@ APRS_TRACK_NAMESPACE_BEGIN
 
 APRS_TRACK_DETAIL_NAMESPACE_BEGIN
 
-string_t encode_position_packet_no_timestamp_no_message_to(const tracker& t, const data& d);
-string_t encode_position_packet_no_timestamp_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_timestamp_dhm_no_message_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_timestamp_dhm_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_hms_no_message_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_hms_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_dhm_no_message_to(const tracker& t, const data& d);
-string_t encode_position_packet_with_utc_timestamp_dhm_to(const tracker& t, const data& d);
-string_t encode_position_packet_compressed_no_timestamp_no_message_to(const tracker& t, const data& d);
-string_t encode_position_packet_compressed_no_timestamp_to(const tracker& t, const data& d);
-string_t encode_mic_e_packet_no_message_to(const tracker& t, const data& d);
-string_t encode_mic_e_packet_to(const tracker& t, const data& d);
+template<typename Container> Container encode_position_packet_no_timestamp_no_message_to(const tracker& t, const data& d);
+template<typename Container> Container encode_position_packet_no_timestamp_to(const tracker& t, const data& d);
+template<typename Container> Container encode_position_packet_with_timestamp_dhm_no_message_to(const tracker& t, const data& d);
+template<typename Container> Container encode_position_packet_with_timestamp_dhm_to(const tracker& t, const data& d);
+template<typename Container> Container encode_position_packet_with_utc_timestamp_hms_no_message_to(const tracker& t, const data& d);
+template<typename Container> Container encode_position_packet_with_utc_timestamp_hms_to(const tracker& t, const data& d);
+template<typename Container> Container encode_position_packet_with_utc_timestamp_dhm_no_message_to(const tracker& t, const data& d);
+template<typename Container> Container encode_position_packet_with_utc_timestamp_dhm_to(const tracker& t, const data& d);
+template<typename Container> Container encode_position_packet_compressed_no_timestamp_no_message_to(const tracker& t, const data& d);
+template<typename Container> Container encode_position_packet_compressed_no_timestamp_to(const tracker& t, const data& d);
+template<typename Container> Container encode_mic_e_packet_no_message_to(const tracker& t, const data& d);
+template<typename Container> Container encode_mic_e_packet_to(const tracker& t, const data& d);
 template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_no_timestamp_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
 template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
 template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_hms_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
@@ -1075,11 +1037,10 @@ template<std::output_iterator<char> OutputIt> OutputIt encode_altitude(double al
 template<std::output_iterator<char> OutputIt> OutputIt encode_mic_e_alt_feet(double alt_feet, OutputIt out);
 char packet_type_with_timestamp(bool m);
 
-#ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
-
-APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_no_message_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_position_packet_no_timestamp_no_message_to(const tracker& t, const data& d)
 {
-    string_t packet;
+    Container packet;
 
     encode_position_packet_no_timestamp_no_message(t.from(), t.to(), t.path(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
@@ -1096,20 +1057,20 @@ APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_no_message_to(con
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_position_packet_no_timestamp_to(const tracker& t, const data& d)
 {
-    string_t packet;
-
-    packet.append(encode_position_packet_no_timestamp_no_message_to(t, d));
+    Container packet = encode_position_packet_no_timestamp_no_message_to<Container>(t, d);
 
     t.message(std::back_inserter(packet));
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_no_message_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_position_packet_with_timestamp_dhm_no_message_to(const tracker& t, const data& d)
 {
-    string_t packet;
+    Container packet;
 
     encode_position_packet_with_timestamp_dhm_no_message(t.from(), t.to(), t.path(), packet_type_with_timestamp(t.messaging()), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
@@ -1126,20 +1087,20 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_no_message_
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_position_packet_with_timestamp_dhm_to(const tracker& t, const data& d)
 {
-    string_t packet;
-
-    packet.append(encode_position_packet_with_timestamp_dhm_no_message_to(t, d));
+    Container packet = encode_position_packet_with_timestamp_dhm_no_message_to<Container>(t, d);
 
     t.message(std::back_inserter(packet));
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_no_message_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_position_packet_with_utc_timestamp_hms_no_message_to(const tracker& t, const data& d)
 {
-    string_t packet;
+    Container packet;
 
     encode_position_packet_with_utc_timestamp_hms_no_message(t.from(), t.to(), t.path(), t.messaging(), d.hour, d.minute, d.second, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
@@ -1156,20 +1117,20 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_no_mess
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_position_packet_with_utc_timestamp_hms_to(const tracker& t, const data& d)
 {
-    string_t packet;
-
-    packet.append(encode_position_packet_with_utc_timestamp_hms_no_message_to(t, d));
+    Container packet = encode_position_packet_with_utc_timestamp_hms_no_message_to<Container>(t, d);
 
     t.message(std::back_inserter(packet));
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_no_message_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_position_packet_with_utc_timestamp_dhm_no_message_to(const tracker& t, const data& d)
 {
-    string_t packet;
+    Container packet;
 
     encode_position_packet_with_utc_timestamp_dhm_no_message(t.from(), t.to(), t.path(), t.messaging(), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
@@ -1186,20 +1147,20 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_no_mess
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_position_packet_with_utc_timestamp_dhm_to(const tracker& t, const data& d)
 {
-    string_t packet;
-
-    packet.append(encode_position_packet_with_utc_timestamp_dhm_no_message_to(t, d));
+    Container packet = encode_position_packet_with_utc_timestamp_dhm_no_message_to<Container>(t, d);
 
     t.message(std::back_inserter(packet));
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_no_message_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_position_packet_compressed_no_timestamp_no_message_to(const tracker& t, const data& d)
 {
-    string_t packet;
+    Container packet;
 
     char compression_type = 0b00111000 + 33; // current, RMC, compressed
 
@@ -1213,20 +1174,20 @@ APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_no_mes
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_position_packet_compressed_no_timestamp_to(const tracker& t, const data& d)
 {
-    string_t packet;
-
-    packet.append(encode_position_packet_compressed_no_timestamp_no_message_to(t, d));
+    Container packet = encode_position_packet_compressed_no_timestamp_no_message_to<Container>(t, d);
 
     t.message(std::back_inserter(packet));
 
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_packet_no_message_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_mic_e_packet_no_message_to(const tracker& t, const data& d)
 {
-    string_t packet;
+    Container packet;
 
     encode_mic_e_packet_no_message(t.from(), t.path(), d.lat, d.lon, t.mic_e_status(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
@@ -1238,18 +1199,15 @@ APRS_TRACK_INLINE string_t encode_mic_e_packet_no_message_to(const tracker& t, c
     return packet;
 }
 
-APRS_TRACK_INLINE string_t encode_mic_e_packet_to(const tracker& t, const data& d)
+template<typename Container>
+APRS_TRACK_INLINE_NO_DISABLE Container encode_mic_e_packet_to(const tracker& t, const data& d)
 {
-    string_t packet;
-
-    packet.append(encode_mic_e_packet_no_message_to(t, d));
+    Container packet = encode_mic_e_packet_no_message_to<Container>(t, d);
 
     t.message(std::back_inserter(packet));
 
     return packet;
 }
-
-#endif // APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
 APRS_TRACK_DETAIL_NAMESPACE_END
 
@@ -1916,7 +1874,7 @@ std::array<char, 7> encode_utc_timestamp_hms(int hour, int min, int sec);
 position_ddm dd_to_ddm(double lat, double lon);
 position_ddm_string to_ddm_short_string(const position_ddm& p, int ambiguity);
 
-template <std::output_iterator<char> OutputIt>
+template<std::output_iterator<char> OutputIt>
 APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_data_with_utc_timestamp_hms(char type, int hour, int min, int sec, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out)
 {
     std::array<char, 27>  data = encode_position_data_with_utc_timestamp_hms(type, hour, min, sec, lat, lon, symbol_table, symbol_code, ambiguity);
@@ -2014,11 +1972,11 @@ APRS_TRACK_INLINE std::array<char, 27> encode_position_data_with_utc_timestamp_h
 //                                                                  //
 // **************************************************************** //
 
-template <std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
-template <std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, OutputIt out);
-template <std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out);
-template <std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet, OutputIt out);
-template <std::output_iterator<char> OutputIt> OutputIt encode_position_data_with_utc_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet, OutputIt out);
+template<std::output_iterator<char> OutputIt> OutputIt encode_position_data_with_utc_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out);
 template<std::output_iterator<char> OutputIt> OutputIt encode_header(std::string_view from, std::string_view to, std::string_view path, OutputIt out);
 template<std::output_iterator<char> OutputIt> OutputIt encode_course_speed(double course_degrees, double speed_knots, OutputIt out);
 template<std::output_iterator<char> OutputIt> OutputIt encode_altitude(double alt_feet, OutputIt out);
@@ -2027,7 +1985,7 @@ std::array<char, 7> encode_utc_timestamp_dhm(int day, int hour, int min);
 position_ddm dd_to_ddm(double lat, double lon);
 position_ddm_string to_ddm_short_string(const position_ddm& p, int ambiguity);
 
-template <std::output_iterator<char> OutputIt>
+template<std::output_iterator<char> OutputIt>
 APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_data_with_utc_timestamp_dhm(char type, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out)
 {
     std::array<char, 27> data = encode_position_data_with_utc_timestamp_dhm(type, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity);
@@ -2037,7 +1995,7 @@ APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_data_with_utc_timestamp_dh
     return out;
 }
 
-template <std::output_iterator<char> OutputIt>
+template<std::output_iterator<char> OutputIt>
 APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, OutputIt out)
 {
     out = encode_header(from, to, path, out);
@@ -2047,7 +2005,7 @@ APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_
     return out;
 }
 
-template <std::output_iterator<char> OutputIt>
+template<std::output_iterator<char> OutputIt>
 APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, OutputIt out)
 {
     out = encode_position_packet_with_utc_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity, out);
@@ -2057,7 +2015,7 @@ APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_
     return out;
 }
 
-template <std::output_iterator<char> OutputIt>
+template<std::output_iterator<char> OutputIt>
 APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double alt_feet, OutputIt out)
 {
     out = encode_position_packet_with_utc_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity, out);
@@ -2067,7 +2025,7 @@ APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_
     return out;
 }
 
-template <std::output_iterator<char> OutputIt>
+template<std::output_iterator<char> OutputIt>
 APRS_TRACK_INLINE_NO_DISABLE OutputIt encode_position_packet_with_utc_timestamp_dhm_no_message(std::string_view from, std::string_view to, std::string_view path, bool messaging, int day, int hour, int min, double lat, double lon, char symbol_table, char symbol_code, int ambiguity, double speed_knots, double track_degrees, double alt_feet, OutputIt out)
 {
     out = encode_position_packet_with_utc_timestamp_dhm_no_message(from, to, path, messaging, day, hour, min, lat, lon, symbol_table, symbol_code, ambiguity, speed_knots, track_degrees, out);

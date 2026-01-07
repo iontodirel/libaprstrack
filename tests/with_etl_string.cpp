@@ -1,16 +1,6 @@
 #include <gtest/gtest.h>
 #include <etl/string.h>
-#include <cassert>
-#include <string>
 
-namespace aprs::track
-{
-    // Define custom type for APRS tracking
-    using string_t = etl::string<100>;  // Example of a custom string type with a maximum length of 100 characters
-    using u8string_t = std::u8string; // Example of a custom UTF-8 string type with a maximum length of 100 characters
-}
-
-#define APRS_TRACK_DEFINE_CUSTOM_TYPES
 #include "../aprstrack.hpp"
 
 using namespace aprs::track;
@@ -32,7 +22,7 @@ TEST(tracker, encode_mic_e_packet_no_message_etl_string)
     d.speed_knots = 15.999;
     d.alt_feet = 154.2;
 
-    string_t packet = encode_mic_e_packet_no_message_to(t, d);
+    etl::string<100> packet = encode_mic_e_packet_no_message_to<etl::string<100>>(t, d);
     EXPECT_TRUE(packet == "N0CALL>T9QPVP,WIDE1-1:`3T{m\\\x1f[/\"4F}");
 }
 

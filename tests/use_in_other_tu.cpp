@@ -34,7 +34,7 @@ void func()
 
     t.position(data);
 
-    std::string packet = t.packet_string_no_message(packet_type::mic_e);
+    std::string packet = t.packet_string_no_message_to(packet_type::mic_e);
 
     assert(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}");
 
