@@ -47,7 +47,7 @@ void func()
     data_internal.hour = 16;
     data_internal.minute = 13;
 
-    packet = encode_position_packet_with_utc_timestamp_dhm_no_message(t, data_internal);
+    packet = encode_position_packet_with_utc_timestamp_dhm_no_message_to(t, data_internal);
 
     assert(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W>335/008");
 }

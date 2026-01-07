@@ -1368,7 +1368,8 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         // 
         // It is envisaged that other Mic-E-compatible devices will be allocated their
         // own type codes in future. (10th byte)
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 49.176666666667, -123.94916666667, mic_e_status::in_service, 3, 15.999, '/', '[', 0, 154.2);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 49.176666666667, -123.94916666667, mic_e_status::in_service, 3, 15.999, '/', '[', 0, 154.2, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>T9QPVP,WIDE1-1:`3T{m\\\x1f[/\"4F}");
     }
 
@@ -1376,19 +1377,22 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         // IZ2AEU-9>TUSRT8,WIDE2-2,qAR,IR2CK:'<0x7f>,Lm]m>/]"4D}
         //                                                 ~
         // NOTE: Kenwood radios insert '>' or ']' in the 10th position before the encoded altitude
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 45.541333333333, 9.2746666666667, mic_e_status::off_duty, 181, 15.999, '/', '>', 0, 147.64);
-        EXPECT_TRUE(packet == "N0CALL>TUSRT8,WIDE1-1:`\x7f,Lm]m>/\"4D}");        
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 45.541333333333, 9.2746666666667, mic_e_status::off_duty, 181, 15.999, '/', '>', 0, 147.64, std::back_inserter(packet));
+        EXPECT_TRUE(packet == "N0CALL>TUSRT8,WIDE1-1:`\x7f,Lm]m>/\"4D}");
     }
 
     {
         // KD6OMV-4>SS5XWY,WIDE1-1,WIDE2-1,qAR,KELLER:`-95l"Ej/"6=}
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 33.979833333333, -117.4875, mic_e_status::en_route, 241, 0, '/', 'j', 0, 721.78);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 33.979833333333, -117.4875, mic_e_status::en_route, 241, 0, '/', 'j', 0, 721.78, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>SS5XWY,WIDE1-1:`-95l\"Ej/\"6=}");
     }
 
     {
         // KD6OMV-4>SS5XWY,WIDE1-1,WIDE2-1,qAR,KELLER:`-95l"Ej/"6=}
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 33.979833333333, -117.4875, mic_e_status::en_route, 241, 0, '/', 'j', 0);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 33.979833333333, -117.4875, mic_e_status::en_route, 241, 0, '/', 'j', 0, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>SS5XWY,WIDE1-1:`-95l\"Ej/");
     }
 
@@ -1396,13 +1400,15 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         // JH1BLT-9>35CVY8,WIDE1-1,qAR,JJ1YEG-10:`D,'l^U>/`"3u}DE JH1BLT / PUSH Rx->CS By D-STAR._)
         //                                                ~    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // NOTE: '`' inserted in the 10th position is part of the message: `DE JH1BLT / PUSH Rx->CS By D-STAR._)
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 35.449666666667, 140.2685, mic_e_status::custom6, 257, 5.999, '/', '>', 0, 9.84);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 35.449666666667, 140.2685, mic_e_status::custom6, 257, 5.999, '/', '>', 0, 9.84, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>35CVY8,WIDE1-1:`D,'l^U>/\"3u}");
     }
 
     {
         // JG1ZLB-12>SUTQQ6,JF2ZGN-3*,WIDE2-1,qAR,JP1BHH-10:`D[sl@s>/
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 35.686, 140.0645, mic_e_status::off_duty, 287, 2.999, '/', '>', 0);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 35.686, 140.0645, mic_e_status::off_duty, 287, 2.999, '/', '>', 0, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>SUTQQ6,WIDE1-1:`D[sl@s>/");
     }
 
@@ -1410,7 +1416,8 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         // VE7RB-9>4Y1VPX,WIDE1-1,WIDE2-1,qAR,VA7DWC-1:`4Nil <0x1c>K\]"3r}147.240MHz T141GREEDINGS FROM VE7RB=
         //                                                           ~
         // NOTE: Kenwood radios insert '>' or ']' in the 10th position before the encoded altitude
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 49.268, -124.84616666667, mic_e_status::special, 0, 0, '\\', 'K', 0, 0);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 49.268, -124.84616666667, mic_e_status::special, 0, 0, '\\', 'K', 0, 0, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>4Y1VPX,WIDE1-1:`4Nil \x1cK\\\"3r}");
     }
 
@@ -1419,19 +1426,22 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         //                                                                  ~
         // NOTE: Kenwood radios insert '>' or ']' in the 10th position before the encoded altitude
         // r = "
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 37.130166666667, -5.9241666666667, mic_e_status::en_route, 24, 67.98, '/', '>', 0, 19.685);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 37.130166666667, -5.9241666666667, mic_e_status::en_route, 24, 67.98, '/', '>', 0, 19.685, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>SW0WXQ,WIDE1-1:`{SIrp4>/\"3x}");
     }
 
     {
         // BX6AM-2>RSPQR2,BX6AM-5*,WIDE2-1,qAS,BV6JR-2:`0)>l#V</"4K}  144.640MHz 05.69V
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 23.020333333333, 120.22233333333, mic_e_status::off_duty, 358, 0, '/', '<', 0, 170.6);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 23.020333333333, 120.22233333333, mic_e_status::off_duty, 358, 0, '/', '<', 0, 170.6, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>RSPQR2,WIDE1-1:`0)>l#V</\"4K}");
     }
 
     {
         // ZL2BA-2>TP56V2,WIDE1-1,WIDE2-1,qAR,ZL2BA-10:`gD2lh!j/"54}
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", -40.943666666667, 175.67033333333, mic_e_status::en_route, 205, 7, '/', 'j', 0, 393.70);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", -40.943666666667, 175.67033333333, mic_e_status::en_route, 205, 7, '/', 'j', 0, 393.70, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>TP56V2,WIDE1-1:`gD2lh!j/\"54}");
     }
 
@@ -1439,7 +1449,8 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         // CE6PL-9>S3S49V,WIDE1-1*,WIDE2-1,qAO,CE4ERM:`bForR!>/`"9r}QAP 146.520 MHz Op. Bruno PHVF98_1
         //                                                     ~    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // NOTE: '`' inserted in the 10th position is part of the message
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", -33.582666666667, -70.713833333333, mic_e_status::in_service, 5, 65, '/', '>', 0, 1791.34);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", -33.582666666667, -70.713833333333, mic_e_status::in_service, 5, 65, '/', '>', 0, 1791.34, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>S3S49V,WIDE1-1:`bForR!>/\"9r}");
     }
 
@@ -1447,7 +1458,8 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         // G3RJI-9>UQ3SX0,WIDE1-1,WIDE2-1,qAR,MB7UUE:`v+~n4$>/`"4(}145.550MHz alan mobile_%
         //                                                    ~    ~~~~~~~~~~~~~~~~~~~~~~~~
         // NOTE: '`' inserted in the 10th position is part of the message
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 51.563333333333, 0.26633333333333, mic_e_status::en_route, 8, 22, '/', '>', 0, 55.77);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 51.563333333333, 0.26633333333333, mic_e_status::en_route, 8, 22, '/', '>', 0, 55.77, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>UQ3SX0,WIDE1-1:`v+~n4$>/\"4(}");
     }
 
@@ -1455,7 +1467,8 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         // M0MDS-9>UQ3VXW,WIDE1-1,WIDE2-1,qAR,M0BPQ-1:`vZwlh}>/`"48}_1
         //                                                     ~    ~~
         // NOTE: '`' inserted in the 10th position is part of the message
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 51.6145, -0.0485, mic_e_status::en_route, 297, 7, '/', '>', 0, 108.27);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 51.6145, -0.0485, mic_e_status::en_route, 297, 7, '/', '>', 0, 108.27, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}");
     }
 
@@ -1463,7 +1476,8 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         // K2EHE>S9UW2T,W2ZQ*,WIDE2-1,qAO,W2ZQ:`fPel+L-/>"3e}=
         //                                              ~
         // NOTE: '>' inserted in the 10th position is part of the message
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 39.954, -74.878833333333, mic_e_status::in_service, 148, 1, '/', '-', 0, -42.65);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 39.954, -74.878833333333, mic_e_status::in_service, 148, 1, '/', '-', 0, -42.65, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>S9UW2T,WIDE1-1:`fPel+L-/\"3e}");
     }
 
@@ -1471,7 +1485,8 @@ TEST(mic_e, encode_mic_e_packet_no_message)
         // JJ2EJL-9>STUXRL,JF2ZGN-2*,WIDE2-1,qAR,JA1YCQ-10:`C^-l!;j/`"4?}_(
         //                                                          ~
         // NOTE: '`' inserted in the 10th position is part of the message
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 34.970833333333, 139.1025, mic_e_status::off_duty, 131, 0, '/', 'j', 1, 131.23);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 34.970833333333, 139.1025, mic_e_status::off_duty, 131, 0, '/', 'j', 1, 131.23, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>STUXRL,WIDE1-1:`C^+l!;j/\"4?}");
         //                                              ~
         // NOTE: very small difference due to floating point error
@@ -1479,11 +1494,12 @@ TEST(mic_e, encode_mic_e_packet_no_message)
 
     {
         // 2E0KFG-9>U1UQY3,WIDE1-1,WIDE2-1,qAR,MB7UBE:`vSb<0x1c><0x1c>F>/"6#}
-        std::string packet = encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 51.8655, 0.92833333333333, mic_e_status::in_service, 42, 0, '/', '>', 0, 636.48);
+        std::string packet;
+        encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 51.8655, 0.92833333333333, mic_e_status::in_service, 42, 0, '/', '>', 0, 636.48, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>U1UQY3,WIDE1-1:`vSbl F>/\"6#}");
-        std::string course_speed_str = encode_mic_e_course_speed(42, 0);
+        std::array<char, 3> course_speed_str = encode_mic_e_course_speed(42, 0);
         EXPECT_TRUE(course_speed_str == "l F");
-        std::string course_speed_str_alt = encode_mic_e_course_speed_alternate(42, 0);
+        std::array<char, 3> course_speed_str_alt = encode_mic_e_course_speed_alternate(42, 0);
         EXPECT_TRUE(course_speed_str_alt == "\x1c\x1c""F");
     }
 }
@@ -1505,7 +1521,7 @@ TEST(mic_e, encode_mic_e_packet_no_message_with_tracker_data)
         d.speed_knots = 15.999;
         d.alt_feet = 154.2;
 
-        std::string packet = encode_mic_e_packet_no_message(t, d);
+        std::string packet = encode_mic_e_packet_no_message_to(t, d);
         EXPECT_TRUE(packet == "N0CALL>T9QPVP,WIDE1-1:`3T{m\\\x1f[/\"4F}");
     }
 
@@ -1524,7 +1540,7 @@ TEST(mic_e, encode_mic_e_packet_no_message_with_tracker_data)
         d.speed_knots = 7;
         d.alt_feet = 108.27;
 
-        std::string packet = encode_mic_e_packet_no_message(t, d);
+        std::string packet = encode_mic_e_packet_no_message_to(t, d);
         EXPECT_TRUE(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}");
     }
 }
@@ -1570,39 +1586,46 @@ TEST(position, encode_position_data_no_timestamp)
 TEST(position, encode_position_packet_no_timestamp_no_message)
 {
     {
-        std::string packet = encode_position_packet_no_timestamp_no_message_to("N0CALL", "APRS", "WIDE1-1", true, 1.4648333333333, 103.73783333333, '/', '>', 0);
+        std::string packet;
+        encode_position_packet_no_timestamp_no_message("N0CALL", "APRS", "WIDE1-1", true, 1.4648333333333, 103.73783333333, '/', '>', 0, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:=0127.89N/10344.27E>");
     }
 
     {
-        std::string packet = encode_position_packet_no_timestamp_no_message_to("N0CALL", "APRS", "WIDE1-1", false, 1.4648333333333, 103.73783333333, '/', 'j', 0);
+        std::string packet;
+        encode_position_packet_no_timestamp_no_message("N0CALL", "APRS", "WIDE1-1", false, 1.4648333333333, 103.73783333333, '/', 'j', 0, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!0127.89N/10344.27Ej");
     }
 
     {
-        std::string packet = encode_position_packet_no_timestamp_no_message_to("N0CALL", "APRS", "WIDE1-1", false, 34.136833333333, -118.12883333333, '/', 'y', 0, 449.99);
+        std::string packet;
+        encode_position_packet_no_timestamp_no_message("N0CALL", "APRS", "WIDE1-1", false, 34.136833333333, -118.12883333333, '/', 'y', 0, 449.99, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!3408.21N/11807.73Wy/A=000450");
     }
 
     {
-        std::string packet = encode_position_packet_no_timestamp_no_message_to("N0CALL", "APRS", "WIDE1-1", true, 47.392666666667, -122.17833333333, '/', 'O', 0, 4.00, 193, 316.00);
+        std::string packet;
+        encode_position_packet_no_timestamp_no_message("N0CALL", "APRS", "WIDE1-1", true, 47.392666666667, -122.17833333333, '/', 'O', 0, 4.00, 193, 316.00, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:=4723.56N/12210.70WO193/004/A=000316");
     }
 
     {
-        std::string packet = encode_position_packet_no_timestamp_no_message_to("N0CALL", "APRS", "WIDE1-1", true, 47.392666666667, -122.17833333333, '/', 'O', 0, 4.00, 193);
+        std::string packet;
+        encode_position_packet_no_timestamp_no_message("N0CALL", "APRS", "WIDE1-1", true, 47.392666666667, -122.17833333333, '/', 'O', 0, 4.00, 193, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:=4723.56N/12210.70WO193/004");
     }
 
     {
-        std::string packet = encode_position_packet_no_timestamp_no_message_to("N0CALL", "APRS", "WIDE1-1", false, -7.4436666666667, 112.7195, '/', 'v', 0, 0, 312, 41);
+        std::string packet;
+        encode_position_packet_no_timestamp_no_message("N0CALL", "APRS", "WIDE1-1", false, -7.4436666666667, 112.7195, '/', 'v', 0, 0, 312, 41, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!0726.62S/11243.17Ev312/000/A=000041");
     }
 
     {
         // FAP parses N0CALL>APRS,WIDE1-1:!2677.84S/04900.03W# to -27.2973333333333, -49.0005
         // Original packet: N0CALL>APRS,WIDE1-1:!2677.84S/04900.03W#
-        std::string packet = encode_position_packet_no_timestamp_no_message_to("N0CALL", "APRS", "WIDE1-1", false, -27.2973333333333, -49.0005, '/', '#', 0);
+        std::string packet;
+        encode_position_packet_no_timestamp_no_message("N0CALL", "APRS", "WIDE1-1", false, -27.2973333333333, -49.0005, '/', '#', 0, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!2717.84S/04900.03W#");
     }
 }
@@ -1624,7 +1647,7 @@ TEST(position, encode_position_packet_no_timestamp_no_message_with_tracker_data)
         d.speed_knots = 0;
         d.alt_feet = 41;
 
-        std::string packet = encode_position_packet_no_timestamp_no_message(t, d);
+        std::string packet = encode_position_packet_no_timestamp_no_message_to(t, d);
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!0726.62S/11243.17Ev312/000/A=000041");
     }
 
@@ -1643,7 +1666,7 @@ TEST(position, encode_position_packet_no_timestamp_no_message_with_tracker_data)
         d.track_degrees = 193;
         d.speed_knots = 4;
 
-        std::string packet = encode_position_packet_no_timestamp_no_message(t, d);
+        std::string packet = encode_position_packet_no_timestamp_no_message_to(t, d);
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:=4723.56N/12210.70WO193/004");
     }
 
@@ -1659,7 +1682,7 @@ TEST(position, encode_position_packet_no_timestamp_no_message_with_tracker_data)
         d.lat = 47.392666666667;
         d.lon = -122.17833333333;
 
-        std::string packet = encode_position_packet_no_timestamp_no_message(t, d);
+        std::string packet = encode_position_packet_no_timestamp_no_message_to(t, d);
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:!4723.56N/12210.70WO");
     }
 }
@@ -1681,13 +1704,15 @@ TEST(position, encode_position_packet_with_timestamp_dhm_no_message)
 {
     {
         // OM7IT>APRS,TCPIP*,qAC,T2HUN:@190235/4845.89N/01916.63E_.../...t016h47b09870 Slovenska Lupca Radio73.sk 13.24V
-        std::string packet = encode_position_packet_with_timestamp_dhm_no_message("N0CALL", "APRS", "WIDE1-1", true, 19, 02, 35, 48.764833333333, 19.277166666667, '/', '_', 0, 0, 0);
+        std::string packet;
+        encode_position_packet_with_timestamp_dhm_no_message("N0CALL", "APRS", "WIDE1-1", true, 19, 02, 35, 48.764833333333, 19.277166666667, '/', '_', 0, 0, 0, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:@190235/4845.89N/01916.63E_000/000");
     }
 
     {
         // NI0Y-9>APX216,TCPIP*,qAO,NI0Y:@180004/3901.69N/09441.79Wj020/000/A=000000/
-        std::string packet = encode_position_packet_with_timestamp_dhm_no_message("N0CALL", "APRS", "WIDE1-1", true, 18, 00, 04, 39.028166666667, -94.6965, '/', 'j', 0, 0, 20, 0);
+        std::string packet;
+        encode_position_packet_with_timestamp_dhm_no_message("N0CALL", "APRS", "WIDE1-1", true, 18, 00, 04, 39.028166666667, -94.6965, '/', 'j', 0, 0, 20, 0, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:@180004/3901.69N/09441.79Wj020/000/A=000000");
     }
 }
@@ -1711,7 +1736,7 @@ TEST(position, encode_position_packet_with_timestamp_dhm_no_message_with_tracker
         d.hour = 02;
         d.minute = 35;
 
-        std::string packet = encode_position_packet_with_timestamp_dhm_no_message(t, d);
+        std::string packet = encode_position_packet_with_timestamp_dhm_no_message_to(t, d);
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:@190235/4845.89N/01916.63E_000/000");
     }
 }
@@ -1733,7 +1758,8 @@ TEST(position, encode_position_packet_with_utc_timestamp_hms_no_message)
 {
     {
         // N4JAH-02>APWW10,TCPIP*,qAC,T2TAS:@041501h3355.09N/08318.37W#Athens Radio Club 145.330 (-) PL123.0
-        std::string packet = encode_position_packet_with_utc_timestamp_hms_no_message("N0CALL", "APRS", "WIDE1-1", true, 04, 15, 01, 33.918166666667, -83.306166666667, '/', '#', 0);
+        std::string packet;
+        encode_position_packet_with_utc_timestamp_hms_no_message("N0CALL", "APRS", "WIDE1-1", true, 04, 15, 01, 33.918166666667, -83.306166666667, '/', '#', 0, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:@041501h3355.09N/08318.37W#");
     }
 }
@@ -1756,7 +1782,7 @@ TEST(position, encode_position_packet_with_utc_timestamp_hms_no_message_with_tra
         d.minute = 45;
         d.second = 8;
 
-        std::string packet = encode_position_packet_with_utc_timestamp_hms_no_message(t, d);
+        std::string packet = encode_position_packet_with_utc_timestamp_hms_no_message_to(t, d);
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:@234508h1039.58N/12309.54E`");
     }
 }
@@ -1778,8 +1804,16 @@ TEST(position, encode_position_packet_with_utc_timestamp_dhm_no_message)
 {
     {
         // KB2M-2>APWW11,TCPIP*,qAC,T2SYDNEY:/181613z3945.07N/07505.12W_335/008g007t027r000p000P000h37b10213
-        std::string packet = encode_position_packet_with_utc_timestamp_dhm_no_message("N0CALL", "APRS", "WIDE1-1", false, 18, 16, 13, 39.751166666667, -75.085333333333, '/', '_', 0, 8, 335);
+        std::string packet;
+        encode_position_packet_with_utc_timestamp_dhm_no_message("N0CALL", "APRS", "WIDE1-1", false, 18, 16, 13, 39.751166666667, -75.085333333333, '/', '_', 0, 8, 335, std::back_inserter(packet));
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W_335/008");
+    }
+
+    {
+        // KB2M-2>APWW11,TCPIP*,qAC,T2SYDNEY:/181613z3945.07N/07505.12W_335/008g007t027r000p000P000h37b10213/A=000015
+        std::string packet;
+        encode_position_packet_with_utc_timestamp_dhm_no_message("N0CALL", "APRS", "WIDE1-1", false, 18, 16, 13, 39.751166666667, -75.085333333333, '/', '_', 0, 8, 335, 15, std::back_inserter(packet));
+        EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W_335/008/A=000015");
     }
 }
 
@@ -1802,7 +1836,7 @@ TEST(position, encode_position_packet_with_utc_timestamp_dhm_no_message_with_tra
         d.hour = 16;
         d.minute = 13;
 
-        std::string packet = encode_position_packet_with_utc_timestamp_dhm_no_message(t, d);
+        std::string packet = encode_position_packet_with_utc_timestamp_dhm_no_message_to(t, d);
         EXPECT_TRUE(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W_335/008");
     }
 }
@@ -1817,7 +1851,7 @@ TEST(position, encode_position_data_compressed_no_timestamp)
     {
         // 2E0WXF-3>APDW17,WIDE2-1,qAO,2E0WXF-2:!b4KfKNN3c#
         // NOTE: why is the symbol table 'b' instead of 1 when decoded by FAP?
-        std::string data = encode_position_data_compressed_no_timestamp('!', 51.4834062258811, 0.0089466195533987, '1', '#', 0b01001000);
+        std::array<char, 12> data = encode_position_data_compressed_no_timestamp('!', 51.4834062258811, 0.0089466195533987, '1', '#', 0b01001000);
         EXPECT_TRUE(data == "!14KfKNN3c#H");
     }
 }
@@ -2134,18 +2168,33 @@ TEST(tracker, u8packet_string)
     t.path("WIDE1-1");
     t.symbol_table('/');
     t.symbol_code('>');
-    t.mic_e_status(mic_e_status::en_route);
-
-    t.message(u8"Hello 世界");
-
     t.position(51.6145, -0.0485);
     t.speed(3.601);
     t.track(297.0);
     t.alt(33.00);
+    t.mic_e_status(mic_e_status::en_route);
 
-    std::u8string u8packet = t.u8packet_string(packet_type::mic_e);
+    {
+        t.message(u8"Hello 世界");
 
-    EXPECT_TRUE(u8packet == u8"N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}Hello 世界");
+        std::u8string u8packet = t.u8packet_string(packet_type::mic_e);
+
+        EXPECT_TRUE(u8packet == u8"N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}Hello 世界");
+    }
+
+    {
+        std::vector<unsigned char> message_bytes = { 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64 };
+        t.message(message_bytes);
+
+        std::u8string u8packet = t.u8packet_string(packet_type::mic_e);
+
+        EXPECT_TRUE(u8packet == u8"N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}Hello World");
+
+        std::vector<unsigned char> packet_bytes;
+        t.packet(packet_type::position, std::back_inserter(packet_bytes));
+
+        EXPECT_TRUE((packet_bytes == std::vector<unsigned char>{ 0x4e, 0x30, 0x43, 0x41, 0x4c, 0x4c, 0x3e, 0x2c, 0x57, 0x49, 0x44, 0x45, 0x31, 0x2d, 0x31, 0x3a, 0x21, 0x35, 0x31, 0x33, 0x36, 0x2e, 0x38, 0x37, 0x4e, 0x2f, 0x30, 0x30, 0x30, 0x30, 0x32, 0x2e, 0x39, 0x31, 0x57, 0x3e, 0x32, 0x39, 0x37, 0x2f, 0x30, 0x30, 0x37, 0x2f, 0x41, 0x3d, 0x30, 0x30, 0x30, 0x31, 0x30, 0x38, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64 }));
+    }
 }
 
 TEST(tracker, auto_tests)
@@ -2166,7 +2215,7 @@ TEST(tracker, auto_tests)
             if (!packet.alt_str.empty())
             {
                 // Mic-E with altitude
-                actual_packet_string = encode_mic_e_packet_no_message(
+                encode_mic_e_packet_no_message(
                     packet.from,
                     packet.path,
                     packet.lat,
@@ -2177,12 +2226,13 @@ TEST(tracker, auto_tests)
                     packet.symbol_table[0],
                     packet.symbol_code[0],
                     0,
-                    meters_to_feet(packet.alt));
+                    meters_to_feet(packet.alt),
+                    std::back_inserter(actual_packet_string));
             }
             else
             {
                 // Mic-E without altitude
-                actual_packet_string = encode_mic_e_packet_no_message(
+                encode_mic_e_packet_no_message(
                     packet.from,
                     packet.path,
                     packet.lat,
@@ -2192,7 +2242,8 @@ TEST(tracker, auto_tests)
                     kmh_to_knots(packet.speed),
                     packet.symbol_table[0],
                     packet.symbol_code[0],
-                    0);
+                    0,
+                    std::back_inserter(actual_packet_string));
             }
         }
         else if (packet.packet_type == packet_type::position)
@@ -2200,7 +2251,7 @@ TEST(tracker, auto_tests)
             if (packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
             {
                 // Position without altitude, course, or speed
-                actual_packet_string = encode_position_packet_no_timestamp_no_message(
+                encode_position_packet_no_timestamp_no_message(
                     packet.from,
                     packet.to,
                     packet.path,
@@ -2209,43 +2260,13 @@ TEST(tracker, auto_tests)
                     packet.lon,
                     packet.symbol_table[0],
                     packet.symbol_code[0],
-                    0);
+                    0,
+                    std::back_inserter(actual_packet_string));
             }
             else if (packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
             {
                 // Position without altitude, but with course or speed
-                actual_packet_string = encode_position_packet_no_timestamp_no_message(
-                    packet.from,
-                    packet.to,
-                    packet.path,
-                    packet.messaging_str == "true",
-                    packet.lat,
-                    packet.lon,
-                    packet.symbol_table[0],
-                    packet.symbol_code[0],
-                    0,
-                    kmh_to_knots(packet.speed),
-                    packet.course);
-            }
-            else if (!packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
-            {
-                // Position with altitude, but without course or speed
-                actual_packet_string = encode_position_packet_no_timestamp_no_message(
-                    packet.from,
-                    packet.to,
-                    packet.path,
-                    packet.messaging_str == "true",
-                    packet.lat,
-                    packet.lon,
-                    packet.symbol_table[0],
-                    packet.symbol_code[0],
-                    0,
-                    meters_to_feet(packet.alt));
-            }
-            else if (!packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
-            {
-                // Position with altitude, course, and speed
-                actual_packet_string = encode_position_packet_no_timestamp_no_message(
+                encode_position_packet_no_timestamp_no_message(
                     packet.from,
                     packet.to,
                     packet.path,
@@ -2257,7 +2278,41 @@ TEST(tracker, auto_tests)
                     0,
                     kmh_to_knots(packet.speed),
                     packet.course,
-                    meters_to_feet(packet.alt));
+                    std::back_inserter(actual_packet_string));
+            }
+            else if (!packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
+            {
+                // Position with altitude, but without course or speed
+                encode_position_packet_no_timestamp_no_message(
+                    packet.from,
+                    packet.to,
+                    packet.path,
+                    packet.messaging_str == "true",
+                    packet.lat,
+                    packet.lon,
+                    packet.symbol_table[0],
+                    packet.symbol_code[0],
+                    0,
+                    meters_to_feet(packet.alt),
+                    std::back_inserter(actual_packet_string));
+            }
+            else if (!packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
+            {
+                // Position with altitude, course, and speed
+                encode_position_packet_no_timestamp_no_message(
+                    packet.from,
+                    packet.to,
+                    packet.path,
+                    packet.messaging_str == "true",
+                    packet.lat,
+                    packet.lon,
+                    packet.symbol_table[0],
+                    packet.symbol_code[0],
+                    0,
+                    kmh_to_knots(packet.speed),
+                    packet.course,
+                    meters_to_feet(packet.alt),
+                    std::back_inserter(actual_packet_string));
             }
         }
 

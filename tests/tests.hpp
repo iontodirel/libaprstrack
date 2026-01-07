@@ -578,7 +578,7 @@ std::vector<packet_data> process_packets(const std::vector<packet_data>& packets
         {
             if (!packet.alt_str.empty())
             {
-                packet_string = encode_mic_e_packet_no_message(
+                encode_mic_e_packet_no_message(
                     packet.from,
                     packet.path,
                     packet.lat,
@@ -589,11 +589,12 @@ std::vector<packet_data> process_packets(const std::vector<packet_data>& packets
                     packet.symbol_table[0],
                     packet.symbol_code[0],
                     0,
-                    meters_to_feet(packet.alt));
+                    meters_to_feet(packet.alt),
+                    std::back_inserter(packet_string));
             }
             else
             {
-                packet_string = encode_mic_e_packet_no_message(
+                encode_mic_e_packet_no_message(
                     packet.from,
                     packet.path,
                     packet.lat,
@@ -603,12 +604,14 @@ std::vector<packet_data> process_packets(const std::vector<packet_data>& packets
                     kmh_to_knots(packet.speed),
                     packet.symbol_table[0],
                     packet.symbol_code[0],
-                    0);
+                    0,
+                    std::back_inserter(packet_string));
             }
 
             actual_packet_string = packet_string;
 
-            std::string course_speed_alt = encode_mic_e_course_speed_alternate(packet.course, kmh_to_knots(packet.speed));
+            std::string course_speed_alt;
+            encode_mic_e_course_speed_alternate(packet.course, kmh_to_knots(packet.speed), std::back_inserter(course_speed_alt));
             size_t course_speed_alt_index = packet.from.size() + 1 + packet.to.size() + 1 + packet.path.size() + 1 + 3 + 1;
             std::string expected_course_speed = expected_packet_string.substr(course_speed_alt_index, 3);
             std::string actual_course_speed = packet_string.substr(course_speed_alt_index, 3);
@@ -636,7 +639,7 @@ std::vector<packet_data> process_packets(const std::vector<packet_data>& packets
         {
             if (packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
             {
-                packet_string = encode_position_packet_no_timestamp_no_message(
+                encode_position_packet_no_timestamp_no_message(
                     packet.from,
                     packet.to,
                     packet.path,
@@ -645,40 +648,12 @@ std::vector<packet_data> process_packets(const std::vector<packet_data>& packets
                     packet.lon,
                     packet.symbol_table[0],
                     packet.symbol_code[0],
-                    0);
+                    0,
+                    std::back_inserter(packet_string));
             }
             else if (packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
             {
-                packet_string = encode_position_packet_no_timestamp_no_message(
-                    packet.from,
-                    packet.to,
-                    packet.path,
-                    packet.messaging_str == "true",
-                    packet.lat,
-                    packet.lon,
-                    packet.symbol_table[0],
-                    packet.symbol_code[0],
-                    0,
-                    kmh_to_knots(packet.speed),
-                    packet.course);
-            }
-            else if (!packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
-            {
-                packet_string = encode_position_packet_no_timestamp_no_message(
-                    packet.from,
-                    packet.to,
-                    packet.path,
-                    packet.messaging_str == "true",
-                    packet.lat,
-                    packet.lon,
-                    packet.symbol_table[0],
-                    packet.symbol_code[0],
-                    0,
-                    meters_to_feet(packet.alt));
-            }
-            else if (!packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
-            {
-                packet_string = encode_position_packet_no_timestamp_no_message(
+                encode_position_packet_no_timestamp_no_message(
                     packet.from,
                     packet.to,
                     packet.path,
@@ -690,7 +665,39 @@ std::vector<packet_data> process_packets(const std::vector<packet_data>& packets
                     0,
                     kmh_to_knots(packet.speed),
                     packet.course,
-                    meters_to_feet(packet.alt));
+                    std::back_inserter(packet_string));
+            }
+            else if (!packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
+            {
+                encode_position_packet_no_timestamp_no_message(
+                    packet.from,
+                    packet.to,
+                    packet.path,
+                    packet.messaging_str == "true",
+                    packet.lat,
+                    packet.lon,
+                    packet.symbol_table[0],
+                    packet.symbol_code[0],
+                    0,
+                    meters_to_feet(packet.alt),
+                    std::back_inserter(packet_string));
+            }
+            else if (!packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
+            {
+                encode_position_packet_no_timestamp_no_message(
+                    packet.from,
+                    packet.to,
+                    packet.path,
+                    packet.messaging_str == "true",
+                    packet.lat,
+                    packet.lon,
+                    packet.symbol_table[0],
+                    packet.symbol_code[0],
+                    0,
+                    kmh_to_knots(packet.speed),
+                    packet.course,
+                    meters_to_feet(packet.alt),
+                    std::back_inserter(packet_string));
             }
 
             actual_packet_string = packet_string;
@@ -701,36 +708,7 @@ std::vector<packet_data> process_packets(const std::vector<packet_data>& packets
 
             if (packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
             {
-                packet_string = encode_position_packet_compressed_no_timestamp_no_message(
-                    packet.from,
-                    packet.to,
-                    packet.path,
-                    packet.messaging_str == "true",
-                    packet.lat,
-                    packet.lon,
-                    packet.symbol_table[0],
-                    packet.symbol_code[0],
-                    packet.course,
-                    kmh_to_knots(packet.speed),
-                    1);
-            }
-            else if (!packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
-            {
-                packet_string = encode_position_packet_compressed_no_timestamp_no_message(
-                    packet.from,
-                    packet.to,
-                    packet.path,
-                    packet.messaging_str == "true",
-                    packet.lat,
-                    packet.lon,
-                    packet.symbol_table[0],
-                    packet.symbol_code[0],
-                    meters_to_feet(packet.alt),
-                    1);
-            }
-            else if (!packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
-            {
-                packet_string = encode_position_packet_compressed_no_timestamp_no_message(
+                encode_position_packet_compressed_no_timestamp_no_message(
                     packet.from,
                     packet.to,
                     packet.path,
@@ -742,11 +720,11 @@ std::vector<packet_data> process_packets(const std::vector<packet_data>& packets
                     packet.course,
                     kmh_to_knots(packet.speed),
                     1,
-                    meters_to_feet(packet.alt));
+                    std::back_inserter(packet_string));
             }
-            else if (packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
+            else if (!packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
             {
-                packet_string = encode_position_packet_compressed_no_timestamp_no_message(
+                encode_position_packet_compressed_no_timestamp_no_message(
                     packet.from,
                     packet.to,
                     packet.path,
@@ -755,7 +733,40 @@ std::vector<packet_data> process_packets(const std::vector<packet_data>& packets
                     packet.lon,
                     packet.symbol_table[0],
                     packet.symbol_code[0],
-                    1);
+                    meters_to_feet(packet.alt),
+                    1,
+                    std::back_inserter(packet_string));
+            }
+            else if (!packet.alt_str.empty() && (!packet.course_str.empty() || !packet.speed_str.empty()))
+            {
+                encode_position_packet_compressed_no_timestamp_no_message(
+                    packet.from,
+                    packet.to,
+                    packet.path,
+                    packet.messaging_str == "true",
+                    packet.lat,
+                    packet.lon,
+                    packet.symbol_table[0],
+                    packet.symbol_code[0],
+                    packet.course,
+                    kmh_to_knots(packet.speed),
+                    1,
+                    meters_to_feet(packet.alt),
+                    std::back_inserter(packet_string));
+            }
+            else if (packet.alt_str.empty() && packet.course_str.empty() && packet.speed_str.empty())
+            {
+                encode_position_packet_compressed_no_timestamp_no_message(
+                    packet.from,
+                    packet.to,
+                    packet.path,
+                    packet.messaging_str == "true",
+                    packet.lat,
+                    packet.lon,
+                    packet.symbol_table[0],
+                    packet.symbol_code[0],
+                    1,
+                    std::back_inserter(packet_string));
             }
 
             actual_packet_string = packet_string;

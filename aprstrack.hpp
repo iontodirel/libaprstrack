@@ -163,7 +163,6 @@ struct data
 };
 
 // add string version with message!
-// add github workflow
 
 string_t encode_position_packet_no_timestamp_no_message_to(const tracker& t, const data& d);
 string_t encode_position_packet_no_timestamp_to(const tracker& t, const data& d);
@@ -3287,22 +3286,31 @@ APRS_TRACK_INLINE bool smart_beaconing_test(int speed, int prev_course, int cour
     // Smart Beaconing Algorithm (TM)
     // The Smart Beaconing Algorithm (TM) is a trademark of Tony Arnerich and Steve Bragg.
     //
+    // This algorithm dynamically adjusts position reporting intervals based on speed
+    // and course changes, reducing unnecessary transmissions while ensuring timely
+    // updates during maneuvers.
+    //
     // Parameters:
     //
-    //   speed - speed, unit independent, ex: 50 mph
-    //   course - course in degrees, ex: 200 degrees
-    //   low_speed - when the speed is lower than "low_speed", the tracker will update (transmit packet) at the slow_interval_seconds
-    //   high_speed - when the speed is higher than "high_speed", the tracker will update (transmit packet) at the fast_interval_seconds
-    //   slow_rate - seconds, low speed transmission interval time
-    //   fast_rate - seconds, high speed transmission interval time
-    //   turn_time - the minimum number of degrees the tracker must turn before data_it will transmit a packet
-    //   turn_angle - 
-    //   turn_slope - the number of seconds since the last update
+    //   speed       - current speed (unit independent, e.g., 50 mph or 80 km/h)
+    //   course      - current heading in degrees (0-360)
+    //   low_speed   - speed threshold below which slow_rate is used
+    //                 when the speed is lower than "low_speed", the tracker will update (transmit packet) at the slow_rate
+    //   high_speed  - speed threshold above which fast_rate is used
+    //                 when the speed is higher than "high_speed", the tracker will update (transmit packet) at the fast_rate
+    //   slow_rate   - transmission interval (seconds) at or below low_speed
+    //   fast_rate   - transmission interval (seconds) at or above high_speed
+    //   turn_time   - minimum seconds between transmissions when cornering
+    //                 the minimum number of seconds the tracker must turn before it will transmit a packet
+    //   turn_angle  - minimum heading change (degrees) to trigger a corner transmission
+    //   turn_slope  - speed-adjusted turn threshold factor; the effective turn
+    //                 threshold is: turn_angle + (turn_slope / speed)
+    //   last_update - seconds since last update (transmission)
     //
     // Returns:
     //
-    //   true - if the tracker was updated and should transmit a packet
-    //   false - if the tracker was not updated, and no packet should be transmitted
+    //   true - tracker should transmit a position packet
+    //   false - no transmission needed
     //
     // References:
     //
@@ -3310,21 +3318,16 @@ APRS_TRACK_INLINE bool smart_beaconing_test(int speed, int prev_course, int cour
     //   https://thelifeofkenneth.com/files/thesis_aprs_finnegan_final.pdf
     //   https://n3ujj.com/manuals/SmartBeaconing.pdf
     //   https://github.com/wb2osz/direwolf/blob/master/src/beacon.c
+    //
 
     int interval = 0;
 
+    // Calculate course delta with wraparound
     int course_delta = std::abs(prev_course - course);
     if (course_delta > 180)
     {
         course_delta = 360 - course_delta; // Handle angle wraparound
     }
-    /*
-    // Calculate course delta with wraparound
-    double course_delta = std::abs(prev_course - course);
-    if (course_delta > 180) {
-        course_delta = 360 - course_delta; // Handle angle wraparound
-    }
-    */
 
     if (speed < low_speed)
     {
