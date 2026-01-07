@@ -45,8 +45,11 @@
 #include <sstream>
 #include <locale>
 
+#pragma warning(push)
+#pragma warning(disable: 4127)
 #include <fmt/format.h>
 #include <fmt/color.h>
+#pragma warning(pop)
 
 #include <boost/beast/core/detail/base64.hpp>
 
