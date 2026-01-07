@@ -82,7 +82,7 @@ s data { 51.6145, -0.0485, 3.601, 297.0, 33.00 };
 
 t.position(data);
 
-std::string packet = t.packet_string(packet_type::mic_e);
+std::string packet = t.packet_string_to(packet_type::mic_e);
 
 assert(packet == "N0CALL>UQ3VXW,WIDE1-1:`vZwlh}>/\"48}");
 ```
@@ -130,7 +130,7 @@ while (true)
 
     if (t.updated())
     {
-        std::string packet = t.packet_string(aprs::track::packet_type::mic_e);
+        std::string packet = t.packet_string_to(aprs::track::packet_type::mic_e);
 
         fmt::println("{}", packet);
     }
@@ -142,14 +142,14 @@ while (true)
 Position packet with UTC DMS timestamp:
 
 ``` cpp
-std::string packet = t.packet_string(packet_type::position_with_timestamp_utc);
+std::string packet = t.packet_string_to(packet_type::position_with_timestamp_utc);
 assert(packet == "N0CALL>APRS,WIDE1-1:/181613z3945.07N/07505.12W_");
 ```
 
 Compressed position packet:
 
 ``` cpp
-std::string packet = t.packet_string(packet_type::position_compressed);
+std::string packet = t.packet_string_to(packet_type::position_compressed);
 assert(packet == "N0CALL>APRS,WIDE1-1:!/A2hQ5`8vp!!Y");
 ```
 
@@ -196,7 +196,8 @@ assert(packet_string_from_bytes == "N0CALL>APRS,WIDE1-1:!3945.07N/07505.12W_Hell
 The library is modular with no internal coupling. Lower level functions in the library can also be used standalone for convenience or utility:
 
 ``` cpp
-std::string packet = aprs::track::detail::encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 35.449666666667, 140.2685, mic_e_status::custom6, 257, 5.999, '/', '>', 0, 9.84);
+std::string packet;
+aprs::track::detail::encode_mic_e_packet_no_message("N0CALL", "WIDE1-1", 35.449666666667, 140.2685, mic_e_status::custom6, 257, 5.999, '/', '>', 0, 9.84, std::back_inserter(packet));
 assert(packet == "N0CALL>35CVY8,WIDE1-1:`D,'l^U>/\"3u}");
 ```
 

@@ -119,11 +119,6 @@ endif()
 add_executable (aprstrack_use_in_tu "use_in_tu.h" "use_in_tu.cpp" "use_in_other_tu.cpp" "compile_in_tu.cpp")
 set_property(TARGET aprstrack_use_in_tu PROPERTY CXX_STANDARD 20)
 
-add_executable (aprstrack_route_test "routing_test.cpp")
-target_include_directories(aprstrack_route_test PRIVATE ${civetweb_SOURCE_DIR}/include ${civetweb_SOURCE_DIR})
-target_link_libraries(aprstrack_route_test nlohmann_json::nlohmann_json fmt::fmt Boost::asio civetweb)
-set_property(TARGET aprstrack_route_test PROPERTY CXX_STANDARD 20)
-
 add_executable (generate_test_json "generate_test_json.cpp")
 target_link_libraries(generate_test_json nlohmann_json::nlohmann_json fmt::fmt Boost::asio Boost::beast)
 set_property(TARGET generate_test_json PROPERTY CXX_STANDARD 20)
