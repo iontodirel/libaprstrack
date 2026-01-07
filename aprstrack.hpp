@@ -52,6 +52,8 @@
 #include <iterator>
 #include <ranges>
 #include <cmath>
+#include <algorithm>
+#include <array>
 
 #ifndef APRS_TRACK_NAMESPACE
 #define APRS_TRACK_NAMESPACE aprs::track
@@ -350,9 +352,9 @@ struct tracker
     void from(std::string_view f);
     void to(std::string_view t);
     void path(std::string_view p);
-    const string_t& from() const;
-    const string_t& to() const;
-    const string_t& path() const;
+    std::string_view from() const;
+    std::string_view to() const;
+    std::string_view path() const;
 
     void ambiguity(int a);
     int ambiguity() const;
@@ -396,8 +398,8 @@ struct tracker
     template <std::output_iterator<unsigned char> OutputIterator>
     OutputIterator message(OutputIterator output) const;
 
-    string_t message() const;
-    u8string_t u8message() const;
+    std::string message() const;
+    std::u8string u8message() const;
 
     template <class Rep, class Period>
     void interval(std::chrono::duration<Rep, Period> interval);
@@ -440,9 +442,9 @@ struct tracker
 private:
     APRS_TRACK_DETAIL_NAMESPACE_REFERENCE data data_;
     std::vector<APRS_TRACK_DETAIL_NAMESPACE_REFERENCE data> data_list_;
-    string_t from_;
-    string_t to_;
-    string_t path_;
+    std::array<char, 10> from_{};
+    std::array<char, 10> to_{};
+    std::array<char, 88> path_{};
     enum algorithm algorithm_ = algorithm::none;
     std::vector<unsigned char> message_data_;
     size_t message_data_length_ = 0;
@@ -559,32 +561,38 @@ APRS_TRACK_INLINE char tracker::symbol_table() const
 
 APRS_TRACK_INLINE void tracker::from(std::string_view f)
 {
-    from_ = f.data();
+    auto len = std::min(f.size(), from_.size() - 1);
+    std::copy_n(f.data(), len, from_.data());
+    from_[len] = '\0';
 }
 
-APRS_TRACK_INLINE const string_t& tracker::from() const
+APRS_TRACK_INLINE std::string_view tracker::from() const
 {
-    return from_;
+    return from_.data();
 }
 
 APRS_TRACK_INLINE void tracker::to(std::string_view t)
 {
-    to_ = t.data();
+    auto len = std::min(t.size(), to_.size() - 1);
+    std::copy_n(t.data(), len, to_.data());
+    to_[len] = '\0';
 }
 
-APRS_TRACK_INLINE const string_t& tracker::to() const
+APRS_TRACK_INLINE std::string_view tracker::to() const
 {
-    return to_;
+    return to_.data();
 }
 
 APRS_TRACK_INLINE void tracker::path(std::string_view p)
 {
-    path_ = p.data();
+    auto len = std::min(p.size(), path_.size() - 1);
+    std::copy_n(p.data(), len, path_.data());
+    path_[len] = '\0';
 }
 
-APRS_TRACK_INLINE const string_t& tracker::path() const
+APRS_TRACK_INLINE std::string_view tracker::path() const
 {
-    return path_;
+    return path_.data();
 }
 
 APRS_TRACK_INLINE void tracker::ambiguity(int a)
@@ -741,16 +749,16 @@ APRS_TRACK_INLINE_NO_DISABLE OutputIterator tracker::message(OutputIterator outp
 
 #ifndef APRS_TRACK_PUBLIC_FORWARD_DECLARATIONS_ONLY
 
-APRS_TRACK_INLINE string_t tracker::message() const
+APRS_TRACK_INLINE std::string tracker::message() const
 {
     const char* data = reinterpret_cast<const char*>(message_data_.data());
-    return string_t(data, message_data_length_);
+    return std::string(data, message_data_length_);
 }
 
-APRS_TRACK_INLINE u8string_t tracker::u8message() const
+APRS_TRACK_INLINE std::u8string tracker::u8message() const
 {
     const char8_t* data = reinterpret_cast<const char8_t*>(message_data_.data());
-    return u8string_t(data, message_data_length_);
+    return std::u8string(data, message_data_length_);
 }
 
 #endif
@@ -1071,7 +1079,7 @@ APRS_TRACK_INLINE string_t encode_position_packet_no_timestamp_no_message_to(con
 {
     string_t packet;
 
-    encode_position_packet_no_timestamp_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
+    encode_position_packet_no_timestamp_no_message(t.from(), t.to(), t.path(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
@@ -1101,7 +1109,7 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_timestamp_dhm_no_message_
 {
     string_t packet;
 
-    encode_position_packet_with_timestamp_dhm_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), packet_type_with_timestamp(t.messaging()), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
+    encode_position_packet_with_timestamp_dhm_no_message(t.from(), t.to(), t.path(), packet_type_with_timestamp(t.messaging()), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
@@ -1131,7 +1139,7 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_hms_no_mess
 {
     string_t packet;
 
-    encode_position_packet_with_utc_timestamp_hms_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.hour, d.minute, d.second, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
+    encode_position_packet_with_utc_timestamp_hms_no_message(t.from(), t.to(), t.path(), t.messaging(), d.hour, d.minute, d.second, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
@@ -1161,7 +1169,7 @@ APRS_TRACK_INLINE string_t encode_position_packet_with_utc_timestamp_dhm_no_mess
 {
     string_t packet;
 
-    encode_position_packet_with_utc_timestamp_dhm_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
+    encode_position_packet_with_utc_timestamp_dhm_no_message(t.from(), t.to(), t.path(), t.messaging(), d.day, d.hour, d.minute, d.lat, d.lon, t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
     if (d.speed_knots.has_value() && d.track_degrees.has_value())
     {
@@ -1193,7 +1201,7 @@ APRS_TRACK_INLINE string_t encode_position_packet_compressed_no_timestamp_no_mes
 
     char compression_type = 0b00111000 + 33; // current, RMC, compressed
 
-    encode_position_packet_compressed_no_timestamp_no_message(t.from().c_str(), t.to().c_str(), t.path().c_str(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), compression_type, std::back_inserter(packet));
+    encode_position_packet_compressed_no_timestamp_no_message(t.from(), t.to(), t.path(), t.messaging(), d.lat, d.lon, t.symbol_table(), t.symbol_code(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), compression_type, std::back_inserter(packet));
 
     if (d.alt_feet.has_value())
     {
@@ -1218,7 +1226,7 @@ APRS_TRACK_INLINE string_t encode_mic_e_packet_no_message_to(const tracker& t, c
 {
     string_t packet;
 
-    encode_mic_e_packet_no_message(t.from().c_str(), t.path().c_str(), d.lat, d.lon, t.mic_e_status(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
+    encode_mic_e_packet_no_message(t.from(), t.path(), d.lat, d.lon, t.mic_e_status(), d.track_degrees.value_or(0), d.speed_knots.value_or(0), t.symbol_table(), t.symbol_code(), t.ambiguity(), std::back_inserter(packet));
 
     if (d.alt_feet.has_value())
     {
