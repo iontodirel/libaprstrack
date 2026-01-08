@@ -33,6 +33,8 @@
 
 #include "../aprstrack.hpp"
 
+#include <thread>
+
 using namespace aprs::track;
 using namespace aprs::track::detail;
 
