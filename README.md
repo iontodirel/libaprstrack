@@ -38,6 +38,7 @@ APRS is a registered trademark of Bob Bruninga, WB4APR.
   - Ready-to-use test data sets for APRS encoder verification.
 - Modular achitecture
   - No coupling!
+  - Stack only and embedded friendly design.
   - Low level functions can be (re)used standalone or outside the library. The entire encoding core library can be extracted as-is with two copy-pastes.
   - All the code is testable
   - Packet and data encoding can be used without the tracker class
