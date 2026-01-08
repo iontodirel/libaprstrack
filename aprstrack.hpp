@@ -549,7 +549,7 @@ APRS_TRACK_INLINE char tracker::symbol_table() const
 
 APRS_TRACK_INLINE void tracker::from(std::string_view f)
 {
-    auto len = std::min(f.size(), from_.size() - 1);
+    auto len = (std::min)(f.size(), from_.size() - 1);
     std::copy_n(f.data(), len, from_.data());
     from_[len] = '\0';
 }
@@ -561,7 +561,7 @@ APRS_TRACK_INLINE std::string_view tracker::from() const
 
 APRS_TRACK_INLINE void tracker::to(std::string_view t)
 {
-    auto len = std::min(t.size(), to_.size() - 1);
+    auto len = (std::min)(t.size(), to_.size() - 1);
     std::copy_n(t.data(), len, to_.data());
     to_[len] = '\0';
 }
@@ -573,7 +573,7 @@ APRS_TRACK_INLINE std::string_view tracker::to() const
 
 APRS_TRACK_INLINE void tracker::path(std::string_view p)
 {
-    auto len = std::min(p.size(), path_.size() - 1);
+    auto len = (std::min)(p.size(), path_.size() - 1);
     std::copy_n(p.data(), len, path_.data());
     path_[len] = '\0';
 }
@@ -698,7 +698,7 @@ APRS_TRACK_INLINE_NO_DISABLE void tracker::message(const std::basic_string_view<
 {
     message_data_length_ = m.size();
     const unsigned char* data = reinterpret_cast<const unsigned char*>(m.data());
-    size_t size = std::min(m.size() * sizeof(CharType), message_data_.size());
+    size_t size = (std::min)(m.size() * sizeof(CharType), message_data_.size());
     std::copy_n(data, size, message_data_.begin());
     message_data_size_ = size;
 }
@@ -725,7 +725,7 @@ template<std::input_iterator InputIterator>
 APRS_TRACK_INLINE_NO_DISABLE void tracker::message(InputIterator begin, InputIterator end)
 {
     message_data_length_ = std::distance(begin, end);
-    message_data_size_ = std::min(static_cast<size_t>(message_data_length_), message_data_.size());
+    message_data_size_ = (std::min)(static_cast<size_t>(message_data_length_), message_data_.size());
     std::copy_n(begin, message_data_size_, message_data_.begin());
 }
 
@@ -1351,7 +1351,7 @@ APRS_TRACK_INLINE_NO_DISABLE OutputIt format_number_to_string(double number, int
         }
     }
 
-    size_t count = static_cast<size_t>(std::min(len, 31));
+    size_t count = static_cast<size_t>((std::min)(len, 31));
     return std::copy_n(buffer, count, out);
 }
 
@@ -1376,7 +1376,7 @@ APRS_TRACK_INLINE_NO_DISABLE OutputIt format_n_digits_string(int number, int wid
         len = std::snprintf(buffer, sizeof(buffer), "%0*d", width, number);
     }
 
-    size_t count = static_cast<size_t>(std::min(len, 31));
+    size_t count = static_cast<size_t>((std::min)(len, 31));
     return std::copy_n(buffer, count, out);
 }
 
